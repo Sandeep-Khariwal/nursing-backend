@@ -1,15 +1,35 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
+import cors from "cors"
+import bodyParser from "body-parser"
+import authRouter from "./routes/auth.route";
+import adminRouter from "./routes/admin.route";
+import teacherRouter from "./routes/teacher.route";
+import studentRouter from "./routes/student.route";
+import { DataBase } from "./DataBase";
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
+const VERSION = "v1"
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
-});
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
+app.use(bodyParser.json({ limit: "50mb" }));
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+// all routes are here
+app.use(`/api/${VERSION}/auth`,authRouter)
+app.use(`/api/${VERSION}/student`,studentRouter)
+app.use(`/api/${VERSION}/teacher`,teacherRouter)
+app.use(`/api/${VERSION}/admin`,adminRouter)
+
+
+//DataBase
+DataBase()
+
+// server creation
+app.listen(PORT, () => {
+  console.log(`Server is running at ${PORT}`);
 });
