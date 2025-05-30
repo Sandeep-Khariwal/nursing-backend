@@ -81,7 +81,7 @@ export class AdminService {
           const token = generateAccessToken({
             _id: admin._id,
             email: admin.email,
-            phone: admin.phoneNumber,
+            name:admin.name
           });
   
           return { success: 200, message: "OTP varified!!", token };
