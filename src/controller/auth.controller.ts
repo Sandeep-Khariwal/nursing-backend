@@ -1,11 +1,11 @@
-import { StudentService } from "../services/student.service";
+import { AuthService } from "../services/auth.service";
 import { Request, Response } from "express";
 
-export const StudentSignup = async (req: Request, res: Response) => {
-  const { emailOrPhone } = req.body;
-  const studentService = new StudentService();
+export const Signup = async (req: Request, res: Response) => {
+  const { name, emailOrPhone } = req.body;
+  const authService = new AuthService();
 
-  const response = await studentService.signupStudent(emailOrPhone);
+  const response = await authService.signup(name, emailOrPhone);
   if (response["status"] == 200) {
     res.status(200).json({ student: response["student"] });
   } else {
@@ -14,25 +14,24 @@ export const StudentSignup = async (req: Request, res: Response) => {
 };
 
 export const OtpVarification = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { otp } = req.body;
-  const studentService = new StudentService();
+  const { otp, emailOrPhone } = req.body;
+  const authService = new AuthService();
 
-  const response = await studentService.varifyOtpById(id, otp);
+  const response = await authService.varifyOtp(emailOrPhone, otp);
   if (response["status"] == 200) {
     res
       .status(200)
-      .json({ message: response["message"], token: response["token"] });
+      .json({ message: response["message"],user:response["user"], token: response["token"] });
   } else {
     res.status(response["status"]).json({ message: response["message"] });
   }
 };
 
-export const StudentLogin = async (req: Request, res: Response) => {
+export const Login = async (req: Request, res: Response) => {
   const { emailOrPhone } = req.body;
-  const studentService = new StudentService();
+  const authService = new AuthService();
 
-  const response = await studentService.loginStudent(emailOrPhone);
+  const response = await authService.login(emailOrPhone);
 
   if (response["status"] == 200) {
     res.status(200).json({ message: response["message"] });
@@ -41,15 +40,15 @@ export const StudentLogin = async (req: Request, res: Response) => {
   }
 };
 
-export const ResendOtp = async (req: Request, res: Response) => {
-  const { emailOrPhone } = req.body;
-  const studentService = new StudentService();
+// export const ResendOtp = async (req: Request, res: Response) => {
+//   const { emailOrPhone } = req.body;
+//   const studentService = new StudentService();
 
-  const response = await studentService.loginStudent(emailOrPhone);
+//   const response = await studentService.loginStudent(emailOrPhone);
 
-  if (response["status"] == 200) {
-    res.status(200).json({ message: response["message"] });
-  } else {
-    res.status(response["status"]).json({ message: response["message"] });
-  }
-};
+//   if (response["status"] == 200) {
+//     res.status(200).json({ message: response["message"] });
+//   } else {
+//     res.status(response["status"]).json({ message: response["message"] });
+//   }
+// };

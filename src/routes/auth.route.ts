@@ -1,10 +1,11 @@
-import { OtpVarification, ResendOtp, StudentLogin, StudentSignup } from "../controller/auth.controller";
+import {  Login, OtpVarification, Signup, } from "../controller/auth.controller";
 import express  from "express";
 const authRouter = express.Router();
 
-authRouter.post("/student/signup",StudentSignup );
-authRouter.post("/student/varification/:id",OtpVarification );
-authRouter.post("/student/login",StudentLogin );
-authRouter.post("/student/resendOtp",ResendOtp );
+authRouter.post("/signup",Signup );
+authRouter.post("/varification",OtpVarification );
+authRouter.post("/login",Login );
+
+// authRouter.post("/student/resendOtp",ResendOtp );
 
 export default authRouter

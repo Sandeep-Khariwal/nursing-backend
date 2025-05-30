@@ -9,6 +9,7 @@ interface ModulesModel {
     iconImage: string;
     isPro:boolean
   }
+  
   const moduleSchema = new Schema<ModulesModel>({
     _id: {
         type: String,

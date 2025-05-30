@@ -76,11 +76,11 @@ export const CreateHtmlForOTP = (otp:string) =>{
             <div class="email-container">
                 <!-- Email Header -->
                 <div class="email-header">
-                    Welcome to [App Name]!
+                    Welcome to Nurture Nerve!
                 </div>
                 <div class="email-body">
-                    <h2>Hello dear Student,</h2>
-                    <p>Thank you for registering with [App Name]! To complete your registration process, please use the following OTP (One-Time Password) to verify your email address:</p>
+                    <h2>Hello Dear Student,</h2>
+                    <p>Thank you for registering with Nurture Nerve! To complete your registration process, please use the following OTP (One-Time Password) to verify your email address:</p>
                     <div class="otp-container">
                         <span>${otp}</span>
                     </div>
@@ -88,7 +88,7 @@ export const CreateHtmlForOTP = (otp:string) =>{
                 </div>
                 <div class="email-footer">
                     <p>Thank you for joining us. <br> If you have any questions, feel free to reach out to us!</p>
-                    <p>&copy; 2025 [App Name]. All Rights Reserved.</p>
+                    <p>&copy; 2025 Nurture Nerve!. All Rights Reserved.</p>
                 </div>
             </div>
         </div>

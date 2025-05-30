@@ -7,11 +7,12 @@ import adminRouter from "./routes/admin.route";
 import teacherRouter from "./routes/teacher.route";
 import studentRouter from "./routes/student.route";
 import { DataBase } from "./DataBase";
+import examRouter from "./routes/exams.route";
 
 dotenv.config();
 
 const app: Express = express();
-const PORT = process.env.PORT || 8080;
+const PORT =  8090; //process.env.PORT ||
 const VERSION = "v1"
 
 app.use(cors());
@@ -21,6 +22,7 @@ app.use(bodyParser.json({ limit: "50mb" }));
 
 // all routes are here
 app.use(`/api/${VERSION}/auth`,authRouter)
+app.use(`/api/${VERSION}/exam`,examRouter)
 app.use(`/api/${VERSION}/student`,studentRouter)
 app.use(`/api/${VERSION}/teacher`,teacherRouter)
 app.use(`/api/${VERSION}/admin`,adminRouter)

@@ -7,8 +7,8 @@
     "postinstall": "npx puppeteer browsers install chrome",
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "node --exec npx ts-node src/app.ts",
-    "start": "node dist/app.js",
+    "dev": "nodemon --exec npx ts-node src/app.ts",
+    "start": "nodemon dist/app.js",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "keywords": [],
@@ -30,7 +30,7 @@
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.1",
     "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }

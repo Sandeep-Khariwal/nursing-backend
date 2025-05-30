@@ -11,7 +11,7 @@ export const sendMail = async (from: string, to: string, subject: string, html: 
     const transporter = nodemailer.createTransport({
         service: process.env.MAIL_HOST,
         auth: {
-            user: process.env.LIBRARY_EMAIL,
+            user: process.env.MAIL,
             pass: process.env.MAIL_PASSWORD
         }
     });

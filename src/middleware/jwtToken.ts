@@ -1,17 +1,81 @@
 
+// import jwt, { Secret } from "jsonwebtoken";
+
+// export const generateAccessToken = (data: {
+//     _id:string,
+//     email:string,
+//     phone:string,
+// }): string => {
+//     const payload = {
+//       _id: data._id,
+//       email: data.email,
+//       phone: data.phone,
+//     };
+//     return jwt.sign(payload, process.env.TOKEN_SECRET as Secret, {
+//       expiresIn: "365d",
+//     });
+//   };
+
+  import { NextFunction , Response, Request } from "express";
 import jwt, { Secret } from "jsonwebtoken";
 
 export const generateAccessToken = (data: {
     _id:string,
     email:string,
-    phone:string,
+    name:string
 }): string => {
     const payload = {
       _id: data._id,
       email: data.email,
-      phone: data.phone,
+      name: data.name,
     };
     return jwt.sign(payload, process.env.TOKEN_SECRET as Secret, {
       expiresIn: "365d",
     });
   };
+
+  export interface clientRequest extends Request {
+    id :string,
+    user:any
+  }
+  
+export const authenticateToken = (
+  req: clientRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    
+    const brearerToken = req.headers["authorization"];
+    const  authHeader = brearerToken.split(" ")[1]
+
+    if (!authHeader) {
+      res.status(403).json("Token not found");
+      return;
+    }
+
+  jwt.verify(
+    authHeader,
+    process.env.TOKEN_SECRET as string,
+    (err: any, user: any) => {
+      if (err) {
+        return res.status(403).json("Error occure in middleware");
+      }
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (user.exp < currentTime) {
+        return res.status(403).json({ message: "Token expired" });
+      }
+
+      if (!user.active && new Date() > user.endDate) {
+        return res.status(403).json({ message: "expired" });
+      } 
+      req.user = user
+      next();
+    }
+  );
+  } catch (error) {
+    console.log(error);
+    
+  }
+
+};

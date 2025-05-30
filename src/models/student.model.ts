@@ -5,22 +5,24 @@ interface StudentModel {
   name: string;
   phoneNumber: string;
   profilePic: string;
-  batchId: string[];
+  exams: string[];
   parentNumber: string;
+  email: string;
   dateOfBirth: Date;
   dateOfJoining: Date;
   address: string;
+
   testAnswers: { testId: string; answerSheetId: string }[];
   studentResults: string[];
   createdAt: Date;
   isDeleted: boolean;
   paymentRecords: string[];
+  
   lastOtp: string;
   gender: string;
   country: string;
   state: string;
   city: string;
-  email: string;
   subscriptionType: string;
   featureAccess: {
     pro: boolean;
@@ -44,11 +46,11 @@ const studentSchema = new Schema<StudentModel>({
     type: String,
     default: "",
   },
-  batchId: {
+  exams: {
     type: [String],
     required: false,
     default: [],
-    ref: "Batch",
+    ref: "exams",
   },
   parentNumber: {
     type: String,
