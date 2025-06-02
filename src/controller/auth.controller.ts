@@ -59,7 +59,7 @@ export const LogOut = async (req: clientRequest, res: Response) => {
   const { _id } = req.user;
   const isStudent = _id.startsWith("STUD");
   const authService = new AuthService();
-
+   
   const response = await authService.logout(_id, isStudent);
 
   if (response["status"] == 200) {

@@ -16,7 +16,6 @@ export class AdminService {
       admin.name = props.name;
       admin.email = props.email;
       admin.phoneNumber = props.phone;
-      admin.isAdmin = true;
 
       const savedAdmin = await admin.save();
 

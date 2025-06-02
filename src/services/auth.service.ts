@@ -196,6 +196,9 @@ export class AuthService {
   }
 
   public async logout(id: string, isStudent: boolean) {
+    console.log(id,isStudent);
+    
+
     try {
       if (isStudent) {
         await studentModel.findByIdAndUpdate(id, { isLogedIn: false });
