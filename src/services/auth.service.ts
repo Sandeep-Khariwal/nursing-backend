@@ -59,7 +59,7 @@ export class AuthService {
 
       return { status: 200, student: savedStudent, type: "STUD" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }
@@ -116,10 +116,10 @@ export class AuthService {
           token,
         };
       } else {
-        return { status: 404, message: "OTP not varified!!" };
+        return { status: 401, message: "OTP not varified!!" };
       }
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }
@@ -145,8 +145,6 @@ export class AuthService {
       const admin = await adminModel.findOne({
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
-
-      console.log(student, admin);
 
       // Check if a student was found
       if (!student && !admin) {
@@ -190,15 +188,12 @@ export class AuthService {
         return { status: 200, message: "Check OTP!!" };
       }
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }
 
   public async logout(id: string, isStudent: boolean) {
-    console.log(id,isStudent);
-    
-
     try {
       if (isStudent) {
         await studentModel.findByIdAndUpdate(id, { isLogedIn: false });
@@ -207,7 +202,7 @@ export class AuthService {
       }
       return { status: 200, message: "Logout successfully!!" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }

@@ -10,7 +10,7 @@ export const Signup = async (req: Request, res: Response) => {
   if (response["status"] == 200) {
     res
       .status(200)
-      .json({ status: response["status"], student: response["student"] });
+      .json({ status: response["status"], data: response["student"] });
   } else {
     res
       .status(response["status"])
@@ -29,7 +29,7 @@ export const OtpVarification = async (req: Request, res: Response) => {
       .json({
         status: response["status"],
         message: response["message"],
-        user: response["user"],
+        data: response["user"],
         token: response["token"],
       });
   } else {

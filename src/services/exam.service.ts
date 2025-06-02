@@ -11,7 +11,7 @@ export class ExamService {
       const savedExam = await exam.save();
       return { status: 200, exam: savedExam, message: "Exam created!!" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }
@@ -20,7 +20,7 @@ export class ExamService {
        const exams = await examsModel.find({})
       return { status: 200, exams: exams.map((e)=>{return{_id:e._id,name:e.name}}) };
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 412 };
       return errorObj;
     }
   }
