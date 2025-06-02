@@ -10,9 +10,9 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
 
   const response = await studentService.updateStudentExamsById(_id,exams)
   if (response["status"] == 200) {
-    res.status(200).json({ message: response["message"] });
+    res.status(200).json({status:response["status"] , message: response["message"] });
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res.status(response["status"]).json({status:response["status"] , message: response["message"] });
   }
   
 

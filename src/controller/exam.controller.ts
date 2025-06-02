@@ -11,9 +11,9 @@ export const CreateNewExam = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(200)
-      .json({ exam: response["exam"], message: response["message"] });
+      .json({status:response["status"] , exam: response["exam"], message: response["message"] });
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res.status(response["status"]).json({status:response["status"] , message: response["message"] });
   }
 };
 
@@ -26,8 +26,8 @@ export const GetAllExams = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(200)
-      .json({ exam: response["exams"]});
+      .json({status:response["status"] , exam: response["exams"]});
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res.status(response["status"]).json({status:response["status"] , message: response["message"] });
   }
 };

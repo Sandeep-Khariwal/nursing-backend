@@ -8,6 +8,12 @@ import adminModel from "../models/admin.model";
 export class AuthService {
   public async signup(name: string, emailOrPhone: string) {
     try {
+      const checkStudent = await studentModel.findOne({
+        $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
+      });
+      if (checkStudent) {
+        return { status: 400, message: "User already exist!!" };
+      }
       let otp = "";
       let isEmail = false;
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -42,6 +48,7 @@ export class AuthService {
       student.dateOfJoining = new Date();
       student.name = name;
       student.lastOtp = otp;
+      student.isLogedIn = true;
       if (isEmail) {
         student.email = emailOrPhone;
       } else {
@@ -128,12 +135,18 @@ export class AuthService {
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
 
+      if (student.isLogedIn) {
+        return {
+          status: 401,
+          message: "User already logedin another device!!",
+        };
+      }
+
       const admin = await adminModel.findOne({
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
 
-      console.log(student,admin);
-      
+      console.log(student, admin);
 
       // Check if a student was found
       if (!student && !admin) {
@@ -176,6 +189,20 @@ export class AuthService {
         }
         return { status: 200, message: "Check OTP!!" };
       }
+    } catch (error) {
+      const errorObj = { message: error.message, status: 502 };
+      return errorObj;
+    }
+  }
+
+  public async logout(id: string, isStudent: boolean) {
+    try {
+      if (isStudent) {
+        await studentModel.findByIdAndUpdate(id, { isLogedIn: false });
+      } else {
+        await adminModel.findByIdAndUpdate(id, { isLogedIn: false });
+      }
+      return { status: 200, message: "Logout successfully!!" };
     } catch (error) {
       const errorObj = { message: error.message, status: 502 };
       return errorObj;

@@ -11,6 +11,7 @@ interface StudentModel {
   dateOfBirth: Date;
   dateOfJoining: Date;
   address: string;
+  isLogedIn:boolean
 
   testAnswers: { testId: string; answerSheetId: string }[];
   studentResults: string[];
@@ -83,6 +84,10 @@ const studentSchema = new Schema<StudentModel>({
     default: Date.now(),
   },
   isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  isLogedIn: {
     type: Boolean,
     default: false,
   },

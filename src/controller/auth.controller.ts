@@ -1,3 +1,4 @@
+import { clientRequest } from "../middleware/jwtToken";
 import { AuthService } from "../services/auth.service";
 import { Request, Response } from "express";
 
@@ -7,9 +8,13 @@ export const Signup = async (req: Request, res: Response) => {
 
   const response = await authService.signup(name, emailOrPhone);
   if (response["status"] == 200) {
-    res.status(200).json({ student: response["student"] });
+    res
+      .status(200)
+      .json({ status: response["status"], student: response["student"] });
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };
 
@@ -21,9 +26,16 @@ export const OtpVarification = async (req: Request, res: Response) => {
   if (response["status"] == 200) {
     res
       .status(200)
-      .json({ message: response["message"],user:response["user"], token: response["token"] });
+      .json({
+        status: response["status"],
+        message: response["message"],
+        user: response["user"],
+        token: response["token"],
+      });
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };
 
@@ -34,9 +46,30 @@ export const Login = async (req: Request, res: Response) => {
   const response = await authService.login(emailOrPhone);
 
   if (response["status"] == 200) {
-    res.status(200).json({ message: response["message"] });
+    res
+      .status(200)
+      .json({ status: response["status"], message: response["message"] });
   } else {
-    res.status(response["status"]).json({ message: response["message"] });
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const LogOut = async (req: clientRequest, res: Response) => {
+  const { _id } = req.user;
+  const isStudent = _id.startsWith("STUD");
+  const authService = new AuthService();
+
+  const response = await authService.logout(_id, isStudent);
+
+  if (response["status"] == 200) {
+    res
+      .status(200)
+      .json({ status: response["status"], message: response["message"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };
 
