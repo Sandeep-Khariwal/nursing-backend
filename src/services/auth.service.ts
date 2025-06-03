@@ -48,7 +48,7 @@ export class AuthService {
       student.dateOfJoining = new Date();
       student.name = name;
       student.lastOtp = otp;
-      student.isLogedIn = true;
+      student.isLogedIn = false;
       if (isEmail) {
         student.email = emailOrPhone;
       } else {
@@ -78,6 +78,13 @@ export class AuthService {
 
       //varify the otp
       if (user.lastOtp === otp) {
+        // set isLogedIn
+        if (isStudent) {
+          await studentModel.findByIdAndUpdate(user._id, { isLogedIn: true });
+        } else {
+          await adminModel.findByIdAndUpdate(user._id, { isLogedIn: true });
+        }
+
         const token = generateAccessToken({
           _id: user._id,
           email: user.email,
@@ -135,13 +142,6 @@ export class AuthService {
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
 
-      if (student.isLogedIn) {
-        return {
-          status: 401,
-          message: "User already logedin another device!!",
-        };
-      }
-
       const admin = await adminModel.findOne({
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
@@ -149,6 +149,11 @@ export class AuthService {
       // Check if a student was found
       if (!student && !admin) {
         return { status: 404, message: "User not registered!!" };
+      } else if (student.isLogedIn) {
+        return {
+          status: 401,
+          message: "User already logedin another device!!",
+        };
       } else {
         // check admin is or not
         if (admin) {
