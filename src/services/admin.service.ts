@@ -21,7 +21,7 @@ export class AdminService {
 
       return { status: 200, admin: savedAdmin };
     } catch (error) {
-      const errorObj = { message: error.message, status: 502 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }

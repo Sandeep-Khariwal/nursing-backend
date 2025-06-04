@@ -12,7 +12,7 @@ export class AuthService {
         $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
       });
       if (checkStudent) {
-        return { status: 400, message: "User already exist!!" };
+        return { status: 404, message: "User already exist!!" };
       }
       let otp = "";
       let isEmail = false;
@@ -59,7 +59,7 @@ export class AuthService {
 
       return { status: 200, student: savedStudent, type: "STUD" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 412 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }
@@ -123,10 +123,10 @@ export class AuthService {
           token,
         };
       } else {
-        return { status: 401, message: "OTP not varified!!" };
+        return { status: 404, message: "OTP not varified!!" };
       }
     } catch (error) {
-      const errorObj = { message: error.message, status: 412 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }
@@ -151,7 +151,7 @@ export class AuthService {
         return { status: 404, message: "User not registered!!" };
       } else if (student.isLogedIn) {
         return {
-          status: 401,
+          status: 404,
           message: "User already logedin another device!!",
         };
       } else {
@@ -193,7 +193,7 @@ export class AuthService {
         return { status: 200, message: "Check OTP!!" };
       }
     } catch (error) {
-      const errorObj = { message: error.message, status: 412 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }
@@ -207,7 +207,7 @@ export class AuthService {
       }
       return { status: 200, message: "Logout successfully!!" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 412 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }

@@ -6,7 +6,7 @@ export class StudentService {
       await studentModel.findByIdAndUpdate(id, { $addToSet: { exams: exams } });
       return { status: 200, message: "Exams updated!!" };
     } catch (error) {
-      const errorObj = { message: error.message, status: 412 };
+      const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }
