@@ -63,11 +63,11 @@ export const authenticateToken = (
       }
       const currentTime = Math.floor(Date.now() / 1000);
       if (user.exp < currentTime) {
-        return res.status(403).json({ message: "Token expired" });
+        return res.status(401).json({ message: "Token expired" });
       }
 
       if (!user.active && new Date() > user.endDate) {
-        return res.status(403).json({ message: "expired" });
+        return res.status(401).json({ message: "expired" });
       } 
       req.user = user
       next();

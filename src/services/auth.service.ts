@@ -192,7 +192,7 @@ export class AuthService {
         }
         return { status: 200, message: "Check OTP!!" };
       }
-    } catch (error) {
+    } catch (error){
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
