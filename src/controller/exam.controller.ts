@@ -19,7 +19,6 @@ export const CreateNewExam = async (req: Request, res: Response) => {
 export const GetAllExams = async (req: Request, res: Response) => {
     
   const exam = new ExamService();
-
   const response = await exam.findAllExams();
 
   if (response["status"] === 200) {
