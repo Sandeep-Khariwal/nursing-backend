@@ -5,7 +5,6 @@ import { StudentService } from "../services/student.service";
 export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
   const { _id } = req.user;
   const { exams } = req.body;
-
   const studentService = new StudentService();
 
   const response = await studentService.updateStudentExamsById(_id, exams);
