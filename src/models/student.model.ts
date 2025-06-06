@@ -5,20 +5,20 @@ interface StudentModel {
   name: string;
   phoneNumber: string;
   profilePic: string;
-  exams: string[];
+  exams: { _id: string; is_primary: boolean }[];
   parentNumber: string;
   email: string;
   dateOfBirth: Date;
   dateOfJoining: Date;
   address: string;
-  isLogedIn:boolean
+  isLogedIn: boolean;
 
   testAnswers: { testId: string; answerSheetId: string }[];
   studentResults: string[];
   createdAt: Date;
   isDeleted: boolean;
   paymentRecords: string[];
-  
+
   lastOtp: string;
   gender: string;
   country: string;
@@ -48,7 +48,19 @@ const studentSchema = new Schema<StudentModel>({
     default: "",
   },
   exams: {
-    type: [String],
+    type: [
+      {
+        _id: {
+          type: String,
+          default: "",
+          ref:"exams"
+        },
+        is_primary: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     required: false,
     default: [],
     ref: "exams",
