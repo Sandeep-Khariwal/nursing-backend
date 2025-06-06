@@ -5,7 +5,6 @@ export const CreateNewExam = async (req: Request, res: Response) => {
   const { name } = req.body;
 
   const exam = new ExamService();
-
   const response = await exam.createExam(name);
 
   if (response["status"] === 200) {
