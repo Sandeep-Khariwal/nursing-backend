@@ -49,6 +49,7 @@ export class AuthService {
       student.name = name;
       student.lastOtp = otp;
       student.isLogedIn = false;
+      student.token = ""
       if (isEmail) {
         student.email = emailOrPhone;
       } else {
@@ -150,6 +151,7 @@ export class AuthService {
       if (!student && !admin) {
         return { status: 404, message: "User not registered!!" };
       } else if (student.isLogedIn) {
+        
         return {
           status: 404,
           message: "User already logedin another device!!",

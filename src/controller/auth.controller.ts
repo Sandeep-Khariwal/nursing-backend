@@ -45,14 +45,14 @@ export const Login = async (req: Request, res: Response) => {
 
   const response = await authService.login(emailOrPhone);
 
-  if (response["status"] == 200) {
+  if (response["status"] === 200) {
     res
       .status(200)
-      .json({ status: response["status"], message: response["message"] });
+      .json({ status: response["status"], message: response["message"]});
   } else {
     res
       .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
+      .json({ status: response["status"], message: response["message"],token:response["token"]  });
   }
 };
 export const LogOut = async (req: clientRequest, res: Response) => {
