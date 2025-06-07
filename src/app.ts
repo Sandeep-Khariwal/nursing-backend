@@ -12,7 +12,7 @@ import examRouter from "./routes/exams.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT = 8090; //process.env.PORT ||
+const PORT = process.env.PORT || 8080; //process.env.PORT ||
 const VERSION = "v1"
 
 app.use(cors());
