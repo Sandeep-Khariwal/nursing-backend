@@ -76,20 +76,20 @@ export class AuthService {
         user = await adminModel.findOne({ email: emailOrPhone });
       }
 
+      const token = generateAccessToken({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      });
+
       //varify the otp
       if (user.lastOtp === otp) {
         // set isLogedIn
         if (isStudent) {
-          await studentModel.findByIdAndUpdate(user._id, { isLogedIn: true });
+          await studentModel.findByIdAndUpdate(user._id, { isLogedIn: true , token:token });
         } else {
-          await adminModel.findByIdAndUpdate(user._id, { isLogedIn: true });
+          await adminModel.findByIdAndUpdate(user._id, { isLogedIn: true , token:token });
         }
-
-        const token = generateAccessToken({
-          _id: user._id,
-          email: user.email,
-          name: user.name,
-        });
 
         // initialize the empty object
         const newUser: {
@@ -153,6 +153,7 @@ export class AuthService {
         return {
           status: 404,
           message: "User already logedin another device!!",
+          token:student.token
         };
       } else {
         // check admin is or not
@@ -192,7 +193,7 @@ export class AuthService {
         }
         return { status: 200, message: "Check OTP!!" };
       }
-    } catch (error){
+    } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }

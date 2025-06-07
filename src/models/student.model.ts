@@ -28,6 +28,7 @@ interface StudentModel {
   featureAccess: {
     pro: boolean;
   };
+  token: string;
 }
 
 const studentSchema = new Schema<StudentModel>({
@@ -132,6 +133,10 @@ const studentSchema = new Schema<StudentModel>({
     required: false,
   },
   subscriptionType: {
+    type: String,
+    required: false,
+  },
+  token: {
     type: String,
     required: false,
   },

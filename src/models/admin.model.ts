@@ -6,6 +6,7 @@ interface AdminModel {
   email: string;
   phoneNumber: string;
   lastOtp: string;
+  token: string;
   isLogedIn: boolean;
 }
 const adminSchema = new Schema<AdminModel>({
@@ -27,6 +28,10 @@ const adminSchema = new Schema<AdminModel>({
     default: "",
   },
   lastOtp: {
+    type: String,
+    default: "",
+  },
+  token: {
     type: String,
     default: "",
   },
