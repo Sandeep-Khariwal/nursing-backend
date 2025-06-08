@@ -1,28 +1,69 @@
-import DailyDoseQuestion from "@models/dailyDoseQuestion";
+import DailyDoseQuestion from "../models/dailyDoseQuestion";
 import { randomUUID } from "crypto";
 
 export class DailyDoseService {
   public async createDailyDoseQuestion(data: {
     question: string;
     options: {
-    name: string;
-    answer: boolean;
-  }[];
+      name: string;
+      answer: boolean;
+    }[];
     correctAns: string;
+    showAt: string;
   }) {
     try {
+      console.log("data : ", data);
+
       const dailyDose = new DailyDoseQuestion();
       dailyDose._id = `DDQP-${randomUUID()}`;
       dailyDose.question = data.question;
-      dailyDose.options = data.options
-      dailyDose.correctAns = data.correctAns
+      dailyDose.options = data.options;
+      dailyDose.correctAns = data.correctAns;
+      dailyDose.showAt = new Date(data.showAt);
 
-      await dailyDose.save()
+      await dailyDose.save();
 
-      return {status:200,message:"question created"}
+      return { status: 200, message: "question created" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
+    }
+  }
+  public async getTodayQuestion() {
+    const today = new Date();
+    const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
+
+    try {
+      const question = await DailyDoseQuestion.findOne({
+        showAt: {
+          $gte: startOfDay,
+          $lte: endOfDay,
+        },
+      });
+
+      return { status: 200, question };
+    } catch (error: any) {
+      return { message: error.message, status: 500 };
+    }
+  }
+
+  public async updateStudentResponse(
+    id: string,
+    student: { id: string; option_id: string }
+  ) {
+    try {
+      const updatedResponse = await DailyDoseQuestion.findByIdAndUpdate(
+        id,
+        {
+          $push: { attempt: student },
+        },
+        { new: true }
+      );
+
+      return { status: 200, question: updatedResponse };
+    } catch (error) {
+      return { message: error.message, status: 500 };
     }
   }
 }

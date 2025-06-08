@@ -16,10 +16,24 @@ export class StudentService {
           };
         }
       });
-      await studentModel.findByIdAndUpdate(id, {
+      const updateExam = await studentModel.findByIdAndUpdate(id, {
         $addToSet: { exams: updateExams },
       });
-      return { status: 200, message: "Exams updated!!" };
+      return {
+        status: 200,
+        message: "Exams updated!!",
+        selectedExam: updateExam,
+      };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+
+  public async deleteAccount(id: string) {
+    try {
+      await studentModel.findByIdAndUpdate(id,{isDeleted:true})
+      return {status:200,message:"account deleted"}
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

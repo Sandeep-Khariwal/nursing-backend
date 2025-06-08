@@ -1,3 +1,4 @@
+import { StudentService } from "../services/student.service";
 import { clientRequest } from "../middleware/jwtToken";
 import { AuthService } from "../services/auth.service";
 import { Request, Response } from "express";
@@ -24,14 +25,12 @@ export const OtpVarification = async (req: Request, res: Response) => {
 
   const response = await authService.varifyOtp(emailOrPhone, otp);
   if (response["status"] == 200) {
-    res
-      .status(200)
-      .json({
-        status: response["status"],
-        message: response["message"],
-        data: response["user"],
-        token: response["token"],
-      });
+    res.status(200).json({
+      status: response["status"],
+      message: response["message"],
+      data: response["user"],
+      token: response["token"],
+    });
   } else {
     res
       .status(response["status"])
@@ -48,18 +47,24 @@ export const Login = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(200)
-      .json({ status: response["status"], message: response["message"]});
-  } else {
+      .json({ status: response["status"], message: response["message"] });
+  } else if (response["status"] === 402) {
     res
       .status(response["status"])
-      .json({ status: response["status"], message: response["message"],token:response["token"]  });
+      .json({ status: response["status"], token: response["token"] });
+  } else {
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: response["otp"],
+      message: response["message"],
+    });
   }
 };
 export const LogOut = async (req: clientRequest, res: Response) => {
   const { _id } = req.user;
   const isStudent = _id.startsWith("STUD");
   const authService = new AuthService();
-   
+
   const response = await authService.logout(_id, isStudent);
 
   if (response["status"] == 200) {
@@ -73,15 +78,18 @@ export const LogOut = async (req: clientRequest, res: Response) => {
   }
 };
 
-// export const ResendOtp = async (req: Request, res: Response) => {
-//   const { emailOrPhone } = req.body;
-//   const studentService = new StudentService();
+export const DeleteAcount = async (req: clientRequest, res: Response) => {
+  const { _id } = req.user;
+  
+  const studentService = new StudentService();
 
-//   const response = await studentService.loginStudent(emailOrPhone);
+  const response = await studentService.deleteAccount(_id);
 
-//   if (response["status"] == 200) {
-//     res.status(200).json({ message: response["message"] });
-//   } else {
-//     res.status(response["status"]).json({ message: response["message"] });
-//   }
-// };
+  if (response["status"] == 200) {
+    res
+      .status(200)
+      .json({ status: response["status"], message: response["message"] });
+  } else {
+    res.status(response["status"]).json({ message: response["message"] });
+  }
+};

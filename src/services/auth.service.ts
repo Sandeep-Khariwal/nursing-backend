@@ -153,7 +153,7 @@ export class AuthService {
       } else if (student.isLogedIn) {
         
         return {
-          status: 404,
+          status: 402,
           message: "User already logedin another device!!",
           token:student.token
         };
@@ -193,7 +193,7 @@ export class AuthService {
         } else {
           await adminModel.findByIdAndUpdate(admin._id, { lastOtp: otp });
         }
-        return { status: 200, message: "Check OTP!!" };
+        return { status: 200, message: "Check OTP!!" , otp:otp };
       }
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };

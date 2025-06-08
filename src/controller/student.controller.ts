@@ -11,7 +11,11 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
   if (response["status"] == 200) {
     res
       .status(200)
-      .json({ status: response["status"], message: response["message"] });
+      .json({
+        status: response["status"],
+        data: response["selectedExam"],
+        message: response["message"],
+      });
   } else {
     res
       .status(response["status"])

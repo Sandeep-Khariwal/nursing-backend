@@ -8,10 +8,11 @@ interface DailyDose {
     answer: boolean;
   }[];
   attempt: {
-    _id: string;
+    student_id: string;
     option_id: string;
   }[];
   correctAns: string;
+  showAt: Date;
 }
 const dailyDoseSchema = new Schema<DailyDose>({
   _id: {
@@ -40,9 +41,10 @@ const dailyDoseSchema = new Schema<DailyDose>({
   attempt: {
     type: [
       {
-        _id: {
+        student_id: {
           type: String,
           default: "",
+          ref:"student"
         },
         option_id: {
           type: String,
@@ -54,6 +56,10 @@ const dailyDoseSchema = new Schema<DailyDose>({
   correctAns: {
     type: String,
     default: "",
+  },
+  showAt: {
+    type: Date,
+    required: true,
   },
 });
 
