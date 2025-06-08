@@ -1,24 +1,33 @@
 import studentModel from "../models/student.model";
 
 export class StudentService {
-  public async updateStudentExamsById(id: string, exams: string[]) {
+  public async updateStudentExamsById(
+    id: string,
+    exams: { _id: string; name: string }[]
+  ) {
     try {
       const updateExams = exams.map((e, i) => {
         if (i === 0) {
           return {
             _id: e,
+            name: e.name,
             is_primary: true,
           };
         } else {
           return {
             _id: e,
+            name: e.name,
             is_primary: false,
           };
         }
       });
-      const updateExam = await studentModel.findByIdAndUpdate(id, {
-        $addToSet: { exams: updateExams },
-      });
+      const updateExam = await studentModel.findByIdAndUpdate(
+        id,
+        {
+          $addToSet: { exams: updateExams },
+        },
+        { new: true }
+      );
       return {
         status: 200,
         message: "Exams updated!!",
@@ -32,8 +41,8 @@ export class StudentService {
 
   public async deleteAccount(id: string) {
     try {
-      await studentModel.findByIdAndUpdate(id,{isDeleted:true})
-      return {status:200,message:"account deleted"}
+      await studentModel.findByIdAndUpdate(id, { isDeleted: true });
+      return { status: 200, message: "account deleted" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

@@ -47,6 +47,7 @@ export const authenticateToken = (
 ): void => {
   try {
     const brearerToken = req.headers["authorization"];
+
     const authHeader = brearerToken.split(" ")[1];
 
     if (!authHeader) {
@@ -91,6 +92,10 @@ export const LogoutMiddleware = (
     const brearerToken = req.headers["authorization"];
     const authHeader = brearerToken.split(" ")[1];
 
+    if (blacklistedTokens.has(authHeader)) {
+      res.status(401).json({ status: 401, message: "user already logged out" });
+      return;
+    }
     if (!authHeader) {
       res.status(403).json("Token not found");
       return;

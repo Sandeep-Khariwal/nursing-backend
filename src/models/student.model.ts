@@ -5,7 +5,7 @@ interface StudentModel {
   name: string;
   phoneNumber: string;
   profilePic: string;
-  exams: { _id: string; is_primary: boolean }[];
+  exams: { _id: string; name: string; is_primary: boolean }[];
   parentNumber: string;
   email: string;
   dateOfBirth: Date;
@@ -54,7 +54,11 @@ const studentSchema = new Schema<StudentModel>({
         _id: {
           type: String,
           default: "",
-          ref:"exams"
+          ref: "exams",
+        },
+        name: {
+          type: String,
+          default: "",
         },
         is_primary: {
           type: Boolean,

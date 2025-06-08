@@ -24,4 +24,13 @@ export class ExamService {
       return errorObj;
     }
   }
+  public async findNameById(id:string) {
+    try {
+       const exam = await examsModel.findById(id)
+      return exam;
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
 }
