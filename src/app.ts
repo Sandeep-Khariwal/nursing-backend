@@ -17,7 +17,14 @@ const PORT =  process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  strict: false,  // allows non-object JSON values like "" (not recommended long-term)
+  verify: (req:Request, res:Response, buf) => {
+    if (!buf.length) {
+      req.body = {}; 
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true })); 
 app.use(bodyParser.json({ limit: "50mb" }));
 
