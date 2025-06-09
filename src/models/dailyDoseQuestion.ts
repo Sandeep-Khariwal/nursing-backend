@@ -12,6 +12,7 @@ interface DailyDose {
     option_id: string;
   }[];
   correctAns: string;
+  exam: string[];
   showAt: Date;
 }
 const dailyDoseSchema = new Schema<DailyDose>({
@@ -56,6 +57,11 @@ const dailyDoseSchema = new Schema<DailyDose>({
   correctAns: {
     type: String,
     default: "",
+  },
+  exam: {
+    type: [String],
+    default: [],
+    ref:"exams"
   },
   showAt: {
     type: Date,

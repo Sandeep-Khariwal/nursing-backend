@@ -22,8 +22,8 @@ export const GetTodayQuestion = async (req: Request, res: Response) => {
   const response = await dailyDoseService.getTodayQuestion();
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({
-      data: { status: response["status"], question: response["question"] },
+    res.status(response["status"]).json({status: response["status"],
+      data: {  question: response["question"] },
     });
   } else {
     res

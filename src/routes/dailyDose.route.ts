@@ -4,10 +4,11 @@ import {
   CreateDailyDoseQuestion,
   GetTodayQuestion,
 } from "../controller/dailyDoseQuestion.controller";
+import { authenticateToken } from "../middleware/jwtToken";
 const dailyDoseRouter = express.Router();
 
 dailyDoseRouter.post("/create", CreateDailyDoseQuestion);
-dailyDoseRouter.get("/todayQuestion", GetTodayQuestion);
+dailyDoseRouter.get("/todayQuestion",authenticateToken, GetTodayQuestion);
 dailyDoseRouter.put("/updateStudentResponse/:id", AddStudentResponse);
 
 export default dailyDoseRouter;
