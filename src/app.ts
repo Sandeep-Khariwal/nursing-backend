@@ -13,7 +13,7 @@ import dailyDoseRouter from "./routes/dailyDose.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT =  5070; //process.env.PORT ||
+const PORT =  process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
