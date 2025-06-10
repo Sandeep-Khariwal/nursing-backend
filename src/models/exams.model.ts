@@ -4,7 +4,7 @@ interface ExamsModel {
   _id:string;
   name:string;
   students:string[];
-  subjects:string[];
+  chapters:string[];
   tests:string[]
 
 }
@@ -22,9 +22,9 @@ const examsSchema = new Schema<ExamsModel>({
       type: [String],
       ref: "students",
     },
-    subjects: {
+    chapters: {
       type: [String],
-      ref: "subjects",
+      ref: "chapter",
     },
     tests: {
       type: [String],

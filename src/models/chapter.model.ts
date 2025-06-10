@@ -1,13 +1,14 @@
 import { model, Schema } from "mongoose";
 
-interface SubjectModel {
+interface ChapterModel {
   _id: string;
   name: string;
   modules: string[];
   attemptedModules: string[];
   iconImage: string;
+  examId:string
 }
-const subjectSchema = new Schema<SubjectModel>({
+const chapterSchema = new Schema<ChapterModel>({
     _id: {
         type: String,
         required: true,
@@ -27,7 +28,13 @@ const subjectSchema = new Schema<SubjectModel>({
       },
       iconImage: {
         type: String,
+           default:"",
+      },
+      examId: {
+        type: String,
+        default:"",
+        ref:"exams"
       },
 });
 
-export default model<SubjectModel>("subjects", subjectSchema);
+export default model<ChapterModel>("chapter", chapterSchema);

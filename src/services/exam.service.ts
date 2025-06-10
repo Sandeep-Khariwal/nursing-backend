@@ -17,17 +17,33 @@ export class ExamService {
   }
   public async findAllExams() {
     try {
-       const exams = await examsModel.find({})
-      return { status: 200, exams: exams.map((e)=>{return{_id:e._id,name:e.name}}) };
+      const exams = await examsModel.find({});
+      return {
+        status: 200,
+        exams: exams.map((e) => {
+          return { _id: e._id, name: e.name };
+        }),
+      };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
     }
   }
-  public async findNameById(id:string) {
+  public async findNameById(id: string) {
     try {
-       const exam = await examsModel.findById(id)
+      const exam = await examsModel.findById(id);
       return exam;
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+  public async addNewChapter(id: string, chapterId: string) {
+    try {
+      await examsModel.findById(id, {
+        $addToSet: { chapters: chapterId },
+      });
+      return { status: 200 };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

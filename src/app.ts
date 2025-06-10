@@ -9,6 +9,7 @@ import studentRouter from "./routes/student.route";
 import { DataBase } from "./DataBase";
 import examRouter from "./routes/exams.route";
 import dailyDoseRouter from "./routes/dailyDose.route";
+import chapterRouter from "./routes/chapter.route";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use(`/api/${VERSION}/student`,studentRouter)
 app.use(`/api/${VERSION}/teacher`,teacherRouter)
 app.use(`/api/${VERSION}/exam`,examRouter)
 app.use(`/api/${VERSION}/dailyDose`,dailyDoseRouter)
+app.use(`/api/${VERSION}/chapter`,chapterRouter)
 
 
 //DataBase
