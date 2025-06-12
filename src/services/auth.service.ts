@@ -93,28 +93,19 @@ export class AuthService {
         }
 
         // initialize the empty object
-        const newUser: {
-          _id: string;
-          name: string;
-          userType: string;
-          exams?: string[];
-        } = {
-          _id: "",
-          name: "",
-          userType: "",
-          exams: [],
-        };
+        let newUser ={};
 
         // assign the value as per type
         if (!isStudent) {
-          (newUser._id = user._id),
-            (newUser.name = user.name),
-            (newUser.userType = "admin");
+          newUser = {
+            ...user,
+            userType:"admin"
+          }
         } else {
-          (newUser._id = user._id),
-            (newUser.name = user.name),
-            (newUser.userType = "student"),
-            (newUser.exams = user.exams);
+           newUser = {
+            ...user,
+            userType:"student"
+          }
         }
 
         return {

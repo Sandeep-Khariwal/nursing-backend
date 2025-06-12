@@ -2,10 +2,16 @@ import { model, Schema } from "mongoose";
 interface QuestionsModel {
   _id: string;
   question: string;
-  options: string[];
-  moduleId: string;
-  answer: string;
-  attemptedStudents: string[];
+  module_id: string;
+  options: {
+    name: string;
+    answer: boolean;
+  }[];
+  attempt: {
+    student_id: string;
+    option_id: string;
+  }[];
+  correctAns: string;
   explaination: string;
 }
 const moduleSchema = new Schema<QuestionsModel>({
@@ -19,18 +25,44 @@ const moduleSchema = new Schema<QuestionsModel>({
     required: true,
   },
   options: {
-    type: [String],
+    type: [
+      {
+        name: {
+          type: String,
+          default: "",
+        },
+        answer: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
-  moduleId: {
+  attempt: {
+    type: [
+      {
+        student_id: {
+          type: String,
+          default: "",
+          ref: "student",
+        },
+        option_id: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+  },
+  module_id: {
     type: String,
     ref: "modules",
   },
-  attemptedStudents: {
-    type: [String],
-    ref: "students",
+  correctAns: {
+    type: String,
+    default: "",
   },
   explaination: {
     type: String,
   },
 });
-export default model<QuestionsModel>("questions", moduleSchema);
+export default model<QuestionsModel>("question", moduleSchema);

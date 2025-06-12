@@ -17,11 +17,27 @@ export class ChapterService {
       return errorObj;
     }
   }
-  public async getAllChaptersByExamId(examId: string ) {
+  public async getAllChaptersByExamId(examId: string) {
     try {
-      const chapters = await Chapter.find({examId})
+      const chapters = await Chapter.find({ examId });
 
-      return { status: 200, chapters: chapters};
+      if (chapters.length === 0) {
+        return { status: 404, message: "Chapters not found!!" };
+      }
+
+      return { status: 200, chapters: chapters };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+  public async addNewModuleInChapter(id: string, moduleId: string) {
+    try {
+      const chapters = await Chapter.findByIdAndUpdate(id, {
+        $addToSet: { modules: moduleId },
+      });
+
+      return { status: 200, chapters: chapters };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

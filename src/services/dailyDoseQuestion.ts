@@ -48,22 +48,28 @@ export class DailyDoseService {
     }
   }
 
-  public async updateStudentResponse(
-    id: string,
-    student: { id: string; option_id: string }
-  ) {
-    try {
-      const updatedResponse = await DailyDoseQuestion.findByIdAndUpdate(
-        id,
-        {
-          $push: { attempt: student },
-        },
-        { new: true }
-      );
+public async updateStudentResponse(
+  id: string,
+  student: { student_id: string; option_id: string }
+) {
+  try {
+    const question = await DailyDoseQuestion.findById(id);
 
-      return { status: 200, question: updatedResponse };
-    } catch (error) {
-      return { message: error.message, status: 500 };
+    const alreadyAttempted = question.attempt.some(
+      (attempt) => attempt.student_id === student.student_id
+    );
+
+    if (alreadyAttempted) {
+      return { status: 400, message: 'Student has already attempted.' };
     }
+
+    question.attempt.push(student);
+    await question.save();
+
+    return { status: 200, question };
+  } catch (error) {
+    return { message: error.message, status: 500 };
   }
+}
+
 }

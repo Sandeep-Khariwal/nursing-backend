@@ -32,3 +32,23 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
       .json({ status: response["status"], message: response["message"] });
   }
 };
+
+export const GetStudent = async(req: Request, res: Response) =>{
+  
+  const {id} = req.params
+  const studentService = new StudentService()
+
+  const response = await studentService.getStudentById(id)
+    if (response["status"] == 200) {
+    res
+      .status(200)
+      .json({
+        status: response["status"],
+        data: response["student"],
+      });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+}

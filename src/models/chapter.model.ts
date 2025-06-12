@@ -4,7 +4,6 @@ interface ChapterModel {
   _id: string;
   name: string;
   modules: string[];
-  attemptedModules: string[];
   iconImage: string;
   examId:string
 }
@@ -21,10 +20,6 @@ const chapterSchema = new Schema<ChapterModel>({
       modules: {
         type: [String],
         ref: "modules",
-      },
-      attemptedModules: {
-        type: [String],
-        ref: "question",
       },
       iconImage: {
         type: String,

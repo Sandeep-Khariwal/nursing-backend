@@ -10,11 +10,13 @@ import { DataBase } from "./DataBase";
 import examRouter from "./routes/exams.route";
 import dailyDoseRouter from "./routes/dailyDose.route";
 import chapterRouter from "./routes/chapter.route";
+import moduleRouter from "./routes/module.route";
+import questionRouter from "./routes/question.route";
 
 dotenv.config();
 
 const app: Express = express();
-const PORT =  process.env.PORT || 8080
+const PORT = process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
@@ -37,6 +39,8 @@ app.use(`/api/${VERSION}/teacher`,teacherRouter)
 app.use(`/api/${VERSION}/exam`,examRouter)
 app.use(`/api/${VERSION}/dailyDose`,dailyDoseRouter)
 app.use(`/api/${VERSION}/chapter`,chapterRouter)
+app.use(`/api/${VERSION}/module`,moduleRouter)
+app.use(`/api/${VERSION}/question`,questionRouter)
 
 
 //DataBase

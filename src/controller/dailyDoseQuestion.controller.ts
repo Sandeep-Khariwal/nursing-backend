@@ -39,8 +39,8 @@ export const AddStudentResponse = async (req: Request, res: Response) => {
   const response = await dailyDoseService.updateStudentResponse(id, student);
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({
-      data: { status: response["status"], question: response["question"] },
+    res.status(response["status"]).json({status: response["status"],
+      data: { question: response["question"] }
     });
   } else {
     res

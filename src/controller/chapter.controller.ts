@@ -30,9 +30,17 @@ export const GetAllChapter = async (req: Request, res: Response) => {
   const response = await chapterService.getAllChaptersByExamId(examId);
 
   if (response["status"] === 200) {
+    const chapters = response["chapters"].map((c) => {
+      const chapter = c.toObject();
+      return {
+        ...chapter,
+        modules: chapter.modules.length,
+      };
+    });
+
     res.status(200).json({
       status: 200,
-      data: response["chapters"],
+      data: chapters,
     });
   } else {
     res.status(response["status"]).json(response["message"]);

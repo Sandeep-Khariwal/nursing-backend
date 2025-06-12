@@ -6,8 +6,8 @@ interface ExamsModel {
   students:string[];
   chapters:string[];
   tests:string[]
-
 }
+
 const examsSchema = new Schema<ExamsModel>({
     _id: {
       type: String,
