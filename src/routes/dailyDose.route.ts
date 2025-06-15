@@ -5,6 +5,7 @@ import {
   GetTodayQuestion,
 } from "../controller/dailyDoseQuestion.controller";
 import { authenticateToken } from "../middleware/jwtToken";
+
 const dailyDoseRouter = express.Router();
 
 dailyDoseRouter.post("/create", CreateDailyDoseQuestion);

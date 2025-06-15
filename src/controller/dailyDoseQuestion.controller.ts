@@ -22,9 +22,12 @@ export const GetTodayQuestion = async (req: Request, res: Response) => {
   const response = await dailyDoseService.getTodayQuestion();
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({status: response["status"],
-      data: {  question: response["question"] },
-    });
+    res
+      .status(response["status"])
+      .json({
+        status: response["status"],
+        data: { question: response["question"] },
+      });
   } else {
     res
       .status(response["status"])
@@ -39,9 +42,12 @@ export const AddStudentResponse = async (req: Request, res: Response) => {
   const response = await dailyDoseService.updateStudentResponse(id, student);
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({status: response["status"],
-      data: { question: response["question"] }
-    });
+    res
+      .status(response["status"])
+      .json({
+        status: response["status"],
+        data: { question: response["question"] },
+      });
   } else {
     res
       .status(response["status"])
