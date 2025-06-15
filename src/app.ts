@@ -36,6 +36,7 @@ app.use(`/api/${VERSION}/auth`,authRouter)
 app.use(`/api/${VERSION}/admin`,adminRouter)
 app.use(`/api/${VERSION}/student`,studentRouter)
 app.use(`/api/${VERSION}/teacher`,teacherRouter)
+
 app.use(`/api/${VERSION}/exam`,examRouter)
 app.use(`/api/${VERSION}/dailyDose`,dailyDoseRouter)
 app.use(`/api/${VERSION}/chapter`,chapterRouter)
