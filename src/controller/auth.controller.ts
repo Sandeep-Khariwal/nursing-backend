@@ -47,7 +47,11 @@ export const Login = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(200)
-      .json({ status: response["status"], message: response["message"],   data: response["otp"], });
+      .json({
+        status: response["status"],
+        message: response["message"],
+        data: response["otp"],
+      });
   } else if (response["status"] === 402) {
     res
       .status(response["status"])
@@ -79,7 +83,7 @@ export const LogOut = async (req: clientRequest, res: Response) => {
 
 export const DeleteAcount = async (req: clientRequest, res: Response) => {
   const { _id } = req.user;
-  
+
   const studentService = new StudentService();
 
   const response = await studentService.deleteAccount(_id);

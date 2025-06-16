@@ -48,28 +48,30 @@ export class DailyDoseService {
     }
   }
 
-public async updateStudentResponse(
-  id: string,
-  student: { student_id: string; option_id: string }
-) {
-  try {
-    const question = await DailyDoseQuestion.findById(id);
+  public async updateStudentResponse(
+    id: string,
+    student: { student_id: string; option_id: string }
+  ) {
+    try {
+      const question = await DailyDoseQuestion.findById(id);
 
-    const alreadyAttempted = question.attempt.some(
-      (attempt) => attempt.student_id === student.student_id
-    );
+      if (!question) {
+        return { status: 404, message: "Question not found!!" };
+      }
+      const alreadyAttempted = question.attempt.some(
+        (attempt) => attempt.student_id === student.student_id
+      );
 
-    if (alreadyAttempted) {
-      return { status: 400, message: 'Student has already attempted.' };
+      if (alreadyAttempted) {
+        return { status: 400, message: "Student has already attempted." };
+      }
+
+      question.attempt.push(student);
+      await question.save();
+
+      return { status: 200, question };
+    } catch (error) {
+      return { message: error.message, status: 500 };
     }
-
-    question.attempt.push(student);
-    await question.save();
-
-    return { status: 200, question };
-  } catch (error) {
-    return { message: error.message, status: 500 };
   }
-}
-
 }

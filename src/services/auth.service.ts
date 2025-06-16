@@ -49,7 +49,7 @@ export class AuthService {
       student.name = name;
       student.lastOtp = otp;
       student.isLogedIn = false;
-      student.token = ""
+      student.token = "";
       if (isEmail) {
         student.email = emailOrPhone;
       } else {
@@ -87,25 +87,24 @@ export class AuthService {
       if (user.lastOtp === otp) {
         // set isLogedIn
         if (isStudent) {
-          await studentModel.findByIdAndUpdate(user._id, { isLogedIn: true , token:token });
+          await studentModel.findByIdAndUpdate(user._id, {
+            isLogedIn: true,
+            token: token,
+          });
         } else {
-          await adminModel.findByIdAndUpdate(user._id, { isLogedIn: true , token:token });
+          await adminModel.findByIdAndUpdate(user._id, {
+            isLogedIn: true,
+            token: token,
+          });
         }
 
         // initialize the empty object
-        let newUser ={};
+        let newUser = user.toObject();
 
-        // assign the value as per type
         if (!isStudent) {
-          newUser = {
-            ...user,
-            userType:"admin"
-          }
+          newUser.userType = "admin";
         } else {
-           newUser = {
-            ...user,
-            userType:"student"
-          }
+          newUser.userType = "student";
         }
 
         return {
@@ -142,11 +141,10 @@ export class AuthService {
       if (!student && !admin) {
         return { status: 404, message: "User not registered!!" };
       } else if (student.isLogedIn) {
-        
         return {
           status: 402,
           message: "User already logedin another device!!",
-          token:student.token
+          token: student.token,
         };
       } else {
         // check admin is or not
@@ -184,7 +182,7 @@ export class AuthService {
         } else {
           await adminModel.findByIdAndUpdate(admin._id, { lastOtp: otp });
         }
-        return { status: 200, message: "Check OTP!!" , otp:otp };
+        return { status: 200, message: "Check OTP!!", otp: otp };
       }
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
