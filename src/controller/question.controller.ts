@@ -29,9 +29,37 @@ export const UpdateQuestion = async (req: Request, res: Response) => {
   const { question } = req.body;
 
   const questionService = new QustionService();
+  //update response in question
   const response = await questionService.updateById(id, question);
 
   if (response["status"] === 200) {
+
+    res
+      .status(response["status"])
+      .json({ status: 200, data: { question: response["question"] } });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const UpdateStudentResponse = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { student } = req.body;
+
+  const questionService = new QustionService();
+    const moduleService = new ModuleService();
+  const response = await questionService.updateStudentResponseById(id, student);
+
+  if (response["status"] === 200) {
+      const resp = {
+      student_id: student.student_id,
+      question_id: id,
+    };
+    await moduleService.updateStudentResponse(
+      response["question"].module_id,
+      resp
+    );
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });

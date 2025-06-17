@@ -10,6 +10,6 @@ const dailyDoseRouter = express.Router();
 
 dailyDoseRouter.post("/create", CreateDailyDoseQuestion);
 dailyDoseRouter.get("/todayQuestion",authenticateToken, GetTodayQuestion);
-dailyDoseRouter.put("/updateStudentResponse/:id", AddStudentResponse);
+dailyDoseRouter.put("/updateStudentResponse/:id",authenticateToken, AddStudentResponse);
 
 export default dailyDoseRouter;

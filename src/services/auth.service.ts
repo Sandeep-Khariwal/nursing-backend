@@ -58,7 +58,7 @@ export class AuthService {
 
       const savedStudent = await student.save();
 
-      return { status: 200, student: savedStudent, type: "STUD" };
+      return { status: 200, student: savedStudent, message: "Check OTP!!" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
@@ -110,8 +110,7 @@ export class AuthService {
         return {
           status: 200,
           user: newUser,
-          message: "OTP varified!!",
-          token,
+          message: "OTP varified!!"
         };
       } else {
         return { status: 404, message: "OTP not varified!!" };

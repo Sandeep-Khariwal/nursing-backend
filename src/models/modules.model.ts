@@ -7,6 +7,12 @@ interface ModulesModel {
   questions: string[];
   iconImage: string;
   isPro: boolean;
+  totalTime: number;
+  questionAttempted: {
+    student_id: string;
+    question_id: string;
+    attempted_at?: Date;
+  }[];
 }
 
 const moduleSchema = new Schema<ModulesModel>({
@@ -37,6 +43,21 @@ const moduleSchema = new Schema<ModulesModel>({
   isPro: {
     type: Boolean,
     default: false,
+  },
+  totalTime: {
+    type: Number,
+    default: 0,
+  },
+  questionAttempted: {
+    type: [
+      {
+        _id: false,
+        student_id: { type: String,ref: "student", },
+        question_id: { type: String },
+        attempted_at: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
   },
 });
 export default model<ModulesModel>("module", moduleSchema);

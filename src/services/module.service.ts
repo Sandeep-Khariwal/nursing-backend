@@ -41,4 +41,15 @@ export class ModuleService {
       return { status: 500, message: error.message };
     }
   }
+  public async updateStudentResponse( id:string, res: {student_id:string,question_id:string}) {
+    try {
+      
+      await Module.findByIdAndUpdate(id, {
+        $push: { questionAttempted: res },
+      });
+      return { status: 200 };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
 }

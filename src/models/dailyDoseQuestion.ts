@@ -45,7 +45,7 @@ const dailyDoseSchema = new Schema<DailyDose>({
         student_id: {
           type: String,
           default: "",
-          ref:"student"
+          ref: "student",
         },
         option_id: {
           type: String,
@@ -61,7 +61,7 @@ const dailyDoseSchema = new Schema<DailyDose>({
   exam: {
     type: [String],
     default: [],
-    ref:"exams"
+    ref: "exams",
   },
   showAt: {
     type: Date,

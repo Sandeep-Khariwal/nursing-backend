@@ -11,7 +11,11 @@ export const Signup = async (req: Request, res: Response) => {
   if (response["status"] == 200) {
     res
       .status(200)
-      .json({ status: response["status"], data: response["student"] });
+      .json({
+        status: response["status"],
+        data: response["student"],
+        message: response["message"],
+      });
   } else {
     res
       .status(response["status"])
@@ -29,7 +33,6 @@ export const OtpVarification = async (req: Request, res: Response) => {
       status: response["status"],
       message: response["message"],
       data: response["user"],
-      token: response["token"],
     });
   } else {
     res
@@ -45,17 +48,19 @@ export const Login = async (req: Request, res: Response) => {
   const response = await authService.login(emailOrPhone);
 
   if (response["status"] === 200) {
-    res
-      .status(200)
-      .json({
-        status: response["status"],
-        message: response["message"],
-        data: response["otp"],
-      });
+    res.status(200).json({
+      status: response["status"],
+      message: response["message"],
+      data: response["otp"],
+    });
   } else if (response["status"] === 402) {
     res
       .status(response["status"])
-      .json({ status: response["status"], token: response["token"] });
+      .json({
+        status: response["status"],
+        message: response["message"],
+        token: response["token"],
+      });
   } else {
     res.status(response["status"]).json({
       status: response["status"],

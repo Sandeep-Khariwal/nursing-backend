@@ -63,7 +63,7 @@ export class DailyDoseService {
       );
 
       if (alreadyAttempted) {
-        return { status: 400, message: "Student has already attempted." };
+        return { status: 400, message: "Already attempted." };
       }
 
       question.attempt.push(student);
