@@ -53,7 +53,7 @@ const moduleSchema = new Schema<ModulesModel>({
       {
         _id: false,
         student_id: { type: String,ref: "student", },
-        question_id: { type: String },
+        question_id: { type: String, ref: "question", },
         attempted_at: { type: Date, default: Date.now },
       },
     ],

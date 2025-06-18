@@ -87,15 +87,15 @@ export class AuthService {
       if (user.lastOtp === otp) {
         // set isLogedIn
         if (isStudent) {
-          await studentModel.findByIdAndUpdate(user._id, {
+         user = await studentModel.findByIdAndUpdate(user._id, {
             isLogedIn: true,
             token: token,
-          });
+          },{new:true});
         } else {
-          await adminModel.findByIdAndUpdate(user._id, {
+          user = await adminModel.findByIdAndUpdate(user._id, {
             isLogedIn: true,
             token: token,
-          });
+          },{new:true});
         }
 
         // initialize the empty object

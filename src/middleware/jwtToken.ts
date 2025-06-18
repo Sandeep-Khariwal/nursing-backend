@@ -47,6 +47,10 @@ export const authenticateToken = (
 ): void => {
   try {
     const brearerToken = req.headers["authorization"];
+        if(!brearerToken){
+      res.status(401).json({ status: 401, message: "Token not found" });
+      return;
+    }
     const authHeader = brearerToken.split(" ")[1];
 
     if (!authHeader) {
