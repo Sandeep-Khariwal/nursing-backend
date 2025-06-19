@@ -7,6 +7,7 @@ export class ModuleService {
     exam_id: string;
     chapter_Id: string;
     isPro: boolean;
+    totalTime:number
   }) {
     try {
       const module = new Module();
@@ -15,6 +16,7 @@ export class ModuleService {
       module.exam_id = data.exam_id;
       module.chapter_Id = data.chapter_Id;
       module.isPro = data.isPro;
+      module.totalTime = data.totalTime;
 
       const savedModule = await module.save();
       return { status: 200, module: savedModule };
