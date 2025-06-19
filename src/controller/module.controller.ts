@@ -1,3 +1,4 @@
+import { clientRequest } from "src/middleware/jwtToken";
 import { ChapterService } from "../services/chapter.services";
 import { ModuleService } from "../services/module.service";
 import { Request, Response } from "express";
@@ -25,11 +26,13 @@ export const CreateModule = async (req: Request, res: Response) => {
   }
 };
 
-export const GetAllModules = async (req: Request, res: Response) => {
+export const GetAllModules = async (req: clientRequest, res: Response) => {
   const { id } = req.params;
+  const studentId = req.user._id
   const moduleService = new ModuleService();
+  
 
-  const response = await moduleService.getAllModulesByChapterId(id);
+  const response = await moduleService.getAllModulesByChapterId(id,studentId);
 
   if (response["status"] === 200) {
     res

@@ -23,7 +23,7 @@ export class ModuleService {
     }
   }
 
-  public async getAllModulesByChapterId(id: string) {
+  public async getAllModulesByChapterId(id: string,studentId:string) {
     try {
       const modules = await Module.find({ chapter_Id: id }).populate([
         {
@@ -56,13 +56,15 @@ export class ModuleService {
                 const student = qAtt.question_id.attempt.find(
               (std: any) => std.student_id === qAtt.student_id
             );
-             return {
-              _id:qAtt.question_id._id,
-              student_id:qAtt.student_id,
-              option_id:student.option_id
-             }
+            if(student.student_id === studentId){
+              return {
+               _id:qAtt.question_id._id,
+               student_id:student.student_id,
+               option_id:student.option_id
+              }
             }
-          ):[],
+            }
+          ).filter((s)=>s):[],
         };
       });
 
