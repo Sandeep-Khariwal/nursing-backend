@@ -4,61 +4,87 @@ import { sendMail } from "../email/CreateEmail";
 import { CreateHtmlForOTP } from "../email/CreatehtmlForOTP";
 import { generateAccessToken } from "../middleware/jwtToken";
 import adminModel from "../models/admin.model";
+import bcrypt from "bcryptjs";
 
 export class AuthService {
-  public async signup(name: string, emailOrPhone: string) {
+  public async signup(
+    name: string,
+    email: string,
+    phone: string,
+    password: string,
+    countryCode: string
+  ) {
     try {
       const checkStudent = await studentModel.findOne({
-        $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
+        $or: [{ email: email }, { phoneNumber: phone }],
       });
       if (checkStudent) {
         return { status: 404, message: "User already exist!!" };
       }
-      let otp = "";
-      let isEmail = false;
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const phonePattern = /^\+?[1-9]\d{1,14}$/;
+      // let otp = "";
+      // let isEmail = false;
+      // const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      // const phonePattern = /^\+?[1-9]\d{1,14}$/;
 
-      if (emailPattern.test(emailOrPhone)) {
-        isEmail = true;
-      } else if (phonePattern.test(emailOrPhone)) {
-        isEmail = false;
-      }
+      // if (emailPattern.test(emailOrPhone)) {
+      //   isEmail = true;
+      // } else if (phonePattern.test(emailOrPhone)) {
+      //   isEmail = false;
+      // }
 
-      if (isEmail) {
-        const createOTP = Math.floor(Math.random() * 9000) + 1000;
-        otp = createOTP.toString();
-      } else {
-        otp = "1234";
-      }
+      // if (isEmail) {
+      //   const createOTP = Math.floor(Math.random() * 9000) + 1000;
+      //   otp = createOTP.toString();
+      // } else {
+      //   otp = "1234";
+      // }
 
-      if (isEmail) {
-        sendMail(
-          process.env.MAIL,
-          emailOrPhone,
-          "Email Varification OTP!",
-          CreateHtmlForOTP(otp)
-        );
-      } else {
-        // write logic for send sms on mobile phone
-      }
+      // if (isEmail) {
+      //   sendMail(
+      //     process.env.MAIL,
+      //     emailOrPhone,
+      //     "Email Varification OTP!",
+      //     CreateHtmlForOTP(otp)
+      //   );
+      // } else {
+      //   // write logic for send sms on mobile phone
+      // }
 
       const student = new studentModel();
       student._id = `STUD-${randomUUID()}`;
       student.dateOfJoining = new Date();
       student.name = name;
-      student.lastOtp = otp;
+      student.name = name;
+      // student.lastOtp = otp;
       student.isLogedIn = false;
       student.token = "";
-      if (isEmail) {
-        student.email = emailOrPhone;
-      } else {
-        student.phoneNumber = emailOrPhone;
-      }
+      student.email = email;
 
+      student.phoneNumber = phone;
+      student.password = password;
+      student.countryCode = countryCode;
+      student.isLogedIn = true
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      student.password = hashedPassword;
+
+      const token = generateAccessToken({
+        _id: student._id,
+        email: student.email,
+        name: student.name,
+      });
+
+      student.token = token;
       const savedStudent = await student.save();
 
-      return { status: 200, student: savedStudent, message: "Check OTP!!" };
+      delete savedStudent.password;
+
+      return {
+        status: 200,
+        student: savedStudent,
+        message: "Signup successfully!!",
+      };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
@@ -87,15 +113,23 @@ export class AuthService {
       if (user.lastOtp === otp) {
         // set isLogedIn
         if (isStudent) {
-         user = await studentModel.findByIdAndUpdate(user._id, {
-            isLogedIn: true,
-            token: token,
-          },{new:true});
+          user = await studentModel.findByIdAndUpdate(
+            user._id,
+            {
+              isLogedIn: true,
+              token: token,
+            },
+            { new: true }
+          );
         } else {
-          user = await adminModel.findByIdAndUpdate(user._id, {
-            isLogedIn: true,
-            token: token,
-          },{new:true});
+          user = await adminModel.findByIdAndUpdate(
+            user._id,
+            {
+              isLogedIn: true,
+              token: token,
+            },
+            { new: true }
+          );
         }
 
         // initialize the empty object
@@ -110,7 +144,7 @@ export class AuthService {
         return {
           status: 200,
           user: newUser,
-          message: "OTP varified!!"
+          message: "OTP varified!!",
         };
       } else {
         return { status: 404, message: "OTP not varified!!" };
@@ -121,67 +155,90 @@ export class AuthService {
     }
   }
 
-  public async login(emailOrPhone: string) {
+  public async login(phone: string, password: string) {
     try {
-      let isEmail = false;
-      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const phonePattern = /^\+?[1-9]\d{1,14}$/;
+      // let isEmail = false;
+      // const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      // const phonePattern = /^\+?[1-9]\d{1,14}$/;
 
       let isStudent = true;
-      const student = await studentModel.findOne({
-        $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
-      });
+      let user;
+      user = await studentModel.findOne({ phoneNumber: phone });
 
-      const admin = await adminModel.findOne({
-        $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
-      });
+      if (!user) {
+        user = await adminModel.findOne({ phoneNumber: phone });
+        if (user) {
+          isStudent = false;
+        }
+      }
 
-      // Check if a student was found
-      if (!student && !admin) {
+      // Check if not student was found
+      if (!user) {
         return { status: 404, message: "User not registered!!" };
-      } else if (student.isLogedIn) {
+      } else if (user.isLogedIn) {
         return {
           status: 402,
           message: "User already logedin another device!!",
-          token: student.token,
+          token: user.token,
         };
       } else {
         // check admin is or not
-        if (admin) {
-          isStudent = false;
+        // if (admin) {
+        //   isStudent = false;
+        // }
+
+        // let otp = "";
+
+        // if (emailPattern.test(emailOrPhone)) {
+        //   isEmail = true;
+        // } else if (phonePattern.test(emailOrPhone)) {
+        //   isEmail = false;
+        // }
+
+        // if (isEmail) {
+        //   const createOTP = Math.floor(Math.random() * 9000) + 1000;
+        //   otp = createOTP.toString();
+        // } else {
+        //   otp = "1234";
+        // }
+        // if (isEmail) {
+        //   sendMail(
+        //     process.env.MAIL,
+        //     emailOrPhone,
+        //     "Email Varification OTP!",
+        //     CreateHtmlForOTP(otp)
+        //   );
+        // } else {
+        //   // write logic for send sms on mobile phone
+        // }
+        // let user
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+          return { status: 500, message: "Invalid email or password" };
         }
 
-        let otp = "";
-
-        if (emailPattern.test(emailOrPhone)) {
-          isEmail = true;
-        } else if (phonePattern.test(emailOrPhone)) {
-          isEmail = false;
-        }
-
-        if (isEmail) {
-          const createOTP = Math.floor(Math.random() * 9000) + 1000;
-          otp = createOTP.toString();
-        } else {
-          otp = "1234";
-        }
-        if (isEmail) {
-          sendMail(
-            process.env.MAIL,
-            emailOrPhone,
-            "Email Varification OTP!",
-            CreateHtmlForOTP(otp)
+        const token = generateAccessToken({
+          _id: user._id,
+          email: user.email,
+          name: user.name,
+        });
+        if (isStudent) {
+          user = await studentModel.findByIdAndUpdate(
+            user._id,
+            { token },
+            { new: true }
           );
         } else {
-          // write logic for send sms on mobile phone
+          user = await adminModel.findByIdAndUpdate(
+            user._id,
+            { token },
+            { new: true }
+          );
         }
 
-        if (isStudent) {
-          await studentModel.findByIdAndUpdate(student._id, { lastOtp: otp });
-        } else {
-          await adminModel.findByIdAndUpdate(admin._id, { lastOtp: otp });
-        }
-        return { status: 200, message: "Check OTP!!", otp: otp };
+        delete user.password;
+        return { status: 200, message: "Login successfully!!", user };
       }
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };

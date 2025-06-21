@@ -7,4 +7,5 @@ const chapterRouter = express.Router();
 chapterRouter.post("/create", CreateChapter);
 chapterRouter.get("/getAll/:examId", authenticateToken , GetAllChapter);
 
+
 export default chapterRouter

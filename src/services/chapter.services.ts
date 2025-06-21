@@ -31,6 +31,7 @@ export class ChapterService {
       return errorObj;
     }
   }
+
   public async addNewModuleInChapter(id: string, moduleId: string) {
     try {
       const chapters = await Chapter.findByIdAndUpdate(id, {

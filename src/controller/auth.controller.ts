@@ -4,10 +4,11 @@ import { AuthService } from "../services/auth.service";
 import { Request, Response } from "express";
 
 export const Signup = async (req: Request, res: Response) => {
-  const { name, emailOrPhone } = req.body;
+  const { firstName, lastName, email , phone , password , countryCode } = req.body;
+  const name = firstName + " " + lastName
   const authService = new AuthService();
 
-  const response = await authService.signup(name, emailOrPhone);
+  const response = await authService.signup(name, email , phone , password, countryCode);
   if (response["status"] == 200) {
     res
       .status(200)
@@ -42,16 +43,16 @@ export const OtpVarification = async (req: Request, res: Response) => {
 };
 
 export const Login = async (req: Request, res: Response) => {
-  const { emailOrPhone } = req.body;
+  const { phone , password } = req.body;
   const authService = new AuthService();
 
-  const response = await authService.login(emailOrPhone);
+  const response = await authService.login(phone , password);
 
   if (response["status"] === 200) {
     res.status(200).json({
       status: response["status"],
       message: response["message"],
-      data: response["otp"],
+      data: response["user"],
     });
   } else if (response["status"] === 402) {
     res

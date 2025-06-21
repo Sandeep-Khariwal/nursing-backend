@@ -1,6 +1,8 @@
+import { clientRequest } from "./../middleware/jwtToken";
 import { ExamService } from "../services/exam.service";
 import { ChapterService } from "../services/chapter.services";
 import { Request, Response } from "express";
+import { log } from "winston";
 
 export const CreateChapter = async (req: Request, res: Response) => {
   const { name, examId } = req.body;
@@ -46,3 +48,4 @@ export const GetAllChapter = async (req: Request, res: Response) => {
     res.status(response["status"]).json(response["message"]);
   }
 };
+

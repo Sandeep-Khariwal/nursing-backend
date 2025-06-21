@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import Question from "../models/question.model";
 
-export class QustionService {
+export class QuestionService {
   public async createQuestion(data: {
     question: string;
     module_id: string;
@@ -86,6 +86,34 @@ export class QustionService {
       return { status: 200, question: question };
     } catch (error) {
       return { status: 200, message: error.message };
+    }
+  }
+  public async removeStudentResponseFromQuestion(
+    moduleId: string,
+    studentId: string
+  ) {
+    try {
+      // Step 1: Find all questions belonging to the module
+      const questions = await Question.find({ module_id: moduleId });
+
+      // Step 2: Remove student attempt from each question
+        const updatePromises = questions.map((question) =>
+      Question.findByIdAndUpdate(
+        question._id,
+        {
+          $pull: {
+            attempt: { student_id: studentId },
+          },
+        },
+        { new: true }
+      )
+    );
+
+      const updatedQuestions = await Promise.all(updatePromises);
+      return { status: 200, updatedQuestions };
+    } catch (error) {
+      console.error("Error removing student attempts:", error);
+      return { status: 500, message: error.message };
     }
   }
 }

@@ -12,6 +12,7 @@ interface StudentModel {
   dateOfJoining: Date;
   address: string;
   isLogedIn: boolean;
+  password:string;
 
   testAnswers: { testId: string; answerSheetId: string }[];
   studentResults: string[];
@@ -22,6 +23,7 @@ interface StudentModel {
   lastOtp: string;
   gender: string;
   country: string;
+  countryCode: string;
   state: string;
   city: string;
   subscriptionType: string;
@@ -122,6 +124,14 @@ const studentSchema = new Schema<StudentModel>({
     default: "",
   },
   country: {
+    type: String,
+    default: "",
+  },
+  countryCode: {
+    type: String,
+    default: "",
+  },
+  password: {
     type: String,
     default: "",
   },

@@ -1,11 +1,11 @@
 import { ModuleService } from "../services/module.service";
-import { QustionService } from "../services/question.service";
+import { QuestionService } from "../services/question.service";
 import { Request, Response } from "express";
 
 export const CreateQuestion = async (req: Request, res: Response) => {
   const { question } = req.body;
 
-  const questionService = new QustionService();
+  const questionService = new QuestionService();
   const moduleService = new ModuleService();
   const response = await questionService.createQuestion(question);
 
@@ -28,7 +28,7 @@ export const UpdateQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { question } = req.body;
 
-  const questionService = new QustionService();
+  const questionService = new QuestionService();
   //update response in question
   const response = await questionService.updateById(id, question);
 
@@ -45,9 +45,9 @@ export const UpdateQuestion = async (req: Request, res: Response) => {
 };
 export const UpdateStudentResponse = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { student } = req.body;
+  const { student , pendingTime } = req.body;
 
-  const questionService = new QustionService();
+  const questionService = new QuestionService();
     const moduleService = new ModuleService();
   const response = await questionService.updateStudentResponseById(id, student);
 
@@ -58,7 +58,8 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
     };
     await moduleService.updateStudentResponse(
       response["question"].module_id,
-      resp
+      resp,
+      pendingTime
     );
     res
       .status(response["status"])
@@ -72,7 +73,7 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
 export const GetQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const questionService = new QustionService();
+  const questionService = new QuestionService();
   const response = await questionService.getQuestionById(id);
 
   if (response["status"] === 200) {

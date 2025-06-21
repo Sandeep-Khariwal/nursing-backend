@@ -16,7 +16,7 @@ import questionRouter from "./routes/question.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT = process.env.PORT || 8080
+const PORT =  process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
