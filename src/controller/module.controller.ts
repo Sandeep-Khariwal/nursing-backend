@@ -58,12 +58,21 @@ export const SubmitModuleResponse = async (
 
   if (response["status"] === 200) {
     const module = response["module"].toObject();
+
+    const totalTime =
+      module.student_time.length > 0
+        ? module.student_time.filter((c) => c.student_id === _id)[0]?.totalTime
+        : 0;
+
+    const isCompleted =
+      module.isCompleted.length > 0
+        ? module.isCompleted.filter((c) => c.student_id === _id)[0]?.isCompleted
+        : 0;
+
     const newModule = {
       ...module,
-      isCompleted: module.isCompleted.filter((c) => c.student_id === _id)[0]
-        .isCompleted,
-      student_time: module.student_time.filter((c) => c.student_id === _id)[0]
-        .totalTime,
+      isCompleted: isCompleted?isCompleted:false,
+      student_time: totalTime?totalTime:0,
     };
 
     res.status(200).json({

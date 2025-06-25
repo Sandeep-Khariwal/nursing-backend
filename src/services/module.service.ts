@@ -41,6 +41,32 @@ export class ModuleService {
       const result = modules.map((module) => {
         const plainModule = module.toObject(); // This avoids the _doc error
 
+        const attemptedQuestion = plainModule.questionAttempted
+          .map((qAtt: any) => {
+            const student = qAtt.question_id.attempt.find(
+              (std: any) => std.student_id === qAtt.student_id
+            );
+
+            // console.log("student : ",student);
+            
+            if (student.student_id === studentId) {
+              return {
+                _id: qAtt.question_id._id,
+                student_id: student.student_id,
+                option_id: student.option_id,
+              };
+            }
+          })
+          .filter((s) => s);
+
+        console.log("attemptedQuestion : ", attemptedQuestion);
+
+        const isCompleted =
+          module.isCompleted.length > 0
+            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+                ?.isCompleted
+            : 0;
+
         return {
           ...plainModule,
           questions: plainModule.questions.map((q: any) => {
@@ -52,25 +78,14 @@ export class ModuleService {
               option_id: correctOption ? correctOption._id : null,
             };
           }),
+          isCompleted: isCompleted ? isCompleted : false,
+
           questionAttempted:
-            plainModule.questionAttempted.length > 0
-              ? plainModule.questionAttempted
-                  .map((qAtt: any) => {
-                    const student = qAtt.question_id.attempt.find(
-                      (std: any) => std.student_id === qAtt.student_id
-                    );
-                    if (student.student_id === studentId) {
-                      return {
-                        _id: qAtt.question_id._id,
-                        student_id: student.student_id,
-                        option_id: student.option_id,
-                      };
-                    }
-                  })
-                  .filter((s) => s)
-              : [],
+            attemptedQuestion.length > 0 ? attemptedQuestion : [],
         };
       });
+
+      // console.log("result : ",result);
 
       return { status: 200, modules: result };
     } catch (error) {

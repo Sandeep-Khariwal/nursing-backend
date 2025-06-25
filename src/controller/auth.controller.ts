@@ -43,10 +43,10 @@ export const OtpVarification = async (req: Request, res: Response) => {
 };
 
 export const Login = async (req: Request, res: Response) => {
-  const { phone , password } = req.body;
+  const { phone , password , countryCode } = req.body;
   const authService = new AuthService();
 
-  const response = await authService.login(phone , password);
+  const response = await authService.login(phone , password , countryCode);
 
   if (response["status"] === 200) {
     res.status(200).json({

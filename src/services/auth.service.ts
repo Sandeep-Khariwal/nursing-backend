@@ -63,7 +63,7 @@ export class AuthService {
       student.phoneNumber = phone;
       student.password = password;
       student.countryCode = countryCode;
-      student.isLogedIn = true
+      student.isLogedIn = true;
 
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -155,7 +155,7 @@ export class AuthService {
     }
   }
 
-  public async login(phone: string, password: string) {
+  public async login(phone: string, password: string, countryCode: string) {
     try {
       // let isEmail = false;
       // const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -163,10 +163,15 @@ export class AuthService {
 
       let isStudent = true;
       let user;
-      user = await studentModel.findOne({ phoneNumber: phone });
+      user = await studentModel.findOne({
+        phoneNumber: phone,
+        countryCode: countryCode,
+      });
 
       if (!user) {
-        user = await adminModel.findOne({ phoneNumber: phone });
+        user = await adminModel.findOne({
+          phoneNumber: phone
+        });
         if (user) {
           isStudent = false;
         }
