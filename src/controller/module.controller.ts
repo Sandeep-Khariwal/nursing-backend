@@ -57,27 +57,27 @@ export const SubmitModuleResponse = async (
   const response = await moduleService.submitModuleById(id, _id);
 
   if (response["status"] === 200) {
-    const module = response["module"].toObject();
+    // const module = response["module"].toObject();
 
-    const totalTime =
-      module.student_time.length > 0
-        ? module.student_time.filter((c) => c.student_id === _id)[0]?.totalTime
-        : 0;
+    // const totalTime =
+    //   module.student_time.length > 0
+    //     ? module.student_time.filter((c) => c.student_id === _id)[0]?.totalTime
+    //     : 0;
 
-    const isCompleted =
-      module.isCompleted.length > 0
-        ? module.isCompleted.filter((c) => c.student_id === _id)[0]?.isCompleted
-        : 0;
+    // const isCompleted =
+    //   module.isCompleted.length > 0
+    //     ? module.isCompleted.filter((c) => c.student_id === _id)[0]?.isCompleted
+    //     : 0;
 
-    const newModule = {
-      ...module,
-      isCompleted: isCompleted?isCompleted:false,
-      student_time: totalTime?totalTime:0,
-    };
+    // const newModule = {
+    //   ...module,
+    //   isCompleted: isCompleted?isCompleted:false,
+    //   student_time: totalTime?totalTime:0,
+    // };
 
     res.status(200).json({
       status: 200,
-      data: newModule,
+      message: response["message"],
     });
   } else {
     res.status(response["status"]).json(response["message"]);
@@ -109,10 +109,16 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
       if (response3["status"] === 200) {
         const module = response3["module"].toObject();
 
+const student_time = module.student_time.filter(
+            (c) => c.student_id === _id
+          )[0]?.totalTime
+
         const newModule = {
           ...module,
+          questionAttempted: [],
           isCompleted: module.isCompleted.filter((c) => c.student_id === _id)[0]
             .isCompleted,
+          student_time: student_time??0,
         };
 
         res.status(200).json({

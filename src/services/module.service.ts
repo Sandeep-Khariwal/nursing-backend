@@ -179,7 +179,7 @@ export class ModuleService {
 
         return {
           status: 200,
-          message: "Response updated!!",
+          message: "Module submitted!!",
           module: updatedModule,
         };
       }

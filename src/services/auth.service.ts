@@ -170,7 +170,7 @@ export class AuthService {
 
       if (!user) {
         user = await adminModel.findOne({
-          phoneNumber: phone
+          phoneNumber: phone,
         });
         if (user) {
           isStudent = false;
@@ -250,7 +250,46 @@ export class AuthService {
       return errorObj;
     }
   }
+  public async forgotPassword(email: string) {
+    try {
+      let otp = "";
+      const createOTP = Math.floor(Math.random() * 9000) + 1000;
+      otp = createOTP.toString();
 
+      sendMail(
+        process.env.MAIL,
+        email,
+        "Email Varification OTP!",
+        CreateHtmlForOTP(otp)
+      );
+      await studentModel.findByIdAndUpdate({
+        email: email,
+        $set: { lastOtp: otp },
+      });
+
+      return { status: 200, email };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+
+  public async resetPassword(password: string, email: string) {
+    try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      await studentModel.findByIdAndUpdate({
+        email: email,
+        $set: { password: hashedPassword },
+      });
+
+      return { status: 200, message:"Password updated!!" };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
   public async logout(id: string, isStudent: boolean) {
     try {
       if (isStudent) {

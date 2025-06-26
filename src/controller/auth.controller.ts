@@ -4,19 +4,23 @@ import { AuthService } from "../services/auth.service";
 import { Request, Response } from "express";
 
 export const Signup = async (req: Request, res: Response) => {
-  const { firstName, lastName, email , phone , password , countryCode } = req.body;
-  const name = firstName + " " + lastName
+  const { firstName, lastName, email, phone, password, countryCode } = req.body;
+  const name = firstName + " " + lastName;
   const authService = new AuthService();
 
-  const response = await authService.signup(name, email , phone , password, countryCode);
+  const response = await authService.signup(
+    name,
+    email,
+    phone,
+    password,
+    countryCode
+  );
   if (response["status"] == 200) {
-    res
-      .status(200)
-      .json({
-        status: response["status"],
-        data: response["student"],
-        message: response["message"],
-      });
+    res.status(200).json({
+      status: response["status"],
+      data: response["student"],
+      message: response["message"],
+    });
   } else {
     res
       .status(response["status"])
@@ -25,15 +29,14 @@ export const Signup = async (req: Request, res: Response) => {
 };
 
 export const OtpVarification = async (req: Request, res: Response) => {
-  const { otp, emailOrPhone } = req.body;
+  const { otp, phone } = req.body;
   const authService = new AuthService();
 
-  const response = await authService.varifyOtp(emailOrPhone, otp);
+  const response = await authService.varifyOtp(phone, otp);
   if (response["status"] == 200) {
     res.status(200).json({
       status: response["status"],
       message: response["message"],
-      data: response["user"],
     });
   } else {
     res
@@ -42,11 +45,43 @@ export const OtpVarification = async (req: Request, res: Response) => {
   }
 };
 
-export const Login = async (req: Request, res: Response) => {
-  const { phone , password , countryCode } = req.body;
+export const ForgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
   const authService = new AuthService();
 
-  const response = await authService.login(phone , password , countryCode);
+  const response = await authService.forgotPassword(email);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], email: response["email"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
+export const ResetPassword = async (req: Request, res: Response) => {
+  const { password, email } = req.body;
+  const authService = new AuthService();
+
+  const response = await authService.resetPassword(password, email);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({ status: response["status"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
+export const Login = async (req: Request, res: Response) => {
+  const { phone, password, countryCode } = req.body;
+  const authService = new AuthService();
+
+  const response = await authService.login(phone, password, countryCode);
 
   if (response["status"] === 200) {
     res.status(200).json({
@@ -55,13 +90,11 @@ export const Login = async (req: Request, res: Response) => {
       data: response["user"],
     });
   } else if (response["status"] === 402) {
-    res
-      .status(response["status"])
-      .json({
-        status: response["status"],
-        message: response["message"],
-        token: response["token"],
-      });
+    res.status(response["status"]).json({
+      status: response["status"],
+      message: response["message"],
+      token: response["token"],
+    });
   } else {
     res.status(response["status"]).json({
       status: response["status"],
