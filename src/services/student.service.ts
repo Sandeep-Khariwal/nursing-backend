@@ -59,4 +59,24 @@ export class StudentService {
       return errorObj;
     }
   }
+  public async updateResultInStudent(id: string, resultId: string) {
+    try {
+      await studentModel.findByIdAndUpdate(id, {
+        $push: { results: resultId },
+      });
+      return { status: 200, message: "Result created!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
+  public async removeResultFromStudent(id: string, resultId: string) {
+    try {
+      await studentModel.findByIdAndUpdate(id, {
+        $pull: { results: resultId },
+      });
+      return { status: 200, message: "Result removed from student!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
 }

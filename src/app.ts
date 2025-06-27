@@ -12,6 +12,7 @@ import dailyDoseRouter from "./routes/dailyDose.route";
 import chapterRouter from "./routes/chapter.route";
 import moduleRouter from "./routes/module.route";
 import questionRouter from "./routes/question.route";
+import resultRouter from "./routes/result.route";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use(`/api/${VERSION}/dailyDose`,dailyDoseRouter)
 app.use(`/api/${VERSION}/chapter`,chapterRouter)
 app.use(`/api/${VERSION}/module`,moduleRouter)
 app.use(`/api/${VERSION}/question`,questionRouter)
+app.use(`/api/${VERSION}/result`,resultRouter)
 
 
 //DataBase

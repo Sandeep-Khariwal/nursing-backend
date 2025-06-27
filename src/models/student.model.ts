@@ -31,6 +31,7 @@ interface StudentModel {
     pro: boolean;
   };
   token: string;
+  results:string[]
 }
 
 const studentSchema = new Schema<StudentModel>({
@@ -152,6 +153,11 @@ const studentSchema = new Schema<StudentModel>({
   },
   token: {
     type: String,
+    required: false,
+  },
+  results: {
+    type: [String],
+    ref:"result",
     required: false,
   },
   dateOfJoining: {

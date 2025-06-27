@@ -25,6 +25,19 @@ export class ModuleService {
     }
   }
 
+  public async getModuleById(id: String) {
+    try {
+      const module = await Module.findById(id);
+
+      if (!module) {
+        return { status: 500, message: "Module not found!!" };
+      }
+
+      return { status: 200, module };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
       const modules = await Module.find({ chapter_Id: id }).populate([
@@ -48,7 +61,7 @@ export class ModuleService {
             );
 
             // console.log("student : ",student);
-            
+
             if (student.student_id === studentId) {
               return {
                 _id: qAtt.question_id._id,

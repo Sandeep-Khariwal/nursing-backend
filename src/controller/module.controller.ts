@@ -3,6 +3,8 @@ import { ChapterService } from "../services/chapter.services";
 import { ModuleService } from "../services/module.service";
 import { Request, Response } from "express";
 import { QuestionService } from "../services/question.service";
+import { ResultService } from "../services/result.service";
+import { StudentService } from "../services/student.service";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module } = req.body;
@@ -90,9 +92,10 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
 
   const moduleService = new ModuleService();
   const questionService = new QuestionService();
+  const resultService = new ResultService();
+  const studentService = new StudentService();
 
   // pull student response from modules attempt
-
   const response1 = await moduleService.removeStudentResponseFromModule(
     id,
     _id
@@ -103,22 +106,30 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
       id,
       _id
     );
+
+    //find result and remove from student profile
+    const resultResp = await resultService.getResultByStudentAndModule(_id, id);
+    if (resultResp["status"] === 200) {
+      await studentService.removeResultFromStudent(_id, resultResp["resultId"]);
+    } else {
+      res.status(resultResp["status"]).json(resultResp["message"]);
+    }
     if (response2["status"] === 200) {
       // update isCompleted false in module for a student
       const response3 = await moduleService.submitModuleById(id, _id);
       if (response3["status"] === 200) {
         const module = response3["module"].toObject();
 
-const student_time = module.student_time.filter(
-            (c) => c.student_id === _id
-          )[0]?.totalTime
+        const student_time = module.student_time.filter(
+          (c) => c.student_id === _id
+        )[0]?.totalTime;
 
         const newModule = {
           ...module,
           questionAttempted: [],
           isCompleted: module.isCompleted.filter((c) => c.student_id === _id)[0]
             .isCompleted,
-          student_time: student_time??0,
+          student_time: student_time ?? 0,
         };
 
         res.status(200).json({
