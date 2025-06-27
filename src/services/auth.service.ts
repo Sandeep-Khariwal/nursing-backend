@@ -96,7 +96,7 @@ export class AuthService {
       let isStudent = true;
       //find user email is student or admin
       let user;
-      user = await studentModel.findOne({ email: emailOrPhone });
+      user = await studentModel.findOne({ phoneNumber: emailOrPhone });
 
       if (!user) {
         isStudent = false;
@@ -104,13 +104,13 @@ export class AuthService {
       }
 
       const token = generateAccessToken({
-        _id: user._id,
-        email: user.email,
-        name: user.name,
+        _id: user?._id,
+        email: user?.email,
+        name: user?.name,
       });
 
       //varify the otp
-      if (user.lastOtp === otp) {
+      if (user?.lastOtp === otp) {
         // set isLogedIn
         if (isStudent) {
           user = await studentModel.findByIdAndUpdate(
@@ -164,8 +164,7 @@ export class AuthService {
       let isStudent = true;
       let user;
       user = await studentModel.findOne({
-        phoneNumber: phone,
-        countryCode: countryCode,
+        phoneNumber: countryCode + phone,
       });
 
       if (!user) {
@@ -262,10 +261,12 @@ export class AuthService {
         "Email Varification OTP!",
         CreateHtmlForOTP(otp)
       );
-      await studentModel.findByIdAndUpdate({
-        email: email,
-        $set: { lastOtp: otp },
-      });
+      await studentModel.findOneAndUpdate(
+        {
+          email: email,
+        },
+        { $set: { lastOtp: otp } }
+      );
 
       return { status: 200, email };
     } catch (error) {
@@ -279,12 +280,14 @@ export class AuthService {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      await studentModel.findByIdAndUpdate({
-        email: email,
-        $set: { password: hashedPassword },
-      });
+      await studentModel.findOneAndUpdate(
+        {
+          email: email,
+        },
+        { $set: { password: hashedPassword } }
+      );
 
-      return { status: 200, message:"Password updated!!" };
+      return { status: 200, message: "Password updated!!" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

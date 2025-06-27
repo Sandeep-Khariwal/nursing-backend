@@ -69,7 +69,7 @@ export const ResetPassword = async (req: Request, res: Response) => {
   const response = await authService.resetPassword(password, email);
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({ status: response["status"] });
+    res.status(response["status"]).json({ status: response["status"] , message:response["message"] });
   } else {
     res
       .status(response["status"])
