@@ -6,7 +6,7 @@ import { ResultService } from "../services/result.service";
 import { QuestionService } from "../services/question.service";
 import { StudentService } from "../services/student.service";
 
-export const createResult = async (req: clientRequest, res: Response) => {
+export const CreateResult = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
   const { id } = req.params;
 
@@ -96,10 +96,31 @@ export const createResult = async (req: clientRequest, res: Response) => {
         studentId,
         resultResponse["result"]._id
       );
-      res.status(response["status"]).json(response["message"]);
+      res
+        .status(response["status"])
+        .json({
+          status: 200,
+          message: response["message"],
+          data: { result_id: resultResponse["result"]._id },
+        });
     } else {
       res.status(response["status"]).json(response["message"]);
     }
+  } else {
+    res.status(response["status"]).json(response["message"]);
+  }
+};
+
+export const GetResult = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const resultService = new ResultService();
+
+  const response = await resultService.getResultById(id);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: 200, data: response["result"] });
   } else {
     res.status(response["status"]).json(response["message"]);
   }

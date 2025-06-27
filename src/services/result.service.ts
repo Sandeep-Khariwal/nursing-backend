@@ -55,4 +55,15 @@ export class ResultService {
       return { status: 500, message: error.message };
     }
   }
+  public async getResultById(id: string) {
+    try {
+      const result = await Result.findById(id);
+      if (!result) {
+        return { status: 500, message: "Result not found!!" };
+      }
+      return { status:200, result };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
 }
