@@ -54,7 +54,7 @@ export const ForgotPassword = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: response["status"], email: response["email"] });
+      .json({ status: response["status"], data:{email: response["email"] , otp:response["otp"]} , message:response["message"]});
   } else {
     res
       .status(response["status"])

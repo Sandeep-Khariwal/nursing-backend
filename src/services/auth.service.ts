@@ -252,6 +252,11 @@ export class AuthService {
   }
   public async forgotPassword(email: string) {
     try {
+      const isEmailPresent = await studentModel.findOne({email:email})
+      if(!isEmailPresent){
+        return {status:500 , message:"Email not registered!!"}
+      }
+      
       let otp = "";
       const createOTP = Math.floor(Math.random() * 9000) + 1000;
       otp = createOTP.toString();
@@ -269,7 +274,7 @@ export class AuthService {
         { $set: { lastOtp: otp } }
       );
 
-      return { status: 200, email };
+      return { status: 200, email , otp , message:"Otp sent!!" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
