@@ -16,7 +16,7 @@ export class AuthService {
   ) {
     try {
       const checkStudent = await studentModel.findOne({
-        $or: [{ email: email }, { phoneNumber: phone }],
+        $or: [{ email: email }, { phoneNumber: countryCode + phone }],
       });
       if (checkStudent) {
         return { status: 404, message: "User already exist!!" };
@@ -60,10 +60,11 @@ export class AuthService {
       student.token = "";
       student.email = email;
 
-      student.phoneNumber = phone;
+      student.phoneNumber = countryCode + phone;
       student.password = password;
       student.countryCode = countryCode;
       student.isLogedIn = true;
+      student.userType = "student";
 
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
