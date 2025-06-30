@@ -53,7 +53,7 @@ export class ExamService {
   }
   public async addNewChapter(id: string, chapterId: string) {
     try {
-      await examsModel.findById(id, {
+      await examsModel.findByIdAndUpdate(id, {
         $addToSet: { chapters: chapterId },
       });
       return { status: 200 };
@@ -62,4 +62,21 @@ export class ExamService {
       return errorObj;
     }
   }
+    public async removeExamById(id: string) {
+      try {
+        const exam = await examsModel.findByIdAndUpdate(
+          id,
+          {
+            $set: { isDeleted: true },
+          },
+          { new: true }
+        );
+        if (!exam) {
+          return { status: 404, message: "Exam not found!!" };
+        }
+        return { status: 200, exam:exam, message: "Exam removed!!" };
+      } catch (error) {
+        return { status: 500, message: error.message };
+      }
+    }
 }

@@ -18,10 +18,14 @@ export class ChapterService {
     }
   }
 
-  public async updateChapterById(name: string,chapterId: string){
+  public async updateChapterById(name: string, chapterId: string) {
     try {
-      const chapter = await Chapter.findByIdAndUpdate(chapterId,{name:name},{new:true})
-        return { status: 200, chapter, message: "chapter updated!!" };
+      const chapter = await Chapter.findByIdAndUpdate(
+        chapterId,
+        { name: name },
+        { new: true }
+      );
+      return { status: 200, chapter, message: "chapter updated!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }
@@ -53,4 +57,32 @@ export class ChapterService {
       return errorObj;
     }
   }
+  public async removeChapterById(id: string) {
+    try {
+      const chapter = await Chapter.findByIdAndUpdate(
+        id,
+        {
+          $set: { isDeleted: true },
+        },
+        { new: true }
+      );
+      if (!chapter) {
+        return { status: 404, message: "Chapter not found!!" };
+      }
+      return { status: 200, chapter, message: "Chapter removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+    public async removeManyChaptersByExamId(examId: string) {
+      try {
+        await Chapter.updateMany(
+          { examId: examId },
+          { $set: { isDeleted: true } }
+        );
+        return { status: 200, message: "Chapter removed!!" };
+      } catch (error) {
+        return { status: 500, message: error.message };
+      }
+    }
 }

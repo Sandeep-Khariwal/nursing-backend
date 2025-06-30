@@ -13,6 +13,7 @@ interface QuestionsModel {
   }[];
   correctAns: string;
   explaination: string;
+  isDeleted:boolean
 }
 const moduleSchema = new Schema<QuestionsModel>({
   _id: {
@@ -64,5 +65,9 @@ const moduleSchema = new Schema<QuestionsModel>({
   explaination: {
     type: String,
   },
+    isDeleted:{
+    type:Boolean,
+    default:false
+  }
 });
 export default model<QuestionsModel>("question", moduleSchema);

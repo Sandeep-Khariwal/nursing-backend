@@ -23,13 +23,11 @@ export const CreateQuestion = async (req: Request, res: Response) => {
         response["question"]._id
       );
     }
-    res
-      .status(response["status"])
-      .json({
-        status: 200,
-        data: { question: response["question"] },
-        message: response["message"],
-      });
+    res.status(response["status"]).json({
+      status: 200,
+      data: { question: response["question"] },
+      message: response["message"],
+    });
   } else {
     res
       .status(response["status"])
@@ -73,6 +71,23 @@ export const GetQuestion = async (req: Request, res: Response) => {
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
+export const RemoveQuestion = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const questionService = new QuestionService();
+  const response = await questionService.removeQuestionById(id);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: 200, message: response["message"] });
   } else {
     res
       .status(response["status"])

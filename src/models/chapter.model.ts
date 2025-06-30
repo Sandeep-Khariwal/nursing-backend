@@ -6,6 +6,7 @@ interface ChapterModel {
   modules: string[];
   iconImage: string;
   examId: string;
+    isDeleted:boolean
 }
 const chapterSchema = new Schema<ChapterModel>({
   _id: {
@@ -30,6 +31,10 @@ const chapterSchema = new Schema<ChapterModel>({
     default: "",
     ref: "exams",
   },
+    isDeleted:{
+    type:Boolean,
+    default:false
+  }
 });
 
 export default model<ChapterModel>("chapter", chapterSchema);

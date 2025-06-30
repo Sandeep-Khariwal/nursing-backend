@@ -27,13 +27,11 @@ export const CreateModule = async (req: Request, res: Response) => {
         response["module"]._id
       );
     }
-    res
-      .status(response["status"])
-      .json({
-        status: 200,
-        data: { module: response["module"] },
-        message: response["message"],
-      });
+    res.status(response["status"]).json({
+      status: 200,
+      data: { module: response["module"] },
+      message: response["message"],
+    });
   } else {
     res
       .status(response["status"])
@@ -156,5 +154,25 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
     }
   } else {
     res.status(response1["status"]).json(response1["message"]);
+  }
+};
+
+export const RemoveModule = async (req: clientRequest, res: Response) => {
+  const { id } = req.params;
+  const moduleService = new ModuleService();
+  const questionService = new QuestionService();
+
+  const response = await moduleService.removeModuleById(id);
+
+  if (response["status"] === 200) {
+    await questionService.removeManyQuestionByModuleId([id]);
+
+    res
+      .status(response["status"])
+      .json({ status: 200, message: response["message"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };

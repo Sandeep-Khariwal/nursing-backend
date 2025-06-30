@@ -19,7 +19,7 @@ export class ModuleService {
       module.totalTime = data.totalTime * 60 * 1000;
 
       const savedModule = await module.save();
-      return { status: 200, module: savedModule , message:"module created!!" };
+      return { status: 200, module: savedModule, message: "module created!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -39,7 +39,7 @@ export class ModuleService {
       totalTime: data.totalTime * 60 * 1000,
     };
     try {
-      const module = await Module.findByIdAndUpdate(id, { newData });
+      const module = await Module.findByIdAndUpdate(id, newData, { new: true });
       return { status: 200, module, message: "module updated!!" };
     } catch (error) {
       return { status: 500, message: error.message };
@@ -271,8 +271,55 @@ export class ModuleService {
 
       return { status: 200, message: "Student removed!!" };
     } catch (error) {
-      console.error("Error removing student response:", error);
       return { status: 500, message: error.message };
+    }
+  }
+
+  public async removeModuleById(id: string) {
+    try {
+      const module = await Module.findByIdAndUpdate(
+        id,
+        {
+          $set: { isDeleted: true },
+        },
+        { new: true }
+      );
+      if (!module) {
+        return { status: 404, message: "Module not found!!" };
+      }
+      return { status: 200, module, message: "Module removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeManyModulesByChapterIds(chapterIds: string[]) {
+    try {
+      // Step 1: Find all module _ids associated with the chapterIds
+      const modules = await Module.find({
+        chapter_Id: { $in: chapterIds },
+        isDeleted: false,
+      }).lean();
+
+      const moduleIds = modules.map((mod) => mod._id);
+
+      // Step 2: Update those modules to set isDeleted: true
+      await Module.updateMany(
+        {
+          chapter_Id: { $in: chapterIds },
+        },
+        { $set: { isDeleted: true } }
+      );
+
+      return {
+        status: 200,
+        message: "Modules deleted!!",
+        moduleIds,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: error.message || "Internal Server Error",
+      };
     }
   }
 }

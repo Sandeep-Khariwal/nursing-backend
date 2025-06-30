@@ -14,6 +14,7 @@ interface ModulesModel {
     attempted_at?: Date;
   }[];
   totalTime: number;
+    isDeleted:boolean
   isCompleted: { student_id: string; isCompleted: boolean }[];
   student_time: { student_id: string; totalTime: number }[];
 }
@@ -94,5 +95,9 @@ const moduleSchema = new Schema<ModulesModel>({
     ],
     default: [],
   },
+    isDeleted:{
+    type:Boolean,
+    default:false
+  }
 });
 export default model<ModulesModel>("module", moduleSchema);

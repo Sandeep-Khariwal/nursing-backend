@@ -3,25 +3,28 @@ import { ExamService } from "../services/exam.service";
 import { ChapterService } from "../services/chapter.services";
 import { Request, Response } from "express";
 import { log } from "winston";
+import { ModuleService } from "../services/module.service";
+import { QuestionService } from "../services/question.service";
 
 export const CreateChapter = async (req: Request, res: Response) => {
-  const { name, examId , chapterId } = req.body;
+  const { name, examId, chapterId } = req.body;
 
   const chapterService = new ChapterService();
   const examService = new ExamService();
 
-  let response
-  if(chapterId){
-    response  = await chapterService.updateChapterById( name, chapterId );
-
+  let response;
+  if (chapterId) {
+    response = await chapterService.updateChapterById(name, chapterId);
   } else {
-    response  = await chapterService.createChapter({ name, examId });
-
+    response = await chapterService.createChapter({ name, examId });
   }
 
   if (response["status"] === 200) {
     // add chapter in exam
-    await examService.addNewChapter(examId, response["chapter"]._id);
+    if (!chapterId) {
+      await examService.addNewChapter(examId, response["chapter"]._id);
+    }
+
     res.status(200).json({
       status: 200,
       data: response["chapter"],
@@ -56,3 +59,26 @@ export const GetAllChapter = async (req: Request, res: Response) => {
   }
 };
 
+export const RemoveChapter = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const chapterService = new ChapterService();
+  const moduleService = new ModuleService();
+  const questionService = new QuestionService();
+
+  const response = await chapterService.removeChapterById(id);
+
+  if (response["status"] === 200) {
+    // remove all modules present in chapter
+    await moduleService.removeManyModulesByChapterIds([id]);
+
+    // remove all all questions present in all modules
+    const moduleIds = response["chapter"].modules;
+    await questionService.removeManyQuestionByModuleId(moduleIds);
+    res
+      .status(response["status"])
+      .json({ status: 200, message: response["message"] });
+  } else {
+    res.status(response["status"]).json({status:response["status"] , message:response["message"]});
+  }
+};

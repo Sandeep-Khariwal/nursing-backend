@@ -20,10 +20,15 @@ export class QuestionService {
       question.options = data.options;
       question.correctAns = data.correctAns;
       question.explaination = data.explaination;
+      question.isDeleted = false;
 
       const savedQuestion = await question.save();
 
-      return { status: 200, question: savedQuestion , message:"Question created!!" };
+      return {
+        status: 200,
+        question: savedQuestion,
+        message: "Question created!!",
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -46,7 +51,11 @@ export class QuestionService {
       const updatedQuestion = await Question.findByIdAndUpdate(id, question, {
         new: true,
       });
-      return { status: 200, question: updatedQuestion , message:"Question updated!!" };
+      return {
+        status: 200,
+        question: updatedQuestion,
+        message: "Question updated!!",
+      };
     } catch (error) {
       return { status: 200, message: error.message };
     }
@@ -82,7 +91,7 @@ export class QuestionService {
   }
   public async getQuestionById(id: string) {
     try {
-      const question = await Question.findById(id);
+      const question = await Question.findOne({ _id: id, isDelete: false });
       return { status: 200, question: question };
     } catch (error) {
       return { status: 200, message: error.message };
@@ -97,22 +106,45 @@ export class QuestionService {
       const questions = await Question.find({ module_id: moduleId });
 
       // Step 2: Remove student attempt from each question
-        const updatePromises = questions.map((question) =>
-      Question.findByIdAndUpdate(
-        question._id,
-        {
-          $pull: {
-            attempt: { student_id: studentId },
+      const updatePromises = questions.map((question) =>
+        Question.findByIdAndUpdate(
+          question._id,
+          {
+            $pull: {
+              attempt: { student_id: studentId },
+            },
           },
-        },
-        { new: true }
-      )
-    );
+          { new: true }
+        )
+      );
 
       const updatedQuestions = await Promise.all(updatePromises);
       return { status: 200, updatedQuestions };
     } catch (error) {
-      console.error("Error removing student attempts:", error);
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeQuestionById(id: string) {
+    try {
+      const question = await Question.findByIdAndUpdate(id, {
+        $set: { isDeleted: true },
+      });
+      if (!question) {
+        return { status: 404, message: "Question not found!!" };
+      }
+      return { status: 200, message: "Question removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeManyQuestionByModuleId(moduleIds: string[]) {
+    try {
+      await Question.updateMany(
+        { module_id: { $in: moduleIds } },
+        { $set: { isDeleted: true } }
+      );
+      return { status: 200, message: "Question removed!!" };
+    } catch (error) {
       return { status: 500, message: error.message };
     }
   }
