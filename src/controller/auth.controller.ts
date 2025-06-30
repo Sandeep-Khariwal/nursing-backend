@@ -29,10 +29,10 @@ export const Signup = async (req: Request, res: Response) => {
 };
 
 export const OtpVarification = async (req: Request, res: Response) => {
-  const { otp, phone } = req.body;
+  const { otp, email } = req.body;
   const authService = new AuthService();
 
-  const response = await authService.varifyOtp(phone, otp);
+  const response = await authService.varifyOtp(email, otp);
   if (response["status"] == 200) {
     res.status(200).json({
       status: response["status"],

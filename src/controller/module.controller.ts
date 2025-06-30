@@ -7,21 +7,33 @@ import { ResultService } from "../services/result.service";
 import { StudentService } from "../services/student.service";
 
 export const CreateModule = async (req: Request, res: Response) => {
-  const { module } = req.body;
+  const { module, moduleId } = req.body;
 
   const moduleService = new ModuleService();
   const chapterService = new ChapterService();
-  const response = await moduleService.createModule(module);
+
+  let response;
+  if (moduleId) {
+    response = await moduleService.updateModuleById(moduleId, module);
+  } else {
+    response = await moduleService.createModule(module);
+  }
 
   if (response["status"] === 200) {
     // update module in chapter
-    await chapterService.addNewModuleInChapter(
-      module.chapter_Id,
-      response["module"]._id
-    );
+    if (!moduleId) {
+      await chapterService.addNewModuleInChapter(
+        module.chapter_Id,
+        response["module"]._id
+      );
+    }
     res
       .status(response["status"])
-      .json({ status: 200, data: { module: response["module"] } });
+      .json({
+        status: 200,
+        data: { module: response["module"] },
+        message: response["message"],
+      });
   } else {
     res
       .status(response["status"])

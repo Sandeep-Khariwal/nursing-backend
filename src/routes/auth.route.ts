@@ -5,9 +5,9 @@ const authRouter = express.Router();
 
 authRouter.post("/signup",Signup );
 authRouter.post("/login",Login );
-authRouter.post("/varification",OtpVarification );
+authRouter.post("/varification",OtpVarification);
 
-authRouter.put("/forgot-password",ForgotPassword );
+authRouter.put("/forgot-password",ForgotPassword);
 authRouter.put("/reset-password",ResetPassword );
 authRouter.put("/logout",LogoutMiddleware,LogOut );
 authRouter.put("/deleteAccount",authenticateToken, DeleteAcount );

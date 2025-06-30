@@ -1,21 +1,27 @@
-import Admin from "@models/admin.model";
+import Admin from "../models/admin.model";
 import { randomUUID } from "crypto";
-import { sendMail } from "../email/CreateEmail";
-import { CreateHtmlForOTP } from "../email/CreatehtmlForOTP";
-import { generateAccessToken } from "src/middleware/jwtToken";
+import bcrypt from "bcryptjs";
 
 export class AdminService {
   public async createAdmin(props: {
     name: string;
     email: string;
     phone: string;
+    password: string;
+    countryCode: string;
   }) {
     try {
       const admin = new Admin();
       admin._id = `ADMI-${randomUUID()}`;
       admin.name = props.name;
       admin.email = props.email;
-      admin.phoneNumber = props.phone;
+      admin.countryCode = props.countryCode;
+      admin.phoneNumber = props.countryCode + props.phone;
+      admin.userType = "admin"
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(props.password, saltRounds);
+      admin.password = hashedPassword;
 
       const savedAdmin = await admin.save();
 
@@ -25,5 +31,4 @@ export class AdminService {
       return errorObj;
     }
   }
-  
 }

@@ -15,6 +15,19 @@ export class ExamService {
       return errorObj;
     }
   }
+
+  public async updateExamById(id: string, name: string) {
+    try {
+      const exam = await examsModel.findByIdAndUpdate(
+        id,
+        { name },
+        { new: true }
+      );
+      return { status: 200, exam, message: "Exam updated!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
   public async findAllExams() {
     try {
       const exams = await examsModel.find({});

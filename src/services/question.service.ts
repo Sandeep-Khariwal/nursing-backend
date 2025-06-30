@@ -23,7 +23,7 @@ export class QuestionService {
 
       const savedQuestion = await question.save();
 
-      return { status: 200, question: savedQuestion };
+      return { status: 200, question: savedQuestion , message:"Question created!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -46,7 +46,7 @@ export class QuestionService {
       const updatedQuestion = await Question.findByIdAndUpdate(id, question, {
         new: true,
       });
-      return { status: 200, question: updatedQuestion };
+      return { status: 200, question: updatedQuestion , message:"Question updated!!" };
     } catch (error) {
       return { status: 200, message: error.message };
     }

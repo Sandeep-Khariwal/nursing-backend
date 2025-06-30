@@ -19,7 +19,28 @@ export class ModuleService {
       module.totalTime = data.totalTime * 60 * 1000;
 
       const savedModule = await module.save();
-      return { status: 200, module: savedModule };
+      return { status: 200, module: savedModule , message:"module created!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async updateModuleById(
+    id: string,
+    data: {
+      name: string;
+      exam_id: string;
+      chapter_Id: string;
+      isPro: boolean;
+      totalTime: number;
+    }
+  ) {
+    const newData = {
+      ...data,
+      totalTime: data.totalTime * 60 * 1000,
+    };
+    try {
+      const module = await Module.findByIdAndUpdate(id, { newData });
+      return { status: 200, module, message: "module updated!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

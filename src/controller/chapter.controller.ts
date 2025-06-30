@@ -5,12 +5,19 @@ import { Request, Response } from "express";
 import { log } from "winston";
 
 export const CreateChapter = async (req: Request, res: Response) => {
-  const { name, examId } = req.body;
+  const { name, examId , chapterId } = req.body;
 
   const chapterService = new ChapterService();
   const examService = new ExamService();
 
-  const response = await chapterService.createChapter({ name, examId });
+  let response
+  if(chapterId){
+    response  = await chapterService.updateChapterById( name, chapterId );
+
+  } else {
+    response  = await chapterService.createChapter({ name, examId });
+
+  }
 
   if (response["status"] === 200) {
     // add chapter in exam
