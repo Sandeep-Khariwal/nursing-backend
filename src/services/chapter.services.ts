@@ -8,6 +8,7 @@ export class ChapterService {
       chapter._id = `CPTR-${randomUUID()}`;
       chapter.name = data.name;
       chapter.examId = data.examId;
+      chapter.isDeleted = false;
 
       const newChapter = await chapter.save();
 
@@ -46,8 +47,8 @@ export class ChapterService {
   }
   public async getAllChapters() {
     try {
-      const chapters = await Chapter.find({ isDeleted: false });
-
+      let chapters = await Chapter.find({});
+      chapters = chapters.filter((c) => !c?.isDeleted);
       if (chapters.length === 0) {
         return { status: 404, message: "Chapters not found!!" };
       }

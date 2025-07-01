@@ -4,7 +4,6 @@
   "main": "index.js",
   "module": "types",
   "scripts": {
-    "postinstall": "npx puppeteer browsers install chrome",
     "build": "tsc",
     "watch": "tsc -w",
     "dev": "nodemon --exec npx ts-node src/app.ts",

@@ -4,7 +4,7 @@ import { CreateModule, GetAllModules, ReAppearModule, RemoveModule, SubmitModule
 const moduleRouter = express.Router();
 
 moduleRouter.post("/create",CreateModule)
-moduleRouter.get("/getAll/:id", authenticateToken , GetAllModules)
+moduleRouter.get("/getAll", authenticateToken , GetAllModules)
 moduleRouter.put("/submit/:id", authenticateToken , SubmitModuleResponse);
 moduleRouter.put("/removeModule/:id", authenticateToken , RemoveModule);
 moduleRouter.put("/reappear/:id", authenticateToken , ReAppearModule);

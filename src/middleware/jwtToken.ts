@@ -68,6 +68,8 @@ export const authenticateToken = (
       process.env.TOKEN_SECRET as string,
       (err: any, user: any) => {
         if (err) {
+          console.log("error : ",err);
+          
           return res.status(403).json("Error occure in middleware");
         }
         const currentTime = Math.floor(Date.now() / 1000);

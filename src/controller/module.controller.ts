@@ -40,11 +40,16 @@ export const CreateModule = async (req: Request, res: Response) => {
 };
 
 export const GetAllModules = async (req: clientRequest, res: Response) => {
-  const { id } = req.params;
+  const { chapterId } = req.body;
   const studentId = req.user._id;
   const moduleService = new ModuleService();
 
-  const response = await moduleService.getAllModulesByChapterId(id, studentId);
+  let response
+  if(chapterId){
+    response = await moduleService.getAllModulesByChapterId(chapterId, studentId);
+  } else {
+    response = await moduleService.getAllModules(studentId);
+  }
 
   if (response["status"] === 200) {
     res
