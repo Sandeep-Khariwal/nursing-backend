@@ -180,7 +180,13 @@ export class AuthService {
       // Check if not student was found
       if (!user) {
         return { status: 404, message: "User not registered!!" };
-      } else if (user.isLogedIn) {
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return { status: 404, message: "Invalid email or password" };
+      }
+
+      if (user.isLogedIn) {
         return {
           status: 402,
           message: "User already logedin another device!!",
@@ -217,11 +223,6 @@ export class AuthService {
         //   // write logic for send sms on mobile phone
         // }
         // let user
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (!isMatch) {
-          return { status: 500, message: "Invalid email or password" };
-        }
 
         const token = generateAccessToken({
           _id: user._id,
@@ -258,7 +259,7 @@ export class AuthService {
     try {
       const isEmailPresent = await studentModel.findOne({ email: email });
       if (!isEmailPresent) {
-        return { status: 500, message: "Email not registered!!" };
+        return { status: 404, message: "Email not registered!!" };
       }
 
       let otp = "";
@@ -271,12 +272,23 @@ export class AuthService {
         "Email Varification OTP!",
         CreateHtmlForOTP(otp)
       );
-      await studentModel.findOneAndUpdate(
+      const user = await studentModel.findOneAndUpdate(
         {
           email: email,
         },
-        { $set: { lastOtp: otp } }
+        { $set: { lastOtp: otp } },
+        {new:true}
       );
+
+      if(!user){
+        await adminModel.findOneAndUpdate(
+        {
+          email: email,
+        },
+        { $set: { lastOtp: otp } },
+        {new:true}
+      );
+      }
 
       return { status: 200, email, otp, message: "Otp sent!!" };
     } catch (error) {

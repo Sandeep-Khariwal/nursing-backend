@@ -5,7 +5,7 @@ import { authenticateToken } from "../middleware/jwtToken";
 const chapterRouter = express.Router();
 
 chapterRouter.post("/create", CreateChapter);
-chapterRouter.get("/getAll/:examId", authenticateToken , GetAllChapter);
+chapterRouter.get("/getAll", authenticateToken , GetAllChapter);
 chapterRouter.put("/removeChapter/:id" ,authenticateToken, RemoveChapter );
 
 

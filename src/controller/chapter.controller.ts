@@ -35,11 +35,16 @@ export const CreateChapter = async (req: Request, res: Response) => {
   }
 };
 export const GetAllChapter = async (req: Request, res: Response) => {
-  const { examId } = req.params;
+  const { examId } = req.body;
 
   const chapterService = new ChapterService();
 
-  const response = await chapterService.getAllChaptersByExamId(examId);
+  let response 
+  if(examId){
+    response = await chapterService.getAllChaptersByExamId(examId);
+  } else {
+   response = await chapterService.getAllChapters();
+  }
 
   if (response["status"] === 200) {
     const chapters = response["chapters"].map((c) => {

@@ -30,7 +30,7 @@ export class ExamService {
   }
   public async findAllExams() {
     try {
-      const exams = await examsModel.find({});
+      const exams = await examsModel.find({isDeleted:false});
       return {
         status: 200,
         exams: exams.map((e) => {
@@ -44,7 +44,7 @@ export class ExamService {
   }
   public async findNameById(id: string) {
     try {
-      const exam = await examsModel.findById(id);
+      const exam = await examsModel.findById(id,{isDeleted:false});
       return exam;
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };

@@ -32,7 +32,21 @@ export class ChapterService {
   }
   public async getAllChaptersByExamId(examId: string) {
     try {
-      const chapters = await Chapter.find({ examId });
+      const chapters = await Chapter.find({ examId, isDeleted: false });
+
+      if (chapters.length === 0) {
+        return { status: 404, message: "Chapters not found!!" };
+      }
+
+      return { status: 200, chapters: chapters };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+  public async getAllChapters() {
+    try {
+      const chapters = await Chapter.find({ isDeleted: false });
 
       if (chapters.length === 0) {
         return { status: 404, message: "Chapters not found!!" };
@@ -74,15 +88,15 @@ export class ChapterService {
       return { status: 500, message: error.message };
     }
   }
-    public async removeManyChaptersByExamId(examId: string) {
-      try {
-        await Chapter.updateMany(
-          { examId: examId },
-          { $set: { isDeleted: true } }
-        );
-        return { status: 200, message: "Chapter removed!!" };
-      } catch (error) {
-        return { status: 500, message: error.message };
-      }
+  public async removeManyChaptersByExamId(examId: string) {
+    try {
+      await Chapter.updateMany(
+        { examId: examId },
+        { $set: { isDeleted: true } }
+      );
+      return { status: 200, message: "Chapter removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
     }
+  }
 }

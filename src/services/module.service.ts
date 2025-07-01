@@ -48,7 +48,7 @@ export class ModuleService {
 
   public async getModuleById(id: String) {
     try {
-      const module = await Module.findById(id);
+      const module = await Module.findById(id,{isDeleted:false});
 
       if (!module) {
         return { status: 500, message: "Module not found!!" };
@@ -61,7 +61,7 @@ export class ModuleService {
   }
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
-      const modules = await Module.find({ chapter_Id: id }).populate([
+      const modules = await Module.find({ chapter_Id: id , isDeleted:false}).populate([
         {
           path: "questions",
           select: ["_id", "options"],
@@ -92,9 +92,6 @@ export class ModuleService {
             }
           })
           .filter((s) => s);
-
-        console.log("attemptedQuestion : ", attemptedQuestion);
-
         const isCompleted =
           module.isCompleted.length > 0
             ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
