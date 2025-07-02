@@ -273,25 +273,25 @@ export class AuthService {
         "Email Varification OTP!",
         CreateHtmlForOTP(otp)
       );
-      let user
-      if(isStudentPresent){
-         user = await studentModel.findOneAndUpdate(
+      let user;
+      if (isStudentPresent) {
+        user = await studentModel.findOneAndUpdate(
           {
             email: email,
           },
           { $set: { lastOtp: otp } },
-          {new:true}
+          { new: true }
         );
       }
 
-      if(!user){
+      if (!user) {
         await adminModel.findOneAndUpdate(
-        {
-          email: email,
-        },
-        { $set: { lastOtp: otp } },
-        {new:true}
-      );
+          {
+            email: email,
+          },
+          { $set: { lastOtp: otp } },
+          { new: true }
+        );
       }
 
       return { status: 200, email, otp, message: "Otp sent!!" };
@@ -303,10 +303,21 @@ export class AuthService {
 
   public async resetPassword(password: string, email: string) {
     try {
+      const isStudent = await studentModel.findOne({
+        email: email,
+      });
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      await studentModel.findOneAndUpdate(
+      if (isStudent) {
+        await studentModel.findOneAndUpdate(
+          {
+            email: email,
+          },
+          { $set: { password: hashedPassword } }
+        );
+      }
+      await adminModel.findOneAndUpdate(
         {
           email: email,
         },

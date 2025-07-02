@@ -67,7 +67,7 @@ export const GetQuestion = async (req: Request, res: Response) => {
   const questionService = new QuestionService();
   const response = await questionService.getQuestionById(id);
 
-  if (response["status"] === 200) {
+  if(response["status"] === 200){
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });
