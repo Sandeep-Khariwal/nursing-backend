@@ -2,10 +2,10 @@ import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
 export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
-  const { question } = req.body;
+  const { question , exam_id , dailyDoseWisdom } = req.body;
 
   const dailyDoseService = new DailyDoseService();
-  const response = await dailyDoseService.createDailyDoseQuestion(question);
+  const response = await dailyDoseService.createDailyDoseQuestion(question , exam_id , dailyDoseWisdom);
 
   if (response["status"] === 200) {
     res

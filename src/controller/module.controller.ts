@@ -5,12 +5,15 @@ import { Request, Response } from "express";
 import { QuestionService } from "../services/question.service";
 import { ResultService } from "../services/result.service";
 import { StudentService } from "../services/student.service";
+import { ModuleType } from "../enums/test.enum";
+import { ExamService } from "../services/exam.service";
 
 export const CreateModule = async (req: Request, res: Response) => {
-  const { module, moduleId } = req.body;
+  const { module, moduleId , moduleType } = req.body;
 
   const moduleService = new ModuleService();
   const chapterService = new ChapterService();
+  const examService = new ExamService()
 
   let response;
   if (moduleId) {
@@ -22,11 +25,20 @@ export const CreateModule = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     // update module in chapter
     if (!moduleId) {
-      await chapterService.addNewModuleInChapter(
-        module.chapter_Id,
-        response["module"]._id
-      );
+    if(ModuleType.QUESTION_FIELD === moduleType){
+        await chapterService.addNewModuleInChapter(
+          module.chapter_Id,
+          response["module"]._id
+        );
+      
+    } else if(ModuleType.MINI_TEST === moduleType){
+        // add modules in exam mini_test_modiles
+        await examService.addMiniTestModules(module.exam_id,response["module"]._id)
+    } else{
+// add modules in exam mock_drills_modiles
+await examService.addMockDrillsModules(module.exam_id,response["module"]._id)
     }
+  }
     res.status(response["status"]).json({
       status: 200,
       data: { module: response["module"] },
@@ -40,13 +52,15 @@ export const CreateModule = async (req: Request, res: Response) => {
 };
 
 export const GetAllModules = async (req: clientRequest, res: Response) => {
-  const { chapterId } = req.body;
+  const { chapterId , examId } = req.body;
   const studentId = req.user._id;
   const moduleService = new ModuleService();
 
   let response
   if(chapterId){
     response = await moduleService.getAllModulesByChapterId(chapterId, studentId);
+  } else if(examId){
+    response = await moduleService.getAllModulesByExamId(examId, studentId);
   } else {
     response = await moduleService.getAllModules(studentId);
   }

@@ -72,6 +72,7 @@ export class ChapterService {
       return errorObj;
     }
   }
+
   public async removeChapterById(id: string) {
     try {
       const chapter = await Chapter.findByIdAndUpdate(

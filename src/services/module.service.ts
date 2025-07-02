@@ -124,6 +124,70 @@ export class ModuleService {
       return { status: 500, message: error.message };
     }
   }
+  public async getAllModulesByExamId(id: string, studentId: string) {
+    try {
+      const modules = await Module.find({ exam_id: id , isDeleted:false}).populate([
+        {
+          path: "questions",
+          select: ["_id", "options"],
+        },
+        {
+          path: "questionAttempted.question_id", // Populate nested question_id
+          select: ["_id", "attempt"],
+        },
+      ]);
+
+      const result = modules.map((module) => {
+        const plainModule = module.toObject(); // This avoids the _doc error
+
+        const attemptedQuestion = plainModule.questionAttempted
+          .map((qAtt: any) => {
+            const student = qAtt.question_id.attempt.find(
+              (std: any) => std.student_id === qAtt.student_id
+            );
+
+            // console.log("student : ",student);
+
+            if (student.student_id === studentId) {
+              return {
+                _id: qAtt.question_id._id,
+                student_id: student.student_id,
+                option_id: student.option_id,
+              };
+            }
+          })
+          .filter((s) => s);
+        const isCompleted =
+          module.isCompleted.length > 0
+            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+                ?.isCompleted
+            : 0;
+
+        return {
+          ...plainModule,
+          questions: plainModule.questions.map((q: any) => {
+            const correctOption = q.options.find(
+              (opt: any) => opt.answer === true
+            );
+            return {
+              _id: q._id,
+              option_id: correctOption ? correctOption._id : null,
+            };
+          }),
+          isCompleted: isCompleted ? isCompleted : false,
+
+          questionAttempted:
+            attemptedQuestion.length > 0 ? attemptedQuestion : [],
+        };
+      });
+
+      // console.log("result : ",result);
+
+      return { status: 200, modules: result };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
   public async getAllModules( studentId: string) {
     try {
       const modules = await Module.find({}).populate([

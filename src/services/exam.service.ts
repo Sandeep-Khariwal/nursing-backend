@@ -30,7 +30,7 @@ export class ExamService {
   }
   public async findAllExams() {
     try {
-      const exams = await examsModel.find({isDeleted:false});
+      const exams = await examsModel.find({ isDeleted: false });
       return {
         status: 200,
         exams: exams.map((e) => {
@@ -44,7 +44,7 @@ export class ExamService {
   }
   public async findNameById(id: string) {
     try {
-      const exam = await examsModel.findById(id,{isDeleted:false});
+      const exam = await examsModel.findById(id, { isDeleted: false });
       return exam;
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
@@ -62,21 +62,45 @@ export class ExamService {
       return errorObj;
     }
   }
-    public async removeExamById(id: string) {
-      try {
-        const exam = await examsModel.findByIdAndUpdate(
-          id,
-          {
-            $set: { isDeleted: true },
-          },
-          { new: true }
-        );
-        if (!exam) {
-          return { status: 404, message: "Exam not found!!" };
-        }
-        return { status: 200, exam:exam, message: "Exam removed!!" };
-      } catch (error) {
-        return { status: 500, message: error.message };
+  public async removeExamById(id: string) {
+    try {
+      const exam = await examsModel.findByIdAndUpdate(
+        id,
+        {
+          $set: { isDeleted: true },
+        },
+        { new: true }
+      );
+      if (!exam) {
+        return { status: 404, message: "Exam not found!!" };
       }
+      return { status: 200, exam: exam, message: "Exam removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
     }
+  }
+  public async addMiniTestModules(id: string, moduleId: string) {
+    try {
+      const exam = await examsModel.findByIdAndUpdate(id, {
+        $addToSet: { mini_test_modules: moduleId },
+      });
+
+      return { status: 200, exam };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+  public async addMockDrillsModules(id: string, moduleId: string) {
+    try {
+      const exam = await examsModel.findByIdAndUpdate(id, {
+        $addToSet: { mock_drills_modules: moduleId },
+      });
+
+      return { status: 200, exam };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
 }

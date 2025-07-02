@@ -5,6 +5,8 @@ interface ExamsModel {
   name: string;
   students: string[];
   chapters: string[];
+  mini_test_modules: string[];
+  mock_drills_modules: string[];
   tests: string[];
   isDeleted: boolean;
 }
@@ -30,6 +32,14 @@ const examsSchema = new Schema<ExamsModel>({
   tests: {
     type: [String],
     ref: "tests",
+  },
+  mini_test_modules: {
+    type: [String],
+    ref: "module",
+  },
+  mock_drills_modules: {
+    type: [String],
+    ref: "module",
   },
   isDeleted:{
     type:Boolean,
