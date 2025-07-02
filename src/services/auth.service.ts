@@ -183,7 +183,7 @@ export class AuthService {
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return { status: 404, message: "Invalid email or password" };
+        return { status: 404, message: "Invalid phone or password" };
       }
 
       if (user.isLogedIn) {
@@ -257,8 +257,9 @@ export class AuthService {
   }
   public async forgotPassword(email: string) {
     try {
-      const isEmailPresent = await studentModel.findOne({ email: email });
-      if (!isEmailPresent) {
+      const isStudentPresent = await studentModel.findOne({ email: email });
+      const isAdminPresent = await adminModel.findOne({ email: email });
+      if (!isStudentPresent && !isAdminPresent) {
         return { status: 404, message: "Email not registered!!" };
       }
 
@@ -272,13 +273,16 @@ export class AuthService {
         "Email Varification OTP!",
         CreateHtmlForOTP(otp)
       );
-      const user = await studentModel.findOneAndUpdate(
-        {
-          email: email,
-        },
-        { $set: { lastOtp: otp } },
-        {new:true}
-      );
+      let user
+      if(isStudentPresent){
+         user = await studentModel.findOneAndUpdate(
+          {
+            email: email,
+          },
+          { $set: { lastOtp: otp } },
+          {new:true}
+        );
+      }
 
       if(!user){
         await adminModel.findOneAndUpdate(
