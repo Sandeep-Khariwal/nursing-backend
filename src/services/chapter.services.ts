@@ -19,11 +19,15 @@ export class ChapterService {
     }
   }
 
-  public async updateChapterById(name: string, chapterId: string) {
+  public async updateChapterById(
+    name: string,
+    chapterId: string,
+    examId: string
+  ) {
     try {
       const chapter = await Chapter.findByIdAndUpdate(
         chapterId,
-        { name: name },
+        { name: name, examId: examId },
         { new: true }
       );
       return { status: 200, chapter, message: "chapter updated!!" };
@@ -39,7 +43,17 @@ export class ChapterService {
         return { status: 404, message: "Chapters not found!!" };
       }
 
-      return { status: 200, chapters: chapters };
+      const updatedChapters = chapters.map((chapter) => {
+        const { examId, ...rest } = chapter.toObject
+          ? chapter.toObject()
+          : chapter;
+        return {
+          ...rest,
+          exam: examId,
+        };
+      });
+
+      return { status: 200, chapters: updatedChapters };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
@@ -47,13 +61,27 @@ export class ChapterService {
   }
   public async getAllChapters() {
     try {
-      let chapters = await Chapter.find({});
+      let chapters = await Chapter.find({}).populate([
+        {
+          path:"examId",
+          select:["_id","name"]
+        }
+      ]);
       chapters = chapters.filter((c) => !c?.isDeleted);
       if (chapters.length === 0) {
         return { status: 404, message: "Chapters not found!!" };
       }
 
-      return { status: 200, chapters: chapters };
+            const updatedChapters = chapters.map((chapter) => {
+        const { examId, ...rest } = chapter.toObject
+          ? chapter.toObject()
+          : chapter;
+        return {
+          ...rest,
+          exam: examId,
+        };
+      });
+      return { status: 200, chapters: updatedChapters };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

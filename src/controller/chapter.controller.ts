@@ -14,7 +14,7 @@ export const CreateChapter = async (req: Request, res: Response) => {
 
   let response;
   if (chapterId) {
-    response = await chapterService.updateChapterById(name, chapterId);
+    response = await chapterService.updateChapterById(name, chapterId,examId);
   } else {
     response = await chapterService.createChapter({ name, examId });
   }
@@ -48,7 +48,7 @@ export const GetAllChapter = async (req: Request, res: Response) => {
 
   if (response["status"] === 200) {
     const chapters = response["chapters"].map((c) => {
-      const chapter = c.toObject();
+      const chapter = c
       return {
         ...chapter,
         modules: chapter.modules.length,
