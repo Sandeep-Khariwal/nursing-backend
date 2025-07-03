@@ -9,7 +9,7 @@ import { authenticateToken } from "../middleware/jwtToken";
 const dailyDoseRouter = express.Router();
 
 dailyDoseRouter.post("/create", CreateDailyDoseQuestion);
-dailyDoseRouter.get("/todayQuestion",authenticateToken, GetTodayQuestion);
+dailyDoseRouter.get("/todayQuestion/:id",authenticateToken, GetTodayQuestion);
 dailyDoseRouter.put("/updateStudentResponse/:id",authenticateToken, AddStudentResponse);
 
 export default dailyDoseRouter;

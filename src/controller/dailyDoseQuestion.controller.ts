@@ -18,8 +18,9 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
   }
 };
 export const GetTodayQuestion = async (req: Request, res: Response) => {
+  const {id} = req.params
   const dailyDoseService = new DailyDoseService();
-  const response = await dailyDoseService.getTodayQuestion();
+  const response = await dailyDoseService.getTodayQuestion(id);
 
   if (response["status"] === 200) {
     res
