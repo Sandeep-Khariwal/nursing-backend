@@ -68,6 +68,7 @@ export class ModuleService {
       }).populate([
         {
           path: "questions",
+            match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
@@ -135,10 +136,12 @@ export class ModuleService {
       }).populate([
         {
           path: "questions",
+            match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
           path: "questionAttempted.question_id", // Populate nested question_id
+            match: { isDeleted: false },
           select: ["_id", "attempt"],
         },
       ]);
@@ -199,10 +202,12 @@ export class ModuleService {
       const modules = await Module.find({}).populate([
         {
           path: "questions",
+            match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
           path: "questionAttempted.question_id", // Populate nested question_id
+            match: { isDeleted: false },
           select: ["_id", "attempt"],
         },
       ]);

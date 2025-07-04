@@ -108,20 +108,24 @@ export class ExamService {
       const exam = await examsModel.findById(id).populate([
         {
           path: "mini_test_modules",
-            populate: [
+          populate: [
             {
               path: "questions",
-              select: ["_id", "options"],
+              match: { isDeleted: false },
+              select: ["_id", "options", "isDeleted"],
             },
             {
               path: "questionAttempted.question_id", // Populate nested question_id
-              select: ["_id", "attempt"],
+                match: { isDeleted: false },
+              select: ["_id", "attempt","isDeleted"],
             },
           ],
         },
       ]);
 
-      const modules: any = exam["mini_test_modules"];
+      const modules: any = exam["mini_test_modules"].filter(
+        (m: any) => !m.isDeleted
+      );
       const result = modules.map((module) => {
         const plainModule = module.toObject(); // This avoids the _doc error
 
@@ -179,17 +183,21 @@ export class ExamService {
           populate: [
             {
               path: "questions",
-              select: ["_id", "options"],
+              match: { isDeleted: false },
+              select: ["_id", "options", "isDeleted"],
             },
             {
               path: "questionAttempted.question_id", // Populate nested question_id
-              select: ["_id", "attempt"],
+              match: { isDeleted: false },
+              select: ["_id", "attempt", "isDeleted"],
             },
           ],
         },
       ]);
 
-      const modules: any = exam["mock_drills_modules"];
+      const modules: any = exam["mock_drills_modules"].filter(
+        (m: any) => !m.isDeleted
+      );
 
       const result = modules.map((module) => {
         const plainModule = module.toObject(); // This avoids the _doc error
