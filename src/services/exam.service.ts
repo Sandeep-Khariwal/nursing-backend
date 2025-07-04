@@ -103,4 +103,142 @@ export class ExamService {
       return errorObj;
     }
   }
+  public async getAllMiniTestModulesFromExam(id: string, studentId: string) {
+    try {
+      const exam = await examsModel.findById(id).populate([
+        {
+          path: "mini_test_modules",
+            populate: [
+            {
+              path: "questions",
+              select: ["_id", "options"],
+            },
+            {
+              path: "questionAttempted.question_id", // Populate nested question_id
+              select: ["_id", "attempt"],
+            },
+          ],
+        },
+      ]);
+
+      const modules: any = exam["mini_test_modules"];
+      const result = modules.map((module) => {
+        const plainModule = module.toObject(); // This avoids the _doc error
+
+        const attemptedQuestion = plainModule.questionAttempted
+          .map((qAtt: any) => {
+            const student = qAtt.question_id.attempt.find(
+              (std: any) => std.student_id === qAtt.student_id
+            );
+
+            // console.log("student : ",student);
+
+            if (student.student_id === studentId) {
+              return {
+                _id: qAtt.question_id._id,
+                student_id: student.student_id,
+                option_id: student.option_id,
+              };
+            }
+          })
+          .filter((s) => s);
+        const isCompleted =
+          module.isCompleted.length > 0
+            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+                ?.isCompleted
+            : 0;
+
+        return {
+          ...plainModule,
+          questions: plainModule.questions.map((q: any) => {
+            const correctOption = q.options.find(
+              (opt: any) => opt.answer === true
+            );
+            return {
+              _id: q._id,
+              option_id: correctOption ? correctOption._id : null,
+            };
+          }),
+          isCompleted: isCompleted ? isCompleted : false,
+
+          questionAttempted:
+            attemptedQuestion.length > 0 ? attemptedQuestion : [],
+        };
+      });
+      return { status: 200, modules: result };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+  public async getAllMockDrillModulesFromExam(id: string, studentId: string) {
+    try {
+      const exam = await examsModel.findById(id).populate([
+        {
+          path: "mock_drills_modules",
+          populate: [
+            {
+              path: "questions",
+              select: ["_id", "options"],
+            },
+            {
+              path: "questionAttempted.question_id", // Populate nested question_id
+              select: ["_id", "attempt"],
+            },
+          ],
+        },
+      ]);
+
+      const modules: any = exam["mock_drills_modules"];
+
+      const result = modules.map((module) => {
+        const plainModule = module.toObject(); // This avoids the _doc error
+
+        const attemptedQuestion = plainModule.questionAttempted
+          .map((qAtt: any) => {
+            const student = qAtt.question_id.attempt.find(
+              (std: any) => std.student_id === qAtt.student_id
+            );
+
+            // console.log("student : ",student);
+
+            if (student.student_id === studentId) {
+              return {
+                _id: qAtt.question_id._id,
+                student_id: student.student_id,
+                option_id: student.option_id,
+              };
+            }
+          })
+          .filter((s) => s);
+        const isCompleted =
+          module.isCompleted.length > 0
+            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+                ?.isCompleted
+            : 0;
+
+        return {
+          ...plainModule,
+          questions: plainModule.questions.map((q: any) => {
+            const correctOption = q.options.find(
+              (opt: any) => opt.answer === true
+            );
+            return {
+              _id: q._id,
+              option_id: correctOption ? correctOption._id : null,
+            };
+          }),
+          isCompleted: isCompleted ? isCompleted : false,
+
+          questionAttempted:
+            attemptedQuestion.length > 0 ? attemptedQuestion : [],
+        };
+      });
+
+      return { status: 200, modules: result };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
 }

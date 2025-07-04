@@ -9,11 +9,11 @@ import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
 
 export const CreateModule = async (req: Request, res: Response) => {
-  const { module, moduleId , moduleType } = req.body;
+  const { module, moduleId, moduleType } = req.body;
 
   const moduleService = new ModuleService();
   const chapterService = new ChapterService();
-  const examService = new ExamService()
+  const examService = new ExamService();
 
   let response;
   if (moduleId) {
@@ -25,20 +25,25 @@ export const CreateModule = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     // update module in chapter
     if (!moduleId) {
-    if(ModuleType.QUESTION_FIELD === moduleType){
+      if (ModuleType.QUESTION_FIELD === moduleType) {
         await chapterService.addNewModuleInChapter(
           module.chapter_Id,
           response["module"]._id
         );
-      
-    } else if(ModuleType.MINI_TEST === moduleType){
+      } else if (ModuleType.MINI_TEST === moduleType) {
         // add modules in exam mini_test_modiles
-        await examService.addMiniTestModules(module.exam_id,response["module"]._id)
-    } else{
-// add modules in exam mock_drills_modiles
-await examService.addMockDrillsModules(module.exam_id,response["module"]._id)
+        await examService.addMiniTestModules(
+          module.exam_id,
+          response["module"]._id
+        );
+      } else {
+        // add modules in exam mock_drills_modiles
+        await examService.addMockDrillsModules(
+          module.exam_id,
+          response["module"]._id
+        );
+      }
     }
-  }
     res.status(response["status"]).json({
       status: 200,
       data: { module: response["module"] },
@@ -52,23 +57,46 @@ await examService.addMockDrillsModules(module.exam_id,response["module"]._id)
 };
 
 export const GetAllModules = async (req: clientRequest, res: Response) => {
-  const { chapterId , examId } = req.body;
+  const { chapterId, examId, moduleType } = req.body;
   const studentId = req.user._id;
   const moduleService = new ModuleService();
+  const examService = new ExamService();
 
-  let response
-  if(chapterId){
-    response = await moduleService.getAllModulesByChapterId(chapterId, studentId);
-  } else if(examId){
-    response = await moduleService.getAllModulesByExamId(examId, studentId);
+  let response;
+  let modules = [];
+  if (chapterId) {
+    response = await moduleService.getAllModulesByChapterId(
+      chapterId,
+      studentId
+    );
+    modules = response["modules"];
+  } else if (examId) {
+    if (ModuleType.MINI_TEST === moduleType) {
+      response = await examService.getAllMiniTestModulesFromExam(
+        examId,
+        studentId
+      );
+      if (response["status"] === 200) {
+        modules = response["modules"];
+      }
+    } else {
+      response = await examService.getAllMockDrillModulesFromExam(
+        examId,
+        studentId
+      );
+      if (response["status"] === 200) {
+        modules = response["modules"];
+      }
+    }
   } else {
     response = await moduleService.getAllModules(studentId);
+    modules = response["modules"];
   }
 
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: 200, data: { modules: response["modules"] } });
+      .json({ status: 200, data: { modules: modules } });
   } else {
     res
       .status(response["status"])
