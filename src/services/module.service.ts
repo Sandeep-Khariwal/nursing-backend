@@ -68,7 +68,7 @@ export class ModuleService {
       }).populate([
         {
           path: "questions",
-            match: { isDeleted: false },
+          match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
@@ -136,12 +136,12 @@ export class ModuleService {
       }).populate([
         {
           path: "questions",
-            match: { isDeleted: false },
+          match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
           path: "questionAttempted.question_id", // Populate nested question_id
-            match: { isDeleted: false },
+          match: { isDeleted: false },
           select: ["_id", "attempt"],
         },
       ]);
@@ -202,12 +202,12 @@ export class ModuleService {
       const modules = await Module.find({}).populate([
         {
           path: "questions",
-            match: { isDeleted: false },
+          match: { isDeleted: false },
           select: ["_id", "options"],
         },
         {
           path: "questionAttempted.question_id", // Populate nested question_id
-            match: { isDeleted: false },
+          match: { isDeleted: false },
           select: ["_id", "attempt"],
         },
       ]);
@@ -271,6 +271,16 @@ export class ModuleService {
         $addToSet: { questions: questionId },
       });
       return { status: 200 };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async restoreModule(id: string) {
+    try {
+      await Module.findByIdAndUpdate(id, {
+        $set: { isDeleted: false },
+      });
+      return { status: 200 , message:"Module restored!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

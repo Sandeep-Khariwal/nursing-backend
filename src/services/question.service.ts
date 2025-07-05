@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import Question from "../models/question.model";
+import mongoose from "mongoose";
 
 export class QuestionService {
   public async createQuestion(data: {
@@ -97,6 +98,17 @@ export class QuestionService {
       return { status: 200, message: error.message };
     }
   }
+  public async getAllQuestionById(id: string) {
+    try {
+      const questions = await Question.find({
+        module_id: id.trim(),
+        isDeleted: false,
+      });
+      return { status: 200, questions };
+    } catch (error) {
+      return { status: 200, message: error.message };
+    }
+  }
   public async removeStudentResponseFromQuestion(
     moduleId: string,
     studentId: string
@@ -137,6 +149,7 @@ export class QuestionService {
       return { status: 500, message: error.message };
     }
   }
+
   public async removeManyQuestionByModuleId(moduleIds: string[]) {
     try {
       await Question.updateMany(
@@ -144,6 +157,18 @@ export class QuestionService {
         { $set: { isDeleted: true } }
       );
       return { status: 200, message: "Question removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
+  public async restoreManyQuestionByModuleId(moduleIds: string[]) {
+    try {
+      await Question.updateMany(
+        { module_id: { $in: moduleIds } },
+        { $set: { isDeleted: false } }
+      );
+      return { status: 200, message: "Question Restored!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

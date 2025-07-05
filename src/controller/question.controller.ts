@@ -78,6 +78,23 @@ export const GetQuestion = async (req: Request, res: Response) => {
   }
 };
 
+export const GetAllQuestions = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const questionService = new QuestionService();
+  const response = await questionService.getAllQuestionById(id);
+
+  if(response["status"] === 200){
+    res
+      .status(response["status"])
+      .json({ status: 200, data: { questions: response["questions"] } });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
 export const RemoveQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
 

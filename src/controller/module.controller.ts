@@ -64,13 +64,16 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
   let response;
   let modules = [];
-  if (chapterId) {
+  if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
+    console.log("q field");
+    
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
     );
     modules = response["modules"];
   } else if (examId) {
+        console.log("q field");
     if (ModuleType.MINI_TEST === moduleType) {
       response = await examService.getAllMiniTestModulesFromExam(
         examId,
@@ -80,6 +83,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         modules = response["modules"];
       }
     } else {
+          console.log("q field");
       response = await examService.getAllMockDrillModulesFromExam(
         examId,
         studentId
@@ -140,6 +144,25 @@ export const SubmitModuleResponse = async (
     });
   } else {
     res.status(response["status"]).json(response["message"]);
+  }
+};
+
+export const RestoreModules = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const questionService = new QuestionService();
+  const moduleService = new ModuleService();
+  const response = await moduleService.restoreModule(id);
+  await questionService.restoreManyQuestionByModuleId([id]);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: 200, message: response["message"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };
 
