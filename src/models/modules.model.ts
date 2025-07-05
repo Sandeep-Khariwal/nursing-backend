@@ -10,7 +10,7 @@ interface ModulesModel {
 
   questionAttempted: {
     studentId: string;
-    question_id: string;
+    questionId: string;
     attempted_at?: Date;
   }[];
   totalTime: number;
@@ -57,7 +57,7 @@ const moduleSchema = new Schema<ModulesModel>({
       {
         _id: false,
         studentId: { type: String, ref: "student" },
-        question_id: { type: String, ref: "question" },
+        questionId: { type: String, ref: "question" },
         attempted_at: { type: Date, default: Date.now },
       },
     ],

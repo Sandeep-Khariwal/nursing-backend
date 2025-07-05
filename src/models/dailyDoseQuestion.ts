@@ -9,7 +9,7 @@ interface DailyDose {
   }[];
   attempt: {
     studentId: string;
-    option_id: string;
+    optionId: string;
   }[];
   correctAns: string;
   examId: string;
@@ -48,7 +48,7 @@ const dailyDoseSchema = new Schema<DailyDose>({
           default: "",
           ref: "student",
         },
-        option_id: {
+        optionId: {
           type: String,
           default: "",
         },

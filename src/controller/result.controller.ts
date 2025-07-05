@@ -26,7 +26,7 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
 
     const attemptedQuestionIdsByStudent = module.questionAttempted
       .filter((q) => q.studentId === studentId)
-      .map((q) => q.question_id);
+      .map((q) => q.questionId);
     const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
 
     let promises = [];
@@ -56,9 +56,9 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
 
         if (!studentAttempt) return acc; // No attempt made by this student
 
-        // 3. Convert studentAttempt.option_id and correctOption._id to the same type (ObjectId)
+        // 3. Convert studentAttempt.optionId and correctOption._id to the same type (ObjectId)
         const studentOptionId = new mongoose.Types.ObjectId(
-          studentAttempt.option_id
+          studentAttempt.optionId
         );
         const correctOptionId = correctOption._id;
 

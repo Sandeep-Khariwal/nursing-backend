@@ -45,7 +45,7 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     const resp = {
       studentId: student.studentId,
-      question_id: id,
+      questionId: id,
     };
     await moduleService.updateStudentResponse(
       response["question"].moduleId,

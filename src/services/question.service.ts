@@ -65,7 +65,7 @@ export class QuestionService {
     id: string,
     student: {
       studentId: string;
-      option_id: string;
+      optionId: string;
     }
   ) {
     try {

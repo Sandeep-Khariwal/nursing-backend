@@ -115,7 +115,7 @@ export class ExamService {
               select: ["_id", "options", "isDeleted"],
             },
             {
-              path: "questionAttempted.question_id", // Populate nested question_id
+              path: "questionAttempted.questionId", // Populate nested questionId
                 match: { isDeleted: false },
               select: ["_id", "attempt","isDeleted"],
             },
@@ -131,7 +131,7 @@ export class ExamService {
 
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
-            const student = qAtt.question_id.attempt.find(
+            const student = qAtt.questionId.attempt.find(
               (std: any) => std.studentId === qAtt.studentId
             );
 
@@ -139,9 +139,9 @@ export class ExamService {
 
             if (student.studentId === studentId) {
               return {
-                _id: qAtt.question_id._id,
+                _id: qAtt.questionId._id,
                 studentId: student.studentId,
-                option_id: student.option_id,
+                optionId: student.optionId,
               };
             }
           })
@@ -160,7 +160,7 @@ export class ExamService {
             );
             return {
               _id: q._id,
-              option_id: correctOption ? correctOption._id : null,
+              optionId: correctOption ? correctOption._id : null,
             };
           }),
           isCompleted: isCompleted ? isCompleted : false,
@@ -187,7 +187,7 @@ export class ExamService {
               select: ["_id", "options", "isDeleted"],
             },
             {
-              path: "questionAttempted.question_id", // Populate nested question_id
+              path: "questionAttempted.questionId", // Populate nested questionId
               match: { isDeleted: false },
               select: ["_id", "attempt", "isDeleted"],
             },
@@ -204,7 +204,7 @@ export class ExamService {
 
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
-            const student = qAtt.question_id.attempt.find(
+            const student = qAtt.questionId.attempt.find(
               (std: any) => std.studentId === qAtt.studentId
             );
 
@@ -212,9 +212,9 @@ export class ExamService {
 
             if (student.studentId === studentId) {
               return {
-                _id: qAtt.question_id._id,
+                _id: qAtt.questionId._id,
                 studentId: student.studentId,
-                option_id: student.option_id,
+                optionId: student.optionId,
               };
             }
           })
@@ -233,7 +233,7 @@ export class ExamService {
             );
             return {
               _id: q._id,
-              option_id: correctOption ? correctOption._id : null,
+              optionId: correctOption ? correctOption._id : null,
             };
           }),
           isCompleted: isCompleted ? isCompleted : false,

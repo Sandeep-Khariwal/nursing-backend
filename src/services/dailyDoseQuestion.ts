@@ -55,7 +55,7 @@ export class DailyDoseService {
 
   public async updateStudentResponse(
     id: string,
-    student: { studentId: string; option_id: string }
+    student: { studentId: string; optionId: string }
   ) {
     try {
       const question = await DailyDoseQuestion.findById(id);

@@ -9,7 +9,7 @@ interface QuestionsModel {
   }[];
   attempt: {
     studentId: string;
-    option_id: string;
+    optionId: string;
   }[];
   correctAns: string;
   explaination: string;
@@ -47,7 +47,7 @@ const moduleSchema = new Schema<QuestionsModel>({
           default: "",
           ref: "student",
         },
-        option_id: {
+        optionId: {
           type: String,
           default: "",
         },
