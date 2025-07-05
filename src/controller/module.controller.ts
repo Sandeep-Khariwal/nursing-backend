@@ -7,6 +7,22 @@ import { ResultService } from "../services/result.service";
 import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
+import { ParsedQs } from 'qs';
+
+
+function toStringParam(
+  param: string | ParsedQs | (string | ParsedQs)[]
+): string | undefined {
+  if (typeof param === 'string') return param;
+  if (Array.isArray(param)) {
+    const first = param[0];
+    if (typeof first === 'string') return first;
+    return undefined;
+  }
+  return undefined;
+}
+
+
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -58,7 +74,10 @@ export const CreateModule = async (req: Request, res: Response) => {
 };
 
 export const GetAllModules = async (req: clientRequest, res: Response) => {
-  const { chapterId, examId, moduleType } = req.body;
+  const chapterId = toStringParam(req.query.chapterId);
+  const moduleType = toStringParam(req.query.moduleType);
+  const examId = toStringParam(req.query.examId);
+
   const studentId = req.user._id;
   const moduleService = new ModuleService();
   const examService = new ExamService();
