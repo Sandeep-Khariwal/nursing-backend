@@ -62,14 +62,6 @@ export class ModuleService {
   }
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
-       const checkModules = await Module.find({
-        chapterId: id,
-        isDeleted: false,
-      })
-
-      if(checkModules.length === 0){
-        return {status:500,message:"Chapter empty"}
-      }
       const modules = await Module.find({
         chapterId: id,
         isDeleted: false,

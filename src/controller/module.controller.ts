@@ -25,7 +25,6 @@ export const CreateModule = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     // update module in chapter
     if (!moduleId) {
-      
       if (ModuleType.QUESTION_FIELD === moduleType) {
         console.log(" response[module]._id ", response["module"]._id);
         await chapterService.addNewModuleInChapter(
@@ -66,8 +65,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
   let response;
   let modules = [];
-  if (chapterId || ModuleType.QUESTION_FIELD === moduleType){
-    
+  if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
@@ -95,11 +93,35 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
     response = await moduleService.getAllModules(studentId);
     modules = response["modules"];
   }
-  
+
   if (response["status"] === 200) {
     res
       .status(response["status"])
       .json({ status: 200, data: { modules: modules } });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
+export const GetAllQuetionFieldModules = async (
+  req: clientRequest,
+  res: Response
+) => {
+  const { id } = req.params;
+  const studentId = req.user._id;
+  const moduleService = new ModuleService();
+
+  const response = await moduleService.getAllModulesByChapterId(
+    id,
+    studentId
+  );
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: 200, data: { modules: response["modules"] } });
   } else {
     res
       .status(response["status"])
