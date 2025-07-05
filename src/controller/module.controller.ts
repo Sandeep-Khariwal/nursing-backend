@@ -25,21 +25,23 @@ export const CreateModule = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     // update module in chapter
     if (!moduleId) {
+      
       if (ModuleType.QUESTION_FIELD === moduleType) {
+        console.log(" response[module]._id ", response["module"]._id);
         await chapterService.addNewModuleInChapter(
-          module.chapter_Id,
+          module.chapterId,
           response["module"]._id
         );
       } else if (ModuleType.MINI_TEST === moduleType) {
         // add modules in exam mini_test_modiles
         await examService.addMiniTestModules(
-          module.exam_id,
+          module.examId,
           response["module"]._id
         );
       } else {
         // add modules in exam mock_drills_modiles
         await examService.addMockDrillsModules(
-          module.exam_id,
+          module.examId,
           response["module"]._id
         );
       }
@@ -124,12 +126,12 @@ export const SubmitModuleResponse = async (
 
     // const totalTime =
     //   module.student_time.length > 0
-    //     ? module.student_time.filter((c) => c.student_id === _id)[0]?.totalTime
+    //     ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
     //     : 0;
 
     // const isCompleted =
     //   module.isCompleted.length > 0
-    //     ? module.isCompleted.filter((c) => c.student_id === _id)[0]?.isCompleted
+    //     ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
     //     : 0;
 
     // const newModule = {
@@ -201,13 +203,13 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
         const module = response3["module"].toObject();
 
         const student_time = module.student_time.filter(
-          (c) => c.student_id === _id
+          (c) => c.studentId === _id
         )[0]?.totalTime;
 
         const newModule = {
           ...module,
           questionAttempted: [],
-          isCompleted: module.isCompleted.filter((c) => c.student_id === _id)[0]
+          isCompleted: module.isCompleted.filter((c) => c.studentId === _id)[0]
             .isCompleted,
           student_time: student_time ?? 0,
         };

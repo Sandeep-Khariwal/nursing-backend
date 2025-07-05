@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 export class QuestionService {
   public async createQuestion(data: {
     question: string;
-    module_id: string;
+    moduleId: string;
     options: {
       name: string;
       answer: boolean;
@@ -17,7 +17,7 @@ export class QuestionService {
       const question = new Question();
       question._id = `QSTN-${randomUUID()}`;
       question.question = data.question;
-      question.module_id = data.module_id;
+      question.moduleId = data.moduleId;
       question.options = data.options;
       question.correctAns = data.correctAns;
       question.explaination = data.explaination;
@@ -39,7 +39,7 @@ export class QuestionService {
     id: string,
     question: {
       question: string;
-      module_id: string;
+      moduleId: string;
       options: {
         name: string;
         answer: boolean;
@@ -64,7 +64,7 @@ export class QuestionService {
   public async updateStudentResponseById(
     id: string,
     student: {
-      student_id: string;
+      studentId: string;
       option_id: string;
     }
   ) {
@@ -75,7 +75,7 @@ export class QuestionService {
         return { status: 404, message: "Question not found!!" };
       }
       const alreadyAttempted = question.attempt.some(
-        (attempt) => attempt.student_id === student.student_id
+        (attempt) => attempt.studentId === student.studentId
       );
 
       if (alreadyAttempted) {
@@ -101,7 +101,7 @@ export class QuestionService {
   public async getAllQuestionById(id: string) {
     try {
       const questions = await Question.find({
-        module_id: id.trim(),
+        moduleId: id.trim(),
         isDeleted: false,
       });
       return { status: 200, questions };
@@ -115,7 +115,7 @@ export class QuestionService {
   ) {
     try {
       // Step 1: Find all questions belonging to the module
-      const questions = await Question.find({ module_id: moduleId });
+      const questions = await Question.find({ moduleId: moduleId });
 
       // Step 2: Remove student attempt from each question
       const updatePromises = questions.map((question) =>
@@ -123,7 +123,7 @@ export class QuestionService {
           question._id,
           {
             $pull: {
-              attempt: { student_id: studentId },
+              attempt: { studentId: studentId },
             },
           },
           { new: true }
@@ -153,7 +153,7 @@ export class QuestionService {
   public async removeManyQuestionByModuleId(moduleIds: string[]) {
     try {
       await Question.updateMany(
-        { module_id: { $in: moduleIds } },
+        { moduleId: { $in: moduleIds } },
         { $set: { isDeleted: true } }
       );
       return { status: 200, message: "Question removed!!" };
@@ -165,7 +165,7 @@ export class QuestionService {
   public async restoreManyQuestionByModuleId(moduleIds: string[]) {
     try {
       await Question.updateMany(
-        { module_id: { $in: moduleIds } },
+        { moduleId: { $in: moduleIds } },
         { $set: { isDeleted: false } }
       );
       return { status: 200, message: "Question Restored!!" };

@@ -2,10 +2,10 @@ import mongoose, { Schema } from "mongoose";
 
 export interface ResultModal {
     _id:string;
-  student_id: string;
-  exam_id: string;
-  module_id: string;
-  chapter_id: string;
+  studentId: string;
+  examId: string;
+  moduleId: string;
+  chapterId: string;
 
   totalQuestions: number;
   attemptedQuestions: number;
@@ -26,10 +26,10 @@ const ResultSchema = new Schema<ResultModal>(
         default:"",
         required:true
     },
-    student_id: { type: String, required: true },
-    exam_id: { type: String, required: true },
-    module_id: { type: String, required: true },
-    chapter_id: { type: String, required: true },
+    studentId: { type: String, required: true },
+    examId: { type: String, required: true },
+    moduleId: { type: String, required: true },
+    chapterId: { type: String, required: true },
 
     totalQuestions: { type: Number, required: true },
     attemptedQuestions: { type: Number, required: true },

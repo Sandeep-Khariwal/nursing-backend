@@ -4,8 +4,8 @@ import { randomUUID } from "crypto";
 export class ModuleService {
   public async createModule(data: {
     name: string;
-    exam_id: string;
-    chapter_Id: string;
+    examId: string;
+    chapterId: string;
     isPro: boolean;
     totalTime: number;
   }) {
@@ -13,8 +13,8 @@ export class ModuleService {
       const module = new Module();
       module._id = `MDLE-${randomUUID()}`;
       module.name = data.name;
-      module.exam_id = data.exam_id;
-      module.chapter_Id = data.chapter_Id;
+      module.examId = data.examId;
+      module.chapterId = data.chapterId;
       module.isPro = data.isPro;
       module.totalTime = data.totalTime * 60 * 1000;
       module.isDeleted = false;
@@ -29,8 +29,8 @@ export class ModuleService {
     id: string,
     data: {
       name: string;
-      exam_id: string;
-      chapter_Id: string;
+      examId: string;
+      chapterId: string;
       isPro: boolean;
       totalTime: number;
     }
@@ -63,7 +63,7 @@ export class ModuleService {
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
       const modules = await Module.find({
-        chapter_Id: id,
+        chapterId: id,
         isDeleted: false,
       }).populate([
         {
@@ -83,15 +83,15 @@ export class ModuleService {
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
             const student = qAtt.question_id.attempt.find(
-              (std: any) => std.student_id === qAtt.student_id
+              (std: any) => std.studentId === qAtt.studentId
             );
 
             // console.log("student : ",student);
 
-            if (student.student_id === studentId) {
+            if (student.studentId === studentId) {
               return {
                 _id: qAtt.question_id._id,
-                student_id: student.student_id,
+                studentId: student.studentId,
                 option_id: student.option_id,
               };
             }
@@ -99,7 +99,7 @@ export class ModuleService {
           .filter((s) => s);
         const isCompleted =
           module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                 ?.isCompleted
             : 0;
 
@@ -131,7 +131,7 @@ export class ModuleService {
   public async getAllModulesByExamId(id: string, studentId: string) {
     try {
       const modules = await Module.find({
-        exam_id: id,
+        examId: id,
         isDeleted: false,
       }).populate([
         {
@@ -152,15 +152,15 @@ export class ModuleService {
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
             const student = qAtt.question_id.attempt.find(
-              (std: any) => std.student_id === qAtt.student_id
+              (std: any) => std.studentId === qAtt.studentId
             );
 
             // console.log("student : ",student);
 
-            if (student.student_id === studentId) {
+            if (student.studentId === studentId) {
               return {
                 _id: qAtt.question_id._id,
-                student_id: student.student_id,
+                studentId: student.studentId,
                 option_id: student.option_id,
               };
             }
@@ -168,7 +168,7 @@ export class ModuleService {
           .filter((s) => s);
         const isCompleted =
           module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                 ?.isCompleted
             : 0;
 
@@ -220,15 +220,15 @@ export class ModuleService {
           const attemptedQuestion = plainModule.questionAttempted
             .map((qAtt: any) => {
               const student = qAtt.question_id.attempt.find(
-                (std: any) => std.student_id === qAtt.student_id
+                (std: any) => std.studentId === qAtt.studentId
               );
 
               // console.log("student : ",student);
 
-              if (student.student_id === studentId) {
+              if (student.studentId === studentId) {
                 return {
                   _id: qAtt.question_id._id,
-                  student_id: student.student_id,
+                  studentId: student.studentId,
                   option_id: student.option_id,
                 };
               }
@@ -236,7 +236,7 @@ export class ModuleService {
             .filter((s) => s);
           const isCompleted =
             module.isCompleted.length > 0
-              ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+              ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                   ?.isCompleted
               : 0;
 
@@ -287,7 +287,7 @@ export class ModuleService {
   }
   public async updateStudentResponse(
     id: string,
-    res: { student_id: string; question_id: string },
+    res: { studentId: string; question_id: string },
     pendingTime: number
   ) {
     try {
@@ -299,13 +299,13 @@ export class ModuleService {
       // Step 2: Check if student_time entry exists
       const module = await Module.findOne({
         _id: id,
-        "student_time.student_id": res.student_id,
+        "student_time.studentId": res.studentId,
       });
 
       if (module) {
         // Student already exists — update totalTime
         await Module.findOneAndUpdate(
-          { _id: id, "student_time.student_id": res.student_id },
+          { _id: id, "student_time.studentId": res.studentId },
           {
             $set: {
               "student_time.$.totalTime": pendingTime,
@@ -317,7 +317,7 @@ export class ModuleService {
         await Module.findByIdAndUpdate(id, {
           $push: {
             student_time: {
-              student_id: res.student_id,
+              studentId: res.studentId,
               totalTime: pendingTime,
             },
           },
@@ -335,13 +335,13 @@ export class ModuleService {
     try {
       const module = await Module.findOne({
         _id: moduleId,
-        "isCompleted.student_id": studentId,
+        "isCompleted.studentId": studentId,
       });
 
       if (module) {
         // Find the current isCompleted value
         const studentEntry = module.isCompleted.find(
-          (entry) => entry.student_id === studentId
+          (entry) => entry.studentId === studentId
         );
 
         const newStatus = !studentEntry?.isCompleted; // toggle the value
@@ -350,7 +350,7 @@ export class ModuleService {
         const updatedModule = await Module.findOneAndUpdate(
           {
             _id: moduleId,
-            "isCompleted.student_id": studentId,
+            "isCompleted.studentId": studentId,
           },
           {
             $set: {
@@ -373,7 +373,7 @@ export class ModuleService {
         {
           $push: {
             isCompleted: {
-              student_id: studentId,
+              studentId: studentId,
               isCompleted: true,
             },
           },
@@ -396,20 +396,20 @@ export class ModuleService {
     try {
       const updatedDoc = await Module.findOneAndUpdate(
         { _id: id },
-        { $pull: { questionAttempted: { student_id: studentId } } },
+        { $pull: { questionAttempted: { studentId: studentId } } },
         { new: true }
       );
 
       // Step 2: Check if student_time entry exists
       const module = await Module.findOne({
         _id: id,
-        "student_time.student_id": studentId,
+        "student_time.studentId": studentId,
       });
 
       if (module && updatedDoc) {
         // Student already exists — update totalTime
         await Module.findOneAndUpdate(
-          { _id: id, "student_time.student_id": studentId },
+          { _id: id, "student_time.studentId": studentId },
           {
             $set: {
               "student_time.$.totalTime": updatedDoc.totalTime,
@@ -445,7 +445,7 @@ export class ModuleService {
     try {
       // Step 1: Find all module _ids associated with the chapterIds
       const modules = await Module.find({
-        chapter_Id: { $in: chapterIds },
+        chapterId: { $in: chapterIds },
         isDeleted: false,
       }).lean();
 
@@ -454,7 +454,7 @@ export class ModuleService {
       // Step 2: Update those modules to set isDeleted: true
       await Module.updateMany(
         {
-          chapter_Id: { $in: chapterIds },
+          chapterId: { $in: chapterIds },
         },
         { $set: { isDeleted: true } }
       );

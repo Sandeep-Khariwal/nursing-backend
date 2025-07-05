@@ -21,11 +21,11 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
     const module = response["module"].toObject();
 
     // const totalTimeTakenByStudent = module.student_time
-    //   .filter((s) => s.student_id === studentId)
+    //   .filter((s) => s.studentId === studentId)
     //   .map((st) => st.totalTime)[0];
 
     const attemptedQuestionIdsByStudent = module.questionAttempted
-      .filter((q) => q.student_id === studentId)
+      .filter((q) => q.studentId === studentId)
       .map((q) => q.question_id);
     const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
 
@@ -51,7 +51,7 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
 
         // 2. Find the student's attempt for this question
         const studentAttempt = question.attempt.find(
-          (a: any) => a.student_id === studentId
+          (a: any) => a.studentId === studentId
         );
 
         if (!studentAttempt) return acc; // No attempt made by this student
@@ -75,10 +75,10 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
     //     : 0;
 
     const result = {
-      student_id: studentId,
-      exam_id: module.exam_id,
-      module_id: module._id,
-      chapter_id: module.chapter_Id,
+      studentId: studentId,
+      examId: module.examId,
+      moduleId: module._id,
+      chapterId: module.chapterId,
 
       totalQuestions: module.questions.length,
       attemptedQuestions: totalAttemptedQuestions,

@@ -12,7 +12,7 @@ export class DailyDoseService {
       correctAns: string;
       showAt: string;
     },
-    exam_id: string,
+    examId: string,
     dailyDoseWisdom: string
   ) {
     try {
@@ -22,7 +22,7 @@ export class DailyDoseService {
       dailyDose.options = data.options;
       dailyDose.correctAns = data.correctAns;
       dailyDose.showAt = new Date(data.showAt);
-      dailyDose.exam_id = exam_id;
+      dailyDose.examId = examId;
       dailyDose.dailyDoseWisdom = dailyDoseWisdom;
 
       await dailyDose.save();
@@ -40,7 +40,7 @@ export class DailyDoseService {
 
     try {
       const question = await DailyDoseQuestion.findOne({
-        exam_id:examId,
+        examId:examId,
         showAt: {
           $gte: startOfDay,
           $lte: endOfDay,
@@ -55,7 +55,7 @@ export class DailyDoseService {
 
   public async updateStudentResponse(
     id: string,
-    student: { student_id: string; option_id: string }
+    student: { studentId: string; option_id: string }
   ) {
     try {
       const question = await DailyDoseQuestion.findById(id);
@@ -64,7 +64,7 @@ export class DailyDoseService {
         return { status: 404, message: "Question not found!!" };
       }
       const alreadyAttempted = question.attempt.some(
-        (attempt) => attempt.student_id === student.student_id
+        (attempt) => attempt.studentId === student.studentId
       );
 
       if (alreadyAttempted) {

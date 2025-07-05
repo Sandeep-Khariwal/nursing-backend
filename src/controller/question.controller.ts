@@ -19,7 +19,7 @@ export const CreateQuestion = async (req: Request, res: Response) => {
     // update Question in module
     if (!questionId) {
       await moduleService.addNewQuestionInModal(
-        question.module_id,
+        question.moduleId,
         response["question"]._id
       );
     }
@@ -44,11 +44,11 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
 
   if (response["status"] === 200) {
     const resp = {
-      student_id: student.student_id,
+      studentId: student.studentId,
       question_id: id,
     };
     await moduleService.updateStudentResponse(
-      response["question"].module_id,
+      response["question"].moduleId,
       resp,
       pendingTime
     );

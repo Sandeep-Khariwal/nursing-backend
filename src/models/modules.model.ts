@@ -2,21 +2,21 @@ import { model, Schema } from "mongoose";
 interface ModulesModel {
   _id: string;
   name: string;
-  exam_id: string;
-  chapter_Id: string;
+  examId: string;
+  chapterId: string;
   questions: string[];
   iconImage: string;
   isPro: boolean;
 
   questionAttempted: {
-    student_id: string;
+    studentId: string;
     question_id: string;
     attempted_at?: Date;
   }[];
   totalTime: number;
     isDeleted:boolean
-  isCompleted: { student_id: string; isCompleted: boolean }[];
-  student_time: { student_id: string; totalTime: number }[];
+  isCompleted: { studentId: string; isCompleted: boolean }[];
+  student_time: { studentId: string; totalTime: number }[];
 }
 
 const moduleSchema = new Schema<ModulesModel>({
@@ -29,11 +29,11 @@ const moduleSchema = new Schema<ModulesModel>({
     type: String,
     required: true,
   },
-  exam_id: {
+  examId: {
     type: String,
     ref: "exams",
   },
-  chapter_Id: {
+  chapterId: {
     type: String,
     ref: "chapter",
   },
@@ -56,7 +56,7 @@ const moduleSchema = new Schema<ModulesModel>({
     type: [
       {
         _id: false,
-        student_id: { type: String, ref: "student" },
+        studentId: { type: String, ref: "student" },
         question_id: { type: String, ref: "question" },
         attempted_at: { type: Date, default: Date.now },
       },
@@ -66,7 +66,7 @@ const moduleSchema = new Schema<ModulesModel>({
   isCompleted: {
     type: [
       {
-        student_id: {
+        studentId: {
           type: String,
           default: "",
           ref: "students",
@@ -82,7 +82,7 @@ const moduleSchema = new Schema<ModulesModel>({
   student_time: {
     type: [
       {
-        student_id: {
+        studentId: {
           type: String,
           default: "",
           ref: "students",

@@ -91,7 +91,7 @@ export class ChapterService {
   public async addNewModuleInChapter(id: string, moduleId: string) {
     try {
       const chapters = await Chapter.findByIdAndUpdate(id, {
-        $addToSet: { modules: moduleId },
+        $push: { modules: moduleId },
       });
 
       return { status: 200, chapters: chapters };

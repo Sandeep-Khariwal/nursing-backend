@@ -3,10 +3,10 @@ import Result from "../models/result.model";
 
 export class ResultService {
   public async createResult(data: {
-    student_id: string;
-    exam_id: string;
-    module_id: string;
-    chapter_id: string;
+    studentId: string;
+    examId: string;
+    moduleId: string;
+    chapterId: string;
 
     totalQuestions: number;
     attemptedQuestions: number;
@@ -18,10 +18,10 @@ export class ResultService {
     try {
       const result = new Result();
       result._id = `RSLT-${randomUUID()}`;
-      result.student_id = data.student_id;
-      result.exam_id = data.exam_id;
-      result.module_id = data.module_id;
-      result.chapter_id = data.chapter_id;
+      result.studentId = data.studentId;
+      result.examId = data.examId;
+      result.moduleId = data.moduleId;
+      result.chapterId = data.chapterId;
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.correctAnswers = data.correctAnswers;
@@ -46,8 +46,8 @@ export class ResultService {
   ) {
     try {
       const result = await Result.findOne({
-        student_id: studentId,
-        module_id: moduleId,
+        studentId: studentId,
+        moduleId: moduleId,
       });
 
       return { status: 200, resultId: result._id };

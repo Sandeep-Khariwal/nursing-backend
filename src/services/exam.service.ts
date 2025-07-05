@@ -132,15 +132,15 @@ export class ExamService {
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
             const student = qAtt.question_id.attempt.find(
-              (std: any) => std.student_id === qAtt.student_id
+              (std: any) => std.studentId === qAtt.studentId
             );
 
             // console.log("student : ",student);
 
-            if (student.student_id === studentId) {
+            if (student.studentId === studentId) {
               return {
                 _id: qAtt.question_id._id,
-                student_id: student.student_id,
+                studentId: student.studentId,
                 option_id: student.option_id,
               };
             }
@@ -148,7 +148,7 @@ export class ExamService {
           .filter((s) => s);
         const isCompleted =
           module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                 ?.isCompleted
             : 0;
 
@@ -205,15 +205,15 @@ export class ExamService {
         const attemptedQuestion = plainModule.questionAttempted
           .map((qAtt: any) => {
             const student = qAtt.question_id.attempt.find(
-              (std: any) => std.student_id === qAtt.student_id
+              (std: any) => std.studentId === qAtt.studentId
             );
 
             // console.log("student : ",student);
 
-            if (student.student_id === studentId) {
+            if (student.studentId === studentId) {
               return {
                 _id: qAtt.question_id._id,
-                student_id: student.student_id,
+                studentId: student.studentId,
                 option_id: student.option_id,
               };
             }
@@ -221,7 +221,7 @@ export class ExamService {
           .filter((s) => s);
         const isCompleted =
           module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.student_id === studentId)[0]
+            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                 ?.isCompleted
             : 0;
 

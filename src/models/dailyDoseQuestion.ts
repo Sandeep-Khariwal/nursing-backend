@@ -8,11 +8,11 @@ interface DailyDose {
     answer: boolean;
   }[];
   attempt: {
-    student_id: string;
+    studentId: string;
     option_id: string;
   }[];
   correctAns: string;
-  exam_id: string;
+  examId: string;
   dailyDoseWisdom: string;
   showAt: Date;
 }
@@ -43,7 +43,7 @@ const dailyDoseSchema = new Schema<DailyDose>({
   attempt: {
     type: [
       {
-        student_id: {
+        studentId: {
           type: String,
           default: "",
           ref: "student",
@@ -63,7 +63,7 @@ const dailyDoseSchema = new Schema<DailyDose>({
     type: String,
     default: "",
   },
-  exam_id: {
+  examId: {
     type: String,
     ref: "exams",
   },

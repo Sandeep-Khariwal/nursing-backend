@@ -2,13 +2,13 @@ import { model, Schema } from "mongoose";
 interface QuestionsModel {
   _id: string;
   question: string;
-  module_id: string;
+  moduleId: string;
   options: {
     name: string;
     answer: boolean;
   }[];
   attempt: {
-    student_id: string;
+    studentId: string;
     option_id: string;
   }[];
   correctAns: string;
@@ -42,7 +42,7 @@ const moduleSchema = new Schema<QuestionsModel>({
   attempt: {
     type: [
       {
-        student_id: {
+        studentId: {
           type: String,
           default: "",
           ref: "student",
@@ -54,7 +54,7 @@ const moduleSchema = new Schema<QuestionsModel>({
       },
     ],
   },
-  module_id: {
+  moduleId: {
     type: String,
     ref: "modules",
   },
