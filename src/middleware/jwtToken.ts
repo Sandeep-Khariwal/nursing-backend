@@ -17,6 +17,7 @@
 
 import { NextFunction, Response, Request } from "express";
 import jwt, { Secret } from "jsonwebtoken";
+import { ParsedQs } from 'qs';
 
 export const generateAccessToken = (data: {
   _id: string;
@@ -129,3 +130,17 @@ export const LogoutMiddleware = (
     console.log(error);
   }
 };
+
+
+
+export function toStringParam(
+  param: string | ParsedQs | (string | ParsedQs)[]
+): string | undefined {
+  if (typeof param === 'string') return param;
+  if (Array.isArray(param)) {
+    const first = param[0];
+    if (typeof first === 'string') return first;
+    return undefined;
+  }
+  return undefined;
+}

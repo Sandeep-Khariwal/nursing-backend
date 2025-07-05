@@ -1,4 +1,4 @@
-import { clientRequest } from "src/middleware/jwtToken";
+import { clientRequest, toStringParam } from "../middleware/jwtToken";
 import { ChapterService } from "../services/chapter.services";
 import { ModuleService } from "../services/module.service";
 import { Request, Response } from "express";
@@ -7,20 +7,6 @@ import { ResultService } from "../services/result.service";
 import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
-import { ParsedQs } from 'qs';
-
-
-function toStringParam(
-  param: string | ParsedQs | (string | ParsedQs)[]
-): string | undefined {
-  if (typeof param === 'string') return param;
-  if (Array.isArray(param)) {
-    const first = param[0];
-    if (typeof first === 'string') return first;
-    return undefined;
-  }
-  return undefined;
-}
 
 
 

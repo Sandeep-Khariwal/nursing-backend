@@ -1,4 +1,4 @@
-import { clientRequest } from "./../middleware/jwtToken";
+import { clientRequest, toStringParam } from "./../middleware/jwtToken";
 import { ExamService } from "../services/exam.service";
 import { ChapterService } from "../services/chapter.services";
 import { Request, Response } from "express";
@@ -35,7 +35,7 @@ export const CreateChapter = async (req: Request, res: Response) => {
   }
 };
 export const GetAllChapter = async (req: Request, res: Response) => {
-  const { examId } = req.body;
+  const examId = toStringParam(req.query.examId)
 
   const chapterService = new ChapterService();
 
