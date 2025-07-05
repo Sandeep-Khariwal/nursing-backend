@@ -67,7 +67,7 @@ export const GetQuestion = async (req: Request, res: Response) => {
   const questionService = new QuestionService();
   const response = await questionService.getQuestionById(id);
 
-  if(response["status"] === 200){
+  if (response["status"] === 200) {
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });
@@ -84,10 +84,18 @@ export const GetAllQuestions = async (req: Request, res: Response) => {
   const questionService = new QuestionService();
   const response = await questionService.getAllQuestionById(id);
 
-  if(response["status"] === 200){
+  if (response["status"] === 200) {
+    const questions = response["questions"];
+    const updatedQuestions = questions.map((q) => {
+      const question = q.toObject ? q.toObject() : q;
+
+      // Destructure to exclude 'attempt'
+      const { attempt, ...rest } = question;
+      return rest;
+    });
     res
       .status(response["status"])
-      .json({ status: 200, data: { questions: response["questions"] } });
+      .json({ status: 200, data: { questions: updatedQuestions } });
   } else {
     res
       .status(response["status"])
