@@ -1,3 +1,5 @@
+import { ModuleType } from "../enums/test.enum";
+import examsModel from "../models/exams.model";
 import Module from "../models/modules.model";
 import { randomUUID } from "crypto";
 
@@ -52,7 +54,7 @@ export class ModuleService {
       const module = await Module.findById(id, { isDeleted: false });
 
       if (!module) {
-        return { status: 500, message: "Module not found!!" };
+        return { status: 404, message: "Module not found!!" };
       }
 
       return { status: 200, module };
@@ -60,6 +62,39 @@ export class ModuleService {
       return { status: 500, message: error.message };
     }
   }
+  public async getAllModulesByModuleType(moduleType: String) {
+    try {
+      const exams = await examsModel.find({}).populate([
+        {
+          path: "mini_test_modules",
+        },
+
+        {
+          path: "mock_drills_modules",
+        },
+      ]);
+
+      const modules = exams.map((e) => {
+        const exm = e.toObject();
+
+        if (ModuleType.MINI_TEST === moduleType) {
+          return exm.mini_test_modules;
+        }
+        if (ModuleType.MOCK_DRILLS === moduleType) {
+          return exm.mock_drills_modules;
+        }
+      });
+
+      if (modules.length === 0) {
+        return { status: 404, message: "Modules not found!!" };
+      }
+
+      return { status: 200, modules:modules.flat(Infinity) };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
       const modules = await Module.find({
@@ -280,7 +315,7 @@ export class ModuleService {
       await Module.findByIdAndUpdate(id, {
         $set: { isDeleted: false },
       });
-      return { status: 200 , message:"Module restored!!" };
+      return { status: 200, message: "Module restored!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

@@ -24,6 +24,7 @@ export class DailyDoseService {
       dailyDose.showAt = new Date(data.showAt);
       dailyDose.examId = examId;
       dailyDose.dailyDoseWisdom = dailyDoseWisdom;
+      dailyDose.isDeleted = false;
 
       await dailyDose.save();
 
@@ -33,14 +34,15 @@ export class DailyDoseService {
       return errorObj;
     }
   }
-  public async getTodayQuestion(examId:string) {
+  public async getTodayQuestion(examId: string) {
     const today = new Date();
     const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
 
     try {
       const question = await DailyDoseQuestion.findOne({
-        examId:examId,
+        examId: examId,
+        isDeleted: false,
         showAt: {
           $gte: startOfDay,
           $lte: endOfDay,
@@ -75,6 +77,54 @@ export class DailyDoseService {
       await question.save();
 
       return { status: 200, question };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
+
+  public async getAllDailyDoseQuestion() {
+    try {
+      let questions = await DailyDoseQuestion.find({
+        isDeleted: false,
+      }).populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);
+
+      questions = questions.filter((c: any) => !c?.isDeleted);
+      if (questions.length === 0) {
+        return { status: 404, message: "questions not found!!" };
+      }
+
+      const updatedQuestions = questions.map((chapter) => {
+        const { examId, ...rest } = chapter.toObject
+          ? chapter.toObject()
+          : chapter;
+        return {
+          ...rest,
+          exam: examId,
+        };
+      });
+
+      return { status: 200, questions: updatedQuestions };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
+
+  public async removeDailyDoseById(id: string) {
+    try {
+      const question = await DailyDoseQuestion.findByIdAndUpdate(id, {
+        $set: { isDeleted: true },
+      });
+
+      if (!question) {
+        return { status: 404, message: "Question not found!!" };
+      }
+
+      return { status: 200, message: "Question removed" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }

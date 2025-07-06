@@ -8,8 +8,6 @@ import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
 
-
-
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
 
@@ -70,7 +68,10 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
   let response;
   let modules = [];
-  if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
+  if (!chapterId && !examId && moduleType) {
+    response = await moduleService.getAllModulesByModuleType(moduleType);
+    modules = response["modules"];
+  } else if(chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
@@ -118,10 +119,7 @@ export const GetAllQuetionFieldModules = async (
   const studentId = req.user._id;
   const moduleService = new ModuleService();
 
-  const response = await moduleService.getAllModulesByChapterId(
-    id,
-    studentId
-  );
+  const response = await moduleService.getAllModulesByChapterId(id, studentId);
 
   if (response["status"] === 200) {
     res

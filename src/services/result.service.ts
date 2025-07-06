@@ -59,7 +59,7 @@ export class ResultService {
     try {
       const result = await Result.findById(id);
       if (!result) {
-        return { status: 500, message: "Result not found!!" };
+        return { status: 404, message: "Result not found!!" };
       }
       return { status:200, result };
     } catch (error) {

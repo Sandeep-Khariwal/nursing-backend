@@ -92,7 +92,10 @@ export class QuestionService {
   }
   public async getQuestionById(id: string) {
     try {
-      const question = await Question.findOne({ _id: id, isDelete: false });
+      const question = await Question.findById(id,{ isDeleted:false});
+      if(!question){
+        return {status:404,message:"Question not found"}
+      }
       return { status: 200, question: question };
     } catch (error) {
       return { status: 200, message: error.message };

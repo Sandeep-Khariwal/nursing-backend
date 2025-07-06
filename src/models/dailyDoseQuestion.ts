@@ -15,6 +15,7 @@ interface DailyDose {
   examId: string;
   dailyDoseWisdom: string;
   showAt: Date;
+  isDeleted:boolean
 }
 const dailyDoseSchema = new Schema<DailyDose>({
   _id: {
@@ -62,6 +63,10 @@ const dailyDoseSchema = new Schema<DailyDose>({
   dailyDoseWisdom: {
     type: String,
     default: "",
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
   },
   examId: {
     type: String,
