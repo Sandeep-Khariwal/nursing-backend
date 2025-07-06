@@ -70,12 +70,21 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   let modules = [];
   if (!chapterId && !examId && moduleType) {
     response = await moduleService.getAllModulesByModuleType(moduleType);
-    modules = response["modules"];
+    modules = response["modules"].map((m:any)=>{
+      const {examId,...rest} = m
+
+      return {
+        ...rest,
+        exam:examId
+      }
+    })
   } else if(chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
     );
+      const result = response["modules"];
+
     modules = response["modules"];
   } else if (examId) {
     if (ModuleType.MINI_TEST === moduleType) {

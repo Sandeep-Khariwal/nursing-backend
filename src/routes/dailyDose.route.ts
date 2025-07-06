@@ -15,6 +15,6 @@ dailyDoseRouter.post("/create", CreateDailyDoseQuestion);
 dailyDoseRouter.get("/todayQuestion/:id",authenticateToken, GetTodayQuestion);
 dailyDoseRouter.get("/getAll",authenticateToken, GetAllDailyDoseQuestion);
 dailyDoseRouter.put("/updateStudentResponse/:id",authenticateToken, AddStudentResponse);
-dailyDoseRouter.put("/dailyDose/removeDailyDose/:id",authenticateToken, RemoveDailyDose);
+dailyDoseRouter.put("/removeDailyDose/:id",authenticateToken, RemoveDailyDose);
 
 export default dailyDoseRouter;

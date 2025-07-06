@@ -64,15 +64,27 @@ export class ModuleService {
   }
   public async getAllModulesByModuleType(moduleType: String) {
     try {
-      const exams = await examsModel.find({}).populate([
+      const exams = await examsModel.find().populate([
         {
           path: "mini_test_modules",
+          populate: {
+            path: "examId",
+            select: ["_id", "name"],
+          },
         },
 
         {
           path: "mock_drills_modules",
+          populate: {
+            path: "examId",
+            select: ["_id", "name"],
+          },
         },
       ]);
+
+      if(!exams){
+        return {status:404,message:"Exam not found"}
+      }
 
       const modules = exams.map((e) => {
         const exm = e.toObject();
@@ -89,7 +101,7 @@ export class ModuleService {
         return { status: 404, message: "Modules not found!!" };
       }
 
-      return { status: 200, modules:modules.flat(Infinity) };
+      return { status: 200, modules: modules.flat(Infinity).filter((m:any)=>!m.isDeleted) };
     } catch (error) {
       return { status: 500, message: error.message };
     }
