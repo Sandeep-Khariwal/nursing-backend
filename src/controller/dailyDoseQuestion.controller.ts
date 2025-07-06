@@ -2,19 +2,35 @@ import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
 export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
-  const { question, examId, dailyDoseWisdom } = req.body;
+  const { question, examId, dailyDoseWisdom, questionId } = req.body;
 
   const dailyDoseService = new DailyDoseService();
-  const response = await dailyDoseService.createDailyDoseQuestion(
-    question,
-    examId,
-    dailyDoseWisdom
-  );
+  let response;
+  if (!questionId) {
+    response = await dailyDoseService.createDailyDoseQuestion(
+      question,
+      examId,
+      dailyDoseWisdom
+    );
+  } else {
+    response = await dailyDoseService.updateDailyDoseQuestion(
+      questionId,
+      question,
+      examId,
+      dailyDoseWisdom
+    );
+  }
 
   if (response["status"] === 200) {
+    console.log("updated : ",response["question"]);
+    
     res
       .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
+      .json({
+        status: response["status"],
+        data: { question: response["question"] },
+        message: response["message"],
+      });
   } else {
     res
       .status(response["status"])
@@ -87,4 +103,4 @@ export const RemoveDailyDose = async (req: Request, res: Response) => {
       .status(response["status"])
       .json({ status: response["status"], message: response["message"] });
   }
-}
+};

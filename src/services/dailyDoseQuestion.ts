@@ -26,9 +26,13 @@ export class DailyDoseService {
       dailyDose.dailyDoseWisdom = dailyDoseWisdom;
       dailyDose.isDeleted = false;
 
-      await dailyDose.save();
+      const savedQuestion = await dailyDose.save();
 
-      return { status: 200, message: "question created" };
+      return {
+        status: 200,
+        question: savedQuestion,
+        message: "question created",
+      };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
@@ -50,6 +54,35 @@ export class DailyDoseService {
       });
 
       return { status: 200, question };
+    } catch (error: any) {
+      return { message: error.message, status: 500 };
+    }
+  }
+  public async updateDailyDoseQuestion(
+    questionId: string,
+    data: {
+      question: string;
+      options: {
+        name: string;
+        answer: boolean;
+      }[];
+      correctAns: string;
+      showAt: string;
+    },
+    examId: string,
+    dailyDoseWisdom: string
+  ) {
+    try {
+      const question = await DailyDoseQuestion.findByIdAndUpdate(
+        questionId,
+        {
+          ...data,
+          $set: { examId, dailyDoseWisdom },
+        },
+        { new: true }
+      );
+
+      return { status: 200, question, message: "Question updated!!" };
     } catch (error: any) {
       return { message: error.message, status: 500 };
     }
