@@ -69,21 +69,29 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   let response;
   let modules = [];
   if (!chapterId && !examId && moduleType) {
-    response = await moduleService.getAllModulesByModuleType(moduleType);
-    modules = response["modules"].map((m:any)=>{
-      const {examId,...rest} = m
-
-      return {
-        ...rest,
-        exam:examId
-      }
-    })
-  } else if(chapterId || ModuleType.QUESTION_FIELD === moduleType) {
+    response = await moduleService.getAllModulesByModuleType(
+      studentId,
+      moduleType
+    );
+    if (response["status"] === 200) {
+      modules = response["modules"].map((m: any) => {
+        const { examId, ...rest } = m;
+        return {
+          ...rest,
+          exam: examId,
+        };
+      });
+    } else {
+          res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  
+    }
+  } else if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
     );
-      const result = response["modules"];
 
     modules = response["modules"];
   } else if (examId) {
@@ -208,6 +216,9 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
   const resultService = new ResultService();
   const studentService = new StudentService();
 
+  //update Module true
+  // moduleService.restoreModule(id)
+
   // pull student response from modules attempt
   const response1 = await moduleService.removeStudentResponseFromModule(
     id,
@@ -224,36 +235,38 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
     const resultResp = await resultService.getResultByStudentAndModule(_id, id);
     if (resultResp["status"] === 200) {
       await studentService.removeResultFromStudent(_id, resultResp["resultId"]);
-    } else {
-      res.status(resultResp["status"]).json(resultResp["message"]);
-    }
-    if (response2["status"] === 200) {
-      // update isCompleted false in module for a student
-      const response3 = await moduleService.submitModuleById(id, _id);
-      if (response3["status"] === 200) {
-        const module = response3["module"].toObject();
 
-        const student_time = module.student_time.filter(
-          (c) => c.studentId === _id
-        )[0]?.totalTime;
+      if (response2["status"] === 200) {
+        // update isCompleted false in module for a student
+        const response3 = await moduleService.submitModuleById(id, _id);
+        if (response3["status"] === 200) {
+          const module = response3["module"].toObject();
 
-        const newModule = {
-          ...module,
-          questionAttempted: [],
-          isCompleted: module.isCompleted.filter((c) => c.studentId === _id)[0]
-            .isCompleted,
-          student_time: student_time ?? 0,
-        };
+          const student_time = module.student_time.filter(
+            (c) => c.studentId === _id
+          )[0]?.totalTime;
 
-        res.status(200).json({
-          status: 200,
-          data: newModule,
-        });
+          const newModule = {
+            ...module,
+            questionAttempted: [],
+            isCompleted: module.isCompleted.filter(
+              (c) => c.studentId === _id
+            )[0].isCompleted,
+            student_time: student_time ?? 0,
+          };
+
+          res.status(200).json({
+            status: 200,
+            data: newModule,
+          });
+        } else {
+          res.status(response3["status"]).json(response3["message"]);
+        }
       } else {
-        res.status(response3["status"]).json(response3["message"]);
+        res.status(response2["status"]).json(response2["message"]);
       }
     } else {
-      res.status(response2["status"]).json(response2["message"]);
+      res.status(resultResp["status"]).json(resultResp["message"]);
     }
   } else {
     res.status(response1["status"]).json(response1["message"]);

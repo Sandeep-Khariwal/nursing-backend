@@ -9,6 +9,7 @@ interface ExamsModel {
   mock_drills_modules: string[];
   tests: string[];
   isDeleted: boolean;
+  dailyDoses:string[]
 }
 
 const examsSchema = new Schema<ExamsModel>({
@@ -40,6 +41,10 @@ const examsSchema = new Schema<ExamsModel>({
   mock_drills_modules: {
     type: [String],
     ref: "module",
+  },
+  dailyDoses: {
+    type: [String],
+    ref: "dailyDose",
   },
   isDeleted:{
     type:Boolean,

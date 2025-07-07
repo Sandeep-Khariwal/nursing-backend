@@ -1,3 +1,4 @@
+import { ExamService } from "../services/exam.service";
 import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
@@ -5,6 +6,7 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
   const { question, examId, dailyDoseWisdom, questionId } = req.body;
 
   const dailyDoseService = new DailyDoseService();
+  const examService = new ExamService()
   let response;
   if (!questionId) {
     response = await dailyDoseService.createDailyDoseQuestion(
@@ -12,6 +14,11 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
       examId,
       dailyDoseWisdom
     );
+
+    // update daily dose in exam
+    if(response["question"]._id){
+     await examService.updateDDQById(question.examId,response["question"]._id)
+    }
   } else {
     response = await dailyDoseService.updateDailyDoseQuestion(
       questionId,
@@ -22,8 +29,6 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
   }
 
   if (response["status"] === 200) {
-    console.log("updated : ",response["question"]);
-    
     res
       .status(response["status"])
       .json({

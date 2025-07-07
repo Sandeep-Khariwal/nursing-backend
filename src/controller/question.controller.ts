@@ -47,11 +47,13 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
       studentId: student.studentId,
       questionId: id,
     };
+    
     await moduleService.updateStudentResponse(
       response["question"].moduleId,
       resp,
       pendingTime
     );
+    
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });

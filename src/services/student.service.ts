@@ -6,8 +6,16 @@ export class StudentService {
     exams: { _id: string; name: string }[]
   ) {
     try {
+      const student = await studentModel.findById(id);
+
+      if (!student) {
+        return { status: 404, message: "User not found!!" };
+      }
+
+      const examExists = student.exams.length > 0 ? true : false;
+
       const updateExams = exams.map((e, i) => {
-        if (i === 0) {
+        if (i === 0 && !examExists) {
           return {
             _id: e,
             name: e.name,
@@ -75,6 +83,31 @@ export class StudentService {
         $pull: { results: resultId },
       });
       return { status: 200, message: "Result removed from student!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
+  public async updateStudentExam(
+    id: string,
+    data: { examId: string; firstName: string; lastName: string; email: string }
+  ) {
+    try {
+      const student = await studentModel.findById(id);
+
+      if (!student) {
+        return { status: 404, message: "Student not found" };
+      }
+
+      // Update exams: set is_primary true for matching examId, false for others
+      student.exams = student.exams.map((exam: any) => ({
+        ...exam.toObject(), // ensure we're working with plain objects
+        is_primary: exam._id.toString() === data.examId,
+      }));
+      (student.name = data.firstName + " " + data.lastName),
+        (student.email = data.email),
+        await student.save();
+
+      return { status: 200, student, message: "Exam updated!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }

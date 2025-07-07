@@ -13,10 +13,12 @@ export interface ResultModal {
   accuracy: number;
   totalTimeSpent: number;
   isCompleted: boolean;
+  Questions:string[]
 
   isDeleted:boolean;
   createdAt: Date;
   updatedAt: Date;
+
 }
 
 const ResultSchema = new Schema<ResultModal>(
@@ -30,6 +32,7 @@ const ResultSchema = new Schema<ResultModal>(
     examId: { type: String, required: true },
     moduleId: { type: String, required: true },
     chapterId: { type: String, required: true },
+    Questions: { type: [String], default:[] },
 
     totalQuestions: { type: Number, required: true },
     attemptedQuestions: { type: Number, required: true },

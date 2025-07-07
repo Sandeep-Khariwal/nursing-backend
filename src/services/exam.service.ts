@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import examsModel from "../models/exams.model";
+import { IsStudent } from "../../HelperFunction";
 
 export class ExamService {
   public async createExam(name: string) {
@@ -24,6 +25,16 @@ export class ExamService {
         { new: true }
       );
       return { status: 200, exam, message: "Exam updated!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
+  public async updateDDQById(id: string, questionId: string) {
+    try {
+      await examsModel.findByIdAndUpdate(id, {
+        $push: { dailyDoses: questionId },
+      });
+      return { status: 200, message: "Exam updated!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }
@@ -104,71 +115,116 @@ export class ExamService {
     }
   }
   public async getAllMiniTestModulesFromExam(id: string, studentId: string) {
+    const isStudent = IsStudent(studentId);
     try {
-      const exam = await examsModel.findById(id).populate([
-        {
-          path: "mini_test_modules",
-          populate: [
-            {
-              path: "questions",
+      let exam;
+      if (isStudent) {
+        exam = await examsModel.findById(id).populate([
+          {
+            path: "mini_test_modules",
               match: { isDeleted: false },
-              select: ["_id", "options", "isDeleted"],
-            },
-            {
-              path: "questionAttempted.questionId", // Populate nested questionId
+            populate: [
+              {
+                path: "questions",
                 match: { isDeleted: false },
-              select: ["_id", "attempt","isDeleted"],
+                select: ["_id", "options", "isDeleted"],
+              },
+              {
+                path: "questionAttempted.questionId", // Populate nested questionId
+                match: { isDeleted: false },
+                select: ["_id", "attempt", "isDeleted"],
+              },
+            ],
+          },
+        ]);
+      } else {
+        exam = await examsModel
+          .findById(id)
+          .select("mini_test_modules")
+          .populate([
+            {
+              path: "mini_test_modules",
+                match: { isDeleted: false },
+              select: ["_id", "name", "examId", "isPro","totalTime"],
+              populate: [
+                {
+                  path: "examId",
+                  match: { isDeleted: false },
+                  select: ["_id", "name"],
+                },
+              ],
             },
-          ],
-        },
-      ]);
+          ]);
+      }
 
       const modules: any = exam["mini_test_modules"].filter(
         (m: any) => !m.isDeleted
       );
-      const result = modules.map((module) => {
-        const plainModule = module.toObject(); // This avoids the _doc error
 
-        const attemptedQuestion = plainModule.questionAttempted
-          .map((qAtt: any) => {
-            const student = qAtt.questionId.attempt.find(
-              (std: any) => std.studentId === qAtt.studentId
-            );
+      let result;
+      if (isStudent) {
+          if(modules.length === 0){
+          return {status:404,message:"Modules not found!!"}
+        }
+        result = modules.map((module) => {
+          const plainModule = module.toObject(); // This avoids the _doc error
 
-            // console.log("student : ",student);
+          const attemptedQuestion = plainModule.questionAttempted
+            .map((qAtt: any) => {
+              const student = qAtt.questionId.attempt.find(
+                (std: any) => std.studentId === qAtt.studentId
+              );
 
-            if (student.studentId === studentId) {
+              if (student && student.studentId === studentId) {
+                return {
+                  _id: qAtt.questionId._id,
+                  studentId: student.studentId,
+                  optionId: student.optionId,
+                };
+              }
+            })
+            .filter((s) => s);
+          const isCompleted =
+            module.isCompleted.length > 0
+              ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
+                  ?.isCompleted
+              : 0;
+
+          return {
+            ...plainModule,
+            questions: plainModule.questions.map((q: any) => {
+              const correctOption = q.options.find(
+                (opt: any) => opt.answer === true
+              );
               return {
-                _id: qAtt.questionId._id,
-                studentId: student.studentId,
-                optionId: student.optionId,
+                _id: q._id,
+                optionId: correctOption ? correctOption._id : null,
               };
-            }
-          })
-          .filter((s) => s);
-        const isCompleted =
-          module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
-                ?.isCompleted
-            : 0;
+            }),
+            isCompleted: isCompleted ? isCompleted : false,
 
-        return {
-          ...plainModule,
-          questions: plainModule.questions.map((q: any) => {
-            const correctOption = q.options.find(
-              (opt: any) => opt.answer === true
-            );
-            return {
-              _id: q._id,
-              optionId: correctOption ? correctOption._id : null,
-            };
-          }),
-          isCompleted: isCompleted ? isCompleted : false,
+            questionAttempted:
+              attemptedQuestion.length > 0 ? attemptedQuestion : [],
+            student_time:
+              plainModule.student_time.filter(
+                (st) => st.studentId === studentId
+              )[0].totalTime ?? 0,
+          };
+        });
+      } else {
+          if(modules.length === 0){
+          return {status:404,message:"Modules not found!!"}
+        }
+        result = modules.map((m: any) => {
+          const { examId, ...rest } = m.toObject();
 
-          questionAttempted:
-            attemptedQuestion.length > 0 ? attemptedQuestion : [],
-        };
-      });
+          return {
+            ...rest,
+            exam: examId,
+          };
+        });
+      }
+
       return { status: 200, modules: result };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
@@ -177,71 +233,118 @@ export class ExamService {
   }
   public async getAllMockDrillModulesFromExam(id: string, studentId: string) {
     try {
-      const exam = await examsModel.findById(id).populate([
-        {
-          path: "mock_drills_modules",
-          populate: [
+      const isStudent = IsStudent(studentId);
+      let exam;
+      if (isStudent) {
+        exam = await examsModel.findById(id).populate([
+          {
+            path: "mock_drills_modules",
+            match: { isDeleted: false },
+            populate: [
+              {
+                path: "questions",
+                match: { isDeleted: false },
+                select: ["_id", "options", "isDeleted"],
+              },
+              {
+                path: "questionAttempted.questionId", // Populate nested questionId
+                match: { isDeleted: false },
+                select: ["_id", "attempt", "isDeleted"],
+              },
+            ],
+          },
+        ]);
+      } else {
+        exam = await examsModel
+          .findById(id)
+          .select("mock_drills_modules")
+          .populate([
             {
-              path: "questions",
+              path: "mock_drills_modules",
               match: { isDeleted: false },
-              select: ["_id", "options", "isDeleted"],
+              select: ["_id", "name", "examId", "isPro","totalTime"],
+              populate: [
+                {
+                  path: "examId",
+                  match: { isDeleted: false },
+                  select: ["_id", "name"],
+                },
+              ],
             },
-            {
-              path: "questionAttempted.questionId", // Populate nested questionId
-              match: { isDeleted: false },
-              select: ["_id", "attempt", "isDeleted"],
-            },
-          ],
-        },
-      ]);
+          ]);
+      }
 
       const modules: any = exam["mock_drills_modules"].filter(
         (m: any) => !m.isDeleted
       );
 
-      const result = modules.map((module) => {
-        const plainModule = module.toObject(); // This avoids the _doc error
+      let result;
 
-        const attemptedQuestion = plainModule.questionAttempted
-          .map((qAtt: any) => {
-            const student = qAtt.questionId.attempt.find(
-              (std: any) => std.studentId === qAtt.studentId
-            );
+      if (isStudent) {
+          if(modules.length === 0){
+          return {status:404,message:"Modules not found!!"}
+        }
+        result = modules.map((module) => {
+          const plainModule = module.toObject(); // This avoids the _doc error
 
-            // console.log("student : ",student);
+          const attemptedQuestion = plainModule.questionAttempted
+            .map((qAtt: any) => {
+              const student = qAtt.questionId.attempt.find(
+                (std: any) => std.studentId === qAtt.studentId
+              );
 
-            if (student.studentId === studentId) {
+              // console.log("student : ",student);
+
+              if (student.studentId === studentId) {
+                return {
+                  _id: qAtt.questionId._id,
+                  studentId: student.studentId,
+                  optionId: student.optionId,
+                };
+              }
+            })
+            .filter((s) => s);
+          const isCompleted =
+            module.isCompleted.length > 0
+              ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
+                  ?.isCompleted
+              : 0;
+
+          return {
+            ...plainModule,
+            questions: plainModule.questions.map((q: any) => {
+              const correctOption = q.options.find(
+                (opt: any) => opt.answer === true
+              );
               return {
-                _id: qAtt.questionId._id,
-                studentId: student.studentId,
-                optionId: student.optionId,
+                _id: q._id,
+                optionId: correctOption ? correctOption._id : null,
               };
-            }
-          })
-          .filter((s) => s);
-        const isCompleted =
-          module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
-                ?.isCompleted
-            : 0;
+            }),
+            isCompleted: isCompleted ? isCompleted : false,
 
-        return {
-          ...plainModule,
-          questions: plainModule.questions.map((q: any) => {
-            const correctOption = q.options.find(
-              (opt: any) => opt.answer === true
-            );
-            return {
-              _id: q._id,
-              optionId: correctOption ? correctOption._id : null,
-            };
-          }),
-          isCompleted: isCompleted ? isCompleted : false,
+            questionAttempted:
+              attemptedQuestion.length > 0 ? attemptedQuestion : [],
+            student_time:
+              plainModule.student_time.filter(
+                (st) => st.studentId === studentId
+              )[0].totalTime ?? 0,
+          };
+        });
+      }  else {
+        console.log("modules : ", modules);
+        if(modules.length === 0){
+          return {status:404,message:"Modules not found!!"}
+        }
+        result = modules.map((m: any) => {
+          const { examId, ...rest } = m.toObject();
 
-          questionAttempted:
-            attemptedQuestion.length > 0 ? attemptedQuestion : [],
-        };
-      });
+          return {
+            ...rest,
+            exam: examId,
+          };
+        });
+      }
 
       return { status: 200, modules: result };
     } catch (error) {

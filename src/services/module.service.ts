@@ -1,3 +1,4 @@
+import { IsStudent } from "./../../HelperFunction";
 import { ModuleType } from "../enums/test.enum";
 import examsModel from "../models/exams.model";
 import Module from "../models/modules.model";
@@ -62,31 +63,62 @@ export class ModuleService {
       return { status: 500, message: error.message };
     }
   }
-  public async getAllModulesByModuleType(moduleType: String) {
+  public async getAllModulesByModuleType(id: string, moduleType: String) {
+    const isStudent = IsStudent(id);
     try {
-      const exams = await examsModel.find().populate([
-        {
-          path: "mini_test_modules",
-          populate: {
-            path: "examId",
-            select: ["_id", "name"],
+      let exams;
+      if (isStudent) {
+        exams = await examsModel.find({}).populate([
+          {
+            path: "mini_test_modules",
+            match: { isDeleted: false },
+            populate: {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
           },
-        },
 
-        {
-          path: "mock_drills_modules",
-          populate: {
-            path: "examId",
-            select: ["_id", "name"],
+          {
+            path: "mock_drills_modules",
+            match: { isDeleted: false },
+            populate: {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
           },
-        },
-      ]);
-
-      if(!exams){
-        return {status:404,message:"Exam not found"}
+        ]);
+      } else {
+        exams = await examsModel.find({}).populate([
+          {
+            path: "mini_test_modules",
+            match: { isDeleted: false },
+            select: ["_id", "name", "examId", "isPro", "totalTime"],
+            populate: {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
+          },
+          {
+            path: "mock_drills_modules",
+            match: { isDeleted: false },
+            select: ["_id", "name", "examId", "isPro", "totalTime"],
+            populate: {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
+          },
+        ]);
       }
 
-      const modules = exams.map((e) => {
+      if (!exams) {
+        return { status: 404, message: "Exam not found" };
+      }
+
+      const modules = exams.map((e: any) => {
         const exm = e.toObject();
 
         if (ModuleType.MINI_TEST === moduleType) {
@@ -97,11 +129,14 @@ export class ModuleService {
         }
       });
 
-      if (modules.length === 0) {
+      if (!modules || modules.length === 0) {
         return { status: 404, message: "Modules not found!!" };
       }
 
-      return { status: 200, modules: modules.flat(Infinity).filter((m:any)=>!m.isDeleted) };
+      return {
+        status: 200,
+        modules: modules.flat(Infinity),
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -109,159 +144,44 @@ export class ModuleService {
 
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
-      const modules = await Module.find({
-        chapterId: id,
-        isDeleted: false,
-      }).populate([
-        {
-          path: "questions",
-          match: { isDeleted: false },
-          select: ["_id", "options"],
-        },
-        {
-          path: "questionAttempted.questionId", // Populate nested questionId
-          select: ["_id", "attempt"],
-        },
-      ]);
+      const isStudent = IsStudent(studentId);
+      let modules;
+      if (isStudent) {
+        modules = await Module.find({
+          chapterId: id,
+          isDeleted: false,
+        }).populate([
+          {
+            path: "questions",
+            match: { isDeleted: false },
+            select: ["_id", "options"],
+          },
+          {
+            path: "questionAttempted.questionId", // Populate nested questionId
+            select: ["_id", "attempt"],
+          },
+        ]);
+      } else {
+        modules = await Module.find({
+          chapterId: id,
+          isDeleted: false,
+        })
+          .select(["_id", "name", "examId", "isPro", "totalTime"])
+          .populate([
+            {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
+          ]);
+      }
 
-      const result = modules.map((module) => {
-        const plainModule = module.toObject(); // This avoids the _doc error
+      if (isStudent) {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
 
-        const attemptedQuestion = plainModule.questionAttempted
-          .map((qAtt: any) => {
-            const student = qAtt.questionId.attempt.find(
-              (std: any) => std.studentId === qAtt.studentId
-            );
-
-            // console.log("student : ",student);
-
-            if (student.studentId === studentId) {
-              return {
-                _id: qAtt.questionId._id,
-                studentId: student.studentId,
-                optionId: student.optionId,
-              };
-            }
-          })
-          .filter((s) => s);
-        const isCompleted =
-          module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
-                ?.isCompleted
-            : 0;
-
-        return {
-          ...plainModule,
-          questions: plainModule.questions.map((q: any) => {
-            const correctOption = q.options.find(
-              (opt: any) => opt.answer === true
-            );
-            return {
-              _id: q._id,
-              optionId: correctOption ? correctOption._id : null,
-            };
-          }),
-          isCompleted: isCompleted ? isCompleted : false,
-
-          questionAttempted:
-            attemptedQuestion.length > 0 ? attemptedQuestion : [],
-        };
-      });
-
-      // console.log("result : ",result);
-
-      return { status: 200, modules: result };
-    } catch (error) {
-      return { status: 500, message: error.message };
-    }
-  }
-  public async getAllModulesByExamId(id: string, studentId: string) {
-    try {
-      const modules = await Module.find({
-        examId: id,
-        isDeleted: false,
-      }).populate([
-        {
-          path: "questions",
-          match: { isDeleted: false },
-          select: ["_id", "options"],
-        },
-        {
-          path: "questionAttempted.questionId", // Populate nested questionId
-          match: { isDeleted: false },
-          select: ["_id", "attempt"],
-        },
-      ]);
-
-      const result = modules.map((module) => {
-        const plainModule = module.toObject(); // This avoids the _doc error
-
-        const attemptedQuestion = plainModule.questionAttempted
-          .map((qAtt: any) => {
-            const student = qAtt.questionId.attempt.find(
-              (std: any) => std.studentId === qAtt.studentId
-            );
-
-            // console.log("student : ",student);
-
-            if (student.studentId === studentId) {
-              return {
-                _id: qAtt.questionId._id,
-                studentId: student.studentId,
-                optionId: student.optionId,
-              };
-            }
-          })
-          .filter((s) => s);
-        const isCompleted =
-          module.isCompleted.length > 0
-            ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
-                ?.isCompleted
-            : 0;
-
-        return {
-          ...plainModule,
-          questions: plainModule.questions.map((q: any) => {
-            const correctOption = q.options.find(
-              (opt: any) => opt.answer === true
-            );
-            return {
-              _id: q._id,
-              optionId: correctOption ? correctOption._id : null,
-            };
-          }),
-          isCompleted: isCompleted ? isCompleted : false,
-
-          questionAttempted:
-            attemptedQuestion.length > 0 ? attemptedQuestion : [],
-        };
-      });
-
-      // console.log("result : ",result);
-
-      return { status: 200, modules: result };
-    } catch (error) {
-      return { status: 500, message: error.message };
-    }
-  }
-  public async getAllModules(studentId: string) {
-    try {
-      const modules = await Module.find({}).populate([
-        {
-          path: "questions",
-          match: { isDeleted: false },
-          select: ["_id", "options"],
-        },
-        {
-          path: "questionAttempted.questionId", // Populate nested questionId
-          match: { isDeleted: false },
-          select: ["_id", "attempt"],
-        },
-      ]);
-
-      const result = modules
-        .filter((m) => !m?.isDeleted)
-        .map((module) => {
+        modules = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
 
           const attemptedQuestion = plainModule.questionAttempted
@@ -270,7 +190,108 @@ export class ModuleService {
                 (std: any) => std.studentId === qAtt.studentId
               );
 
-              // console.log("student : ",student);
+              if (student.studentId === studentId) {
+                return {
+                  _id: qAtt.questionId._id,
+                  studentId: student.studentId,
+                  optionId: student.optionId,
+                };
+              }
+            })
+            .filter((s) => s);
+          const isCompleted =
+            module.isCompleted.length > 0
+              ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
+                  ?.isCompleted
+              : 0;
+
+          return {
+            ...plainModule,
+            questions: plainModule.questions.map((q: any) => {
+              const correctOption = q.options.find(
+                (opt: any) => opt.answer === true
+              );
+              return {
+                _id: q._id,
+                optionId: correctOption ? correctOption._id : null,
+              };
+            }),
+            isCompleted: isCompleted ? isCompleted : false,
+            questionAttempted:
+              attemptedQuestion.length > 0 ? attemptedQuestion : [],
+            student_time:
+              plainModule.student_time.filter(
+                (st) => st.studentId === studentId
+              )[0].totalTime ?? 0,
+          };
+        });
+      } else {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
+        modules = modules.map((m: any) => {
+          const { examId, ...rest } = m.toObject();
+
+          return {
+            ...rest,
+            exam: examId,
+          };
+        });
+      }
+
+
+      return { status: 200, modules: modules };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async getAllModulesByExamId(id: string, studentId: string) {
+    try {
+      const isStudent = IsStudent(studentId);
+      let modules;
+      if (isStudent) {
+        modules = await Module.find({
+          examId: id,
+          isDeleted: false,
+        }).populate([
+          {
+            path: "questions",
+            match: { isDeleted: false },
+            select: ["_id", "options"],
+          },
+          {
+            path: "questionAttempted.questionId", // Populate nested questionId
+            match: { isDeleted: false },
+            select: ["_id", "attempt"],
+          },
+        ]);
+      } else {
+        modules = await Module.findById({
+          examId: id,
+          isDeleted: false,
+        })
+          .select(["_id", "name", "examId", "isPro", "totalTime"])
+          .populate([
+            {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
+          ]);
+      }
+
+      if (isStudent) {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
+        modules = modules.map((module) => {
+          const plainModule = module.toObject(); // This avoids the _doc error
+
+          const attemptedQuestion = plainModule.questionAttempted
+            .map((qAtt: any) => {
+              const student = qAtt.questionId.attempt.find(
+                (std: any) => std.studentId === qAtt.studentId
+              );
 
               if (student.studentId === studentId) {
                 return {
@@ -304,10 +325,120 @@ export class ModuleService {
               attemptedQuestion.length > 0 ? attemptedQuestion : [],
           };
         });
+      } else {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
+        modules = modules.map((m: any) => {
+          const { examId, ...rest } = m.toObject();
 
-      // console.log("result : ",result);
+          return {
+            ...rest,
+            exam: examId,
+          };
+        });
+      }
 
-      return { status: 200, modules: result };
+      return { status: 200, modules: modules };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async getAllModules(studentId: string) {
+    try {
+      const isStudent = IsStudent(studentId);
+      let modules;
+      if (isStudent) {
+        modules = await Module.find({}).populate([
+          {
+            path: "questions",
+            match: { isDeleted: false },
+            select: ["_id", "options"],
+          },
+          {
+            path: "questionAttempted.questionId", // Populate nested questionId
+            match: { isDeleted: false },
+            select: ["_id", "attempt"],
+          },
+        ]);
+      } else {
+        modules = await Module.find({})
+          .select(["_id", "name", "examId", "isPro", "totalTime"])
+          .populate([
+            {
+              path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+            },
+          ]);
+      }
+
+      if (isStudent) {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
+        modules = modules
+          .filter((m) => !m?.isDeleted)
+          .map((module) => {
+            const plainModule = module.toObject(); // This avoids the _doc error
+
+            const attemptedQuestion = plainModule.questionAttempted
+              .map((qAtt: any) => {
+                const student = qAtt.questionId.attempt.find(
+                  (std: any) => std.studentId === qAtt.studentId
+                );
+
+                if (student.studentId === studentId) {
+                  return {
+                    _id: qAtt.questionId._id,
+                    studentId: student.studentId,
+                    optionId: student.optionId,
+                  };
+                }
+              })
+              .filter((s) => s);
+            const isCompleted =
+              module.isCompleted.length > 0
+                ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
+                    ?.isCompleted
+                : 0;
+
+            return {
+              ...plainModule,
+              questions: plainModule.questions.map((q: any) => {
+                const correctOption = q.options.find(
+                  (opt: any) => opt.answer === true
+                );
+                return {
+                  _id: q._id,
+                  optionId: correctOption ? correctOption._id : null,
+                };
+              }),
+              isCompleted: isCompleted ? isCompleted : false,
+
+              questionAttempted:
+                attemptedQuestion.length > 0 ? attemptedQuestion : [],
+              student_time:
+                plainModule.student_time.filter(
+                  (st) => st.studentId === studentId
+                )[0].totalTime ?? 0,
+            };
+          });
+      } else {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
+        }
+        modules = modules.map((m: any) => {
+          const { examId, ...rest } = m.toObject();
+
+          return {
+            ...rest,
+            exam: examId,
+          };
+        });
+      }
+
+      return { status: 200, modules: modules };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -338,17 +469,18 @@ export class ModuleService {
     pendingTime: number
   ) {
     try {
-      // Step 1: Push new question attempt
-      await Module.findByIdAndUpdate(id, {
-        $push: { questionAttempted: res },
-      });
-
-      // Step 2: Check if student_time entry exists
+      // Step 1: Check if student_time entry exists
       const module = await Module.findOne({
         _id: id,
         "student_time.studentId": res.studentId,
       });
 
+      // Step 1: Push new question attempt if entry not present
+      if (!module) {
+        await Module.findByIdAndUpdate(id, {
+          $push: { questionAttempted: res },
+        });
+      }
       if (module) {
         // Student already exists — update totalTime
         await Module.findOneAndUpdate(
@@ -452,6 +584,9 @@ export class ModuleService {
         _id: id,
         "student_time.studentId": studentId,
       });
+      if (!module) {
+        return { status: 404, message: "Module already re-appeared!!" };
+      }
 
       if (module && updatedDoc) {
         // Student already exists — update totalTime

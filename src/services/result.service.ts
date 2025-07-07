@@ -50,6 +50,10 @@ export class ResultService {
         moduleId: moduleId,
       });
 
+      if (!result) {
+        return { status: 404, message: "Already re-appeared!!" };
+      }
+
       return { status: 200, resultId: result._id };
     } catch (error) {
       return { status: 500, message: error.message };
@@ -61,7 +65,7 @@ export class ResultService {
       if (!result) {
         return { status: 404, message: "Result not found!!" };
       }
-      return { status:200, result };
+      return { status: 200, result };
     } catch (error) {
       return { status: 500, message: error.message };
     }
