@@ -54,7 +54,11 @@ export const ForgotPassword = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: response["status"], data:{email: response["email"] , otp:response["otp"]} , message:response["message"]});
+      .json({
+        status: response["status"],
+        data: { email: response["email"], otp: response["otp"] },
+        message: response["message"],
+      });
   } else {
     res
       .status(response["status"])
@@ -69,7 +73,9 @@ export const ResetPassword = async (req: Request, res: Response) => {
   const response = await authService.resetPassword(password, email);
 
   if (response["status"] === 200) {
-    res.status(response["status"]).json({ status: response["status"] , message:response["message"] });
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   } else {
     res
       .status(response["status"])
@@ -134,4 +140,7 @@ export const DeleteAcount = async (req: clientRequest, res: Response) => {
   } else {
     res.status(response["status"]).json({ message: response["message"] });
   }
+};
+export const GetAcount = async (req: clientRequest, res: Response) => {
+  res.status(200).json({ status: 200, message: "success" });
 };
