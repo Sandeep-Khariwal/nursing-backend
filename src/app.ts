@@ -48,7 +48,6 @@ app.use(`/api/${VERSION}/result`,resultRouter)
 
 //DataBase
 DataBase()
-
 // server creation
 app.listen(Number(PORT),'0.0.0.0', () => {
   console.log(`Server is running at ${PORT}`);
