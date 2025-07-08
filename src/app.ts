@@ -17,7 +17,7 @@ import resultRouter from "./routes/result.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 5070
 const VERSION = "v1"
 
 app.use(cors());
@@ -49,6 +49,6 @@ app.use(`/api/${VERSION}/result`,resultRouter)
 //DataBase
 DataBase()
 // server creation
-app.listen(Number(PORT),'0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`Server is running at ${PORT}`);
 });
