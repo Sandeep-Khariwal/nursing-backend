@@ -14,6 +14,7 @@ export class ResultService {
     accuracy?: number;
     totalTimeSpent?: number;
     isCompleted: boolean;
+    questionIds:string[]
   }) {
     try {
       const result = new Result();
@@ -26,6 +27,7 @@ export class ResultService {
       result.attemptedQuestions = data.attemptedQuestions;
       result.correctAnswers = data.correctAnswers;
       result.isCompleted = data.isCompleted;
+      result.Questions = data.questionIds
       if (data.accuracy) {
         result.accuracy = data.accuracy;
       }

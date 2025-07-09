@@ -82,10 +82,9 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         };
       });
     } else {
-          res
-      .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
-  
+      res
+        .status(response["status"])
+        .json({ status: response["status"], message: response["message"] });
     }
   } else if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
@@ -161,23 +160,23 @@ export const SubmitModuleResponse = async (
   const response = await moduleService.submitModuleById(id, _id);
 
   if (response["status"] === 200) {
-    // const module = response["module"].toObject();
+    const module = response["module"].toObject();
 
-    // const totalTime =
-    //   module.student_time.length > 0
-    //     ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
-    //     : 0;
+    const totalTime =
+      module.student_time.length > 0
+        ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
+        : 0;
 
-    // const isCompleted =
-    //   module.isCompleted.length > 0
-    //     ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
-    //     : 0;
+    const isCompleted =
+      module.isCompleted.length > 0
+        ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
+        : 0;
 
-    // const newModule = {
-    //   ...module,
-    //   isCompleted: isCompleted?isCompleted:false,
-    //   student_time: totalTime?totalTime:0,
-    // };
+    const newModule = {
+      ...module,
+      isCompleted: isCompleted ? isCompleted : false,
+      student_time: totalTime ? totalTime : 0,
+    };
 
     res.status(200).json({
       status: 200,

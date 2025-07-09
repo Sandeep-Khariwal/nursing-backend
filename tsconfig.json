@@ -15,13 +15,14 @@
       "@utils/*": ["src/utils/*"]
     },
     "outDir": "./dist",
+    "rootDir": "./src",
     "moduleResolution": "node",
     "removeComments": true,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "baseUrl": "./"  // Ensure this is correctly set to the root of the project
+    "baseUrl": "./" // Ensure this is correctly set to the root of the project
   },
   "exclude": ["node_modules"],
   "include": ["./src/**/*.ts"]

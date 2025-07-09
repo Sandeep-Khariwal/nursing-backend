@@ -117,7 +117,7 @@ export class ModuleService {
       if (!exams) {
         return { status: 404, message: "Exam not found" };
       }
-
+   
       const modules = exams.map((e: any) => {
         const exm = e.toObject();
 
@@ -128,7 +128,6 @@ export class ModuleService {
           return exm.mock_drills_modules;
         }
       });
-
       if (!modules || modules.length === 0) {
         return { status: 404, message: "Modules not found!!" };
       }
@@ -151,6 +150,11 @@ export class ModuleService {
           chapterId: id,
           isDeleted: false,
         }).populate([
+          {
+               path: "examId",
+              match: { isDeleted: false },
+              select: ["_id", "name"],
+          },
           {
             path: "questions",
             match: { isDeleted: false },
@@ -207,6 +211,7 @@ export class ModuleService {
 
           return {
             ...plainModule,
+            exam:plainModule.examId,
             questions: plainModule.questions.map((q: any) => {
               const correctOption = q.options.find(
                 (opt: any) => opt.answer === true
@@ -238,7 +243,6 @@ export class ModuleService {
           };
         });
       }
-
 
       return { status: 200, modules: modules };
     } catch (error) {
@@ -612,6 +616,26 @@ export class ModuleService {
         id,
         {
           $set: { isDeleted: true },
+        },
+        { new: true }
+      );
+      if (!module) {
+        return { status: 404, message: "Module not found!!" };
+      }
+      return { status: 200, module, message: "Module removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async updateResultIdInModule(
+    id: string,
+    data: {id: string, studentId: string}
+  ) {
+    try {
+      const module = await Module.findByIdAndUpdate(
+        id,
+        {
+          $push: { resultId: data },
         },
         { new: true }
       );

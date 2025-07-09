@@ -86,6 +86,7 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
       //   accuracy: accuracy,
       //   totalTimeSpent: totalTimeTakenByStudent,
       isCompleted: module.questions.length === totalAttemptedQuestions,
+      questionIds:attemptedQuestionIdsByStudent
     };
 
     const resultResponse = await resultService.createResult(result);
@@ -95,6 +96,14 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
       await studentService.updateResultInStudent(
         studentId,
         resultResponse["result"]._id
+      );
+      // update student result in module
+      await moduleService.updateResultIdInModule(
+        id,
+        {
+          id:resultResponse["result"]._id,
+          studentId
+        }
       );
       res
         .status(response["status"])

@@ -1,7 +1,7 @@
 {
   "name": "nursing-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/app.js",
   "module": "types",
   "scripts": {
     "build": "tsc",
