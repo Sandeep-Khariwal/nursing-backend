@@ -1,4 +1,4 @@
-import { IsStudent } from "./../../HelperFunction";
+import { IsStudent } from "../HelperFunction";
 import { ModuleType } from "../enums/test.enum";
 import examsModel from "../models/exams.model";
 import Module from "../models/modules.model";

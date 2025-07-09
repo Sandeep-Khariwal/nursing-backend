@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import examsModel from "../models/exams.model";
-import { IsStudent } from "../../HelperFunction";
+import { IsStudent } from "../HelperFunction";
 
 export class ExamService {
   public async createExam(name: string) {
