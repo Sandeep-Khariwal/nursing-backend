@@ -238,10 +238,10 @@ export const SubmitModuleResponse = async (
         totalQuestions: module.questions.length,
         attemptedQuestions: totalAttemptedQuestions,
         correctAnswers: totalCorrectAnswers,
-        //   accuracy: accuracy,
-        //   totalTimeSpent: totalTimeTakenByStudent,
         isCompleted: module.questions.length === totalAttemptedQuestions,
         questionIds: attemptedQuestionIdsByStudent,
+        //   accuracy: accuracy,
+        //   totalTimeSpent: totalTimeTakenByStudent,
       };
 
       const resultResponse = await resultService.createResult(result);
@@ -323,46 +323,52 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
     _id
   );
   if (response1["status"] === 200) {
+    
     // remove student response from questions
-    const response2 = await questionService.removeStudentResponseFromQuestion(
+     await questionService.removeStudentResponseFromQuestion(
       id,
       _id
     );
 
     //find result and remove from student profile
     const resultResp = await resultService.getResultByStudentAndModule(_id, id);
+    
     if (resultResp["status"] === 200) {
       await studentService.removeResultFromStudent(_id, resultResp["resultId"]);
-
-      if (response2["status"] === 200) {
-        // update isCompleted false in module for a student
-        const response3 = await moduleService.submitModuleById(id, _id);
-        if (response3["status"] === 200) {
-          const module = response3["module"].toObject();
-
-          const student_time = module.student_time.filter(
-            (c) => c.studentId === _id
-          )[0]?.totalTime;
-
-          const newModule = {
-            ...module,
-            questionAttempted: [],
-            isCompleted: module.isCompleted.filter(
-              (c) => c.studentId === _id
-            )[0].isCompleted,
-            student_time: student_time ?? 0,
-          };
-
-          res.status(200).json({
+       await resultService.removeResult(resultResp["resultId"])
+       res.status(200).json({
             status: 200,
-            data: newModule,
+            data:response1["module"] ,
           });
-        } else {
-          res.status(response3["status"]).json(response3["message"]);
-        }
-      } else {
-        res.status(response2["status"]).json(response2["message"]);
-      }
+      // if (response2["status"] === 200) {
+      //   // update isCompleted false in module for a student
+      //   const response3 = await moduleService.submitModuleById(id, _id);
+      //   if (response3["status"] === 200) {
+      //     const module = response3["module"].toObject();
+
+      //     const student_time = module.student_time.filter(
+      //       (c) => c.studentId === _id
+      //     )[0]?.totalTime;
+
+      //     const newModule = {
+      //       ...module,
+      //       questionAttempted: [],
+      //       isCompleted: module.isCompleted.filter(
+      //         (c) => c.studentId === _id
+      //       )[0].isCompleted,
+      //       student_time: student_time ?? 0,
+      //     };
+
+      //     res.status(200).json({
+      //       status: 200,
+      //       data: newModule,
+      //     });
+      //   } else {
+      //     res.status(response3["status"]).json(response3["message"]);
+      //   }
+      // } else {
+      //   res.status(response2["status"]).json(response2["message"]);
+      // }
     } else {
       res.status(resultResp["status"]).json(resultResp["message"]);
     }

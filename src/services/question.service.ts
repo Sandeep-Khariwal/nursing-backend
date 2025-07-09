@@ -122,7 +122,8 @@ export class QuestionService {
 
       // Step 2: Remove student attempt from each question
       const updatePromises = questions.map((question) =>
-        Question.findByIdAndUpdate(
+      {
+       return Question.findByIdAndUpdate(
           question._id,
           {
             $pull: {
@@ -131,6 +132,7 @@ export class QuestionService {
           },
           { new: true }
         )
+      }
       );
 
       const updatedQuestions = await Promise.all(updatePromises);

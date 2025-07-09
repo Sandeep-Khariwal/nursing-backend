@@ -79,9 +79,12 @@ export class StudentService {
   }
   public async removeResultFromStudent(id: string, resultId: string) {
     try {
+      
+      const cleanResultId = resultId.trim();
+      console.log("resultId : ",id, cleanResultId);
       await studentModel.findByIdAndUpdate(id, {
         $pull: { results: resultId },
-      });
+      },{new:true});
       return { status: 200, message: "Result removed from student!!" };
     } catch (error) {
       return { message: error.message, status: 500 };

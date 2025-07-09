@@ -606,6 +606,14 @@ export class ModuleService {
 
   public async removeStudentResponseFromModule(id: string, studentId: string) {
     try {
+      const module = await Module.findOne({
+        _id: id,
+        "questionAttempted.studentId": studentId,
+      });
+      if (!module) {
+        return { status: 200, message: "Module already re-appeared!!" };
+      }
+
       const updatedDoc = await Module.findOneAndUpdate(
         { _id: id },
         {
@@ -619,13 +627,6 @@ export class ModuleService {
       );
 
       // Step 2: Check if student_time entry exists
-      const module = await Module.findOne({
-        _id: id,
-        "questionAttempted.studentId": studentId,
-      });
-      if (!module) {
-        return { status: 404, message: "Module already re-appeared!!" };
-      }
 
       // if (module && updatedDoc) {
       //   // Student already exists — update totalTime
@@ -639,7 +640,7 @@ export class ModuleService {
       //   );
       // }
 
-      return { status: 200, message: "Student removed!!" };
+      return { status: 200, module: updatedDoc, message: "Student removed!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

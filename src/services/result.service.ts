@@ -11,10 +11,11 @@ export class ResultService {
     totalQuestions: number;
     attemptedQuestions: number;
     correctAnswers: number;
+
     accuracy?: number;
     totalTimeSpent?: number;
     isCompleted: boolean;
-    questionIds:string[]
+    questionIds: string[];
   }) {
     try {
       const result = new Result();
@@ -26,8 +27,10 @@ export class ResultService {
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.correctAnswers = data.correctAnswers;
+      result.wrongAnswers =
+        Number(data.attemptedQuestions) - Number(data.correctAnswers);
       result.isCompleted = data.isCompleted;
-      result.Questions = data.questionIds
+      result.Questions = data.questionIds;
       if (data.accuracy) {
         result.accuracy = data.accuracy;
       }
@@ -50,6 +53,7 @@ export class ResultService {
       const result = await Result.findOne({
         studentId: studentId,
         moduleId: moduleId,
+        isDeleted: false,
       });
 
       if (!result) {
@@ -64,6 +68,19 @@ export class ResultService {
   public async getResultById(id: string) {
     try {
       const result = await Result.findById(id);
+      if (!result) {
+        return { status: 404, message: "Result not found!!" };
+      }
+      return { status: 200, result };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeResult(id: string) {
+    try {
+      const result = await Result.findByIdAndUpdate(id, {
+        $set: { isDeleted: true },
+      });
       if (!result) {
         return { status: 404, message: "Result not found!!" };
       }

@@ -10,6 +10,7 @@ export interface ResultModal {
   totalQuestions: number;
   attemptedQuestions: number;
   correctAnswers: number;
+  wrongAnswers: number;
   accuracy: number;
   totalTimeSpent: number;
   isCompleted: boolean;
@@ -37,9 +38,11 @@ const ResultSchema = new Schema<ResultModal>(
     totalQuestions: { type: Number, required: true },
     attemptedQuestions: { type: Number, required: true },
     correctAnswers: { type: Number, required: true },
+    wrongAnswers: { type: Number, default:0},
     accuracy: { type: Number, default:0},
     totalTimeSpent: { type: Number, default:0 },
     isCompleted: { type: Boolean, required: true },
+    isDeleted: { type: Boolean},
   },
   {
     timestamps: true,
