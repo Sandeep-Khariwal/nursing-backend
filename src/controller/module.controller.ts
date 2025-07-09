@@ -94,7 +94,19 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
     modules = response["modules"];
   } else if (examId) {
-    if (ModuleType.MINI_TEST === moduleType) {
+
+    if(!moduleType && examId){
+      
+          response = await moduleService.getAllModulesByExamId(
+        examId,
+        studentId
+      );
+      if (response["status"] === 200) {
+        modules = response["modules"];
+      }
+    }
+
+    if (ModuleType.MINI_TEST === moduleType ) {
       response = await examService.getAllMiniTestModulesFromExam(
         examId,
         studentId
@@ -102,7 +114,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
       if (response["status"] === 200) {
         modules = response["modules"];
       }
-    } else {
+    } else if(ModuleType.MOCK_DRILLS === moduleType ) {
       response = await examService.getAllMockDrillModulesFromExam(
         examId,
         studentId
@@ -111,6 +123,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         modules = response["modules"];
       }
     }
+
   } else {
     response = await moduleService.getAllModules(studentId);
     modules = response["modules"];

@@ -122,8 +122,13 @@ export class ExamService {
         exam = await examsModel.findById(id).populate([
           {
             path: "mini_test_modules",
-              match: { isDeleted: false },
+            match: { isDeleted: false },
             populate: [
+              {
+                path: "examId",
+                match: { isDeleted: false },
+                select: ["_id", "name"],
+              },
               {
                 path: "questions",
                 match: { isDeleted: false },
@@ -144,8 +149,8 @@ export class ExamService {
           .populate([
             {
               path: "mini_test_modules",
-                match: { isDeleted: false },
-              select: ["_id", "name", "examId", "isPro","totalTime"],
+              match: { isDeleted: false },
+              select: ["_id", "name", "examId", "isPro", "totalTime"],
               populate: [
                 {
                   path: "examId",
@@ -163,8 +168,8 @@ export class ExamService {
 
       let result;
       if (isStudent) {
-          if(modules.length === 0){
-          return {status:404,message:"Modules not found!!"}
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -190,9 +195,11 @@ export class ExamService {
                   ?.isCompleted
               : 0;
 
+          const { examId, ...plainModule1 } = plainModule;
           return {
-            ...plainModule,
-            questions: plainModule.questions.map((q: any) => {
+            ...plainModule1,
+            exam: examId,
+            questions: plainModule1.questions.map((q: any) => {
               const correctOption = q.options.find(
                 (opt: any) => opt.answer === true
               );
@@ -206,14 +213,17 @@ export class ExamService {
             questionAttempted:
               attemptedQuestion.length > 0 ? attemptedQuestion : [],
             student_time:
-              plainModule.student_time.filter(
+              plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )[0].totalTime ?? 0,
+              )?.totalTime ?? 0,
+            resultId:
+              plainModule1.resultId.filter((st) => st.studentId === studentId)
+                .id ?? "",
           };
         });
       } else {
-          if(modules.length === 0){
-          return {status:404,message:"Modules not found!!"}
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -242,6 +252,11 @@ export class ExamService {
             match: { isDeleted: false },
             populate: [
               {
+                path: "examId",
+                match: { isDeleted: false },
+                select: ["_id", "name"],
+              },
+              {
                 path: "questions",
                 match: { isDeleted: false },
                 select: ["_id", "options", "isDeleted"],
@@ -262,7 +277,7 @@ export class ExamService {
             {
               path: "mock_drills_modules",
               match: { isDeleted: false },
-              select: ["_id", "name", "examId", "isPro","totalTime"],
+              select: ["_id", "name", "examId", "isPro", "totalTime"],
               populate: [
                 {
                   path: "examId",
@@ -281,8 +296,8 @@ export class ExamService {
       let result;
 
       if (isStudent) {
-          if(modules.length === 0){
-          return {status:404,message:"Modules not found!!"}
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -310,9 +325,11 @@ export class ExamService {
                   ?.isCompleted
               : 0;
 
+          const { examId, ...plainModule1 } = plainModule;
           return {
-            ...plainModule,
-            questions: plainModule.questions.map((q: any) => {
+            ...plainModule1,
+            exam: examId,
+            questions: plainModule1.questions.map((q: any) => {
               const correctOption = q.options.find(
                 (opt: any) => opt.answer === true
               );
@@ -326,15 +343,17 @@ export class ExamService {
             questionAttempted:
               attemptedQuestion.length > 0 ? attemptedQuestion : [],
             student_time:
-              plainModule.student_time.filter(
+              plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )[0].totalTime ?? 0,
+              )?.totalTime ?? 0,
+            resultId:
+              plainModule1.resultId.filter((st) => st.studentId === studentId)
+                .id ?? "",
           };
         });
-      }  else {
-        console.log("modules : ", modules);
-        if(modules.length === 0){
-          return {status:404,message:"Modules not found!!"}
+      } else {
+        if (modules.length === 0) {
+          return { status: 404, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();

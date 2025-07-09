@@ -117,7 +117,7 @@ export class ModuleService {
       if (!exams) {
         return { status: 404, message: "Exam not found" };
       }
-   
+
       const modules = exams.map((e: any) => {
         const exm = e.toObject();
 
@@ -144,6 +144,7 @@ export class ModuleService {
   public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
       const isStudent = IsStudent(studentId);
+
       let modules;
       if (isStudent) {
         modules = await Module.find({
@@ -151,9 +152,9 @@ export class ModuleService {
           isDeleted: false,
         }).populate([
           {
-               path: "examId",
-              match: { isDeleted: false },
-              select: ["_id", "name"],
+            path: "examId",
+            match: { isDeleted: false },
+            select: ["_id", "name"],
           },
           {
             path: "questions",
@@ -209,10 +210,11 @@ export class ModuleService {
                   ?.isCompleted
               : 0;
 
+          const { examId, ...plainModule1 } = plainModule;
           return {
-            ...plainModule,
-            exam:plainModule.examId,
-            questions: plainModule.questions.map((q: any) => {
+            ...plainModule1,
+            exam: examId,
+            questions: plainModule1.questions.map((q: any) => {
               const correctOption = q.options.find(
                 (opt: any) => opt.answer === true
               );
@@ -225,9 +227,12 @@ export class ModuleService {
             questionAttempted:
               attemptedQuestion.length > 0 ? attemptedQuestion : [],
             student_time:
-              plainModule.student_time.filter(
+              plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )[0].totalTime ?? 0,
+              ).totalTime ?? 0,
+            resultId:
+              plainModule1.resultId.filter((st) => st.studentId === studentId)
+                .id ?? "",
           };
         });
       } else {
@@ -258,6 +263,11 @@ export class ModuleService {
           examId: id,
           isDeleted: false,
         }).populate([
+          {
+            path: "examId",
+            match: { isDeleted: false },
+            select: ["_id", "name"],
+          },
           {
             path: "questions",
             match: { isDeleted: false },
@@ -297,7 +307,7 @@ export class ModuleService {
                 (std: any) => std.studentId === qAtt.studentId
               );
 
-              if (student.studentId === studentId) {
+              if (student && student.studentId === studentId) {
                 return {
                   _id: qAtt.questionId._id,
                   studentId: student.studentId,
@@ -311,10 +321,11 @@ export class ModuleService {
               ? module.isCompleted.filter((c) => c.studentId === studentId)[0]
                   ?.isCompleted
               : 0;
-
+          const { examId, ...plainModule1 } = plainModule;
           return {
-            ...plainModule,
-            questions: plainModule.questions.map((q: any) => {
+            ...plainModule1,
+            exam: examId,
+            questions: plainModule1.questions.map((q: any) => {
               const correctOption = q.options.find(
                 (opt: any) => opt.answer === true
               );
@@ -327,6 +338,13 @@ export class ModuleService {
 
             questionAttempted:
               attemptedQuestion.length > 0 ? attemptedQuestion : [],
+            student_time:
+              plainModule1.student_time.filter(
+                (st) => st.studentId === studentId
+              )?.totalTime ?? 0,
+            resultId:
+              plainModule1.resultId.filter((st) => st.studentId === studentId)
+                .id ?? "",
           };
         });
       } else {
@@ -354,6 +372,11 @@ export class ModuleService {
       let modules;
       if (isStudent) {
         modules = await Module.find({}).populate([
+          {
+            path: "examId",
+            match: { isDeleted: false },
+            select: ["_id", "name"],
+          },
           {
             path: "questions",
             match: { isDeleted: false },
@@ -391,8 +414,7 @@ export class ModuleService {
                 const student = qAtt.questionId.attempt.find(
                   (std: any) => std.studentId === qAtt.studentId
                 );
-
-                if (student.studentId === studentId) {
+                if (student && student.studentId === studentId) {
                   return {
                     _id: qAtt.questionId._id,
                     studentId: student.studentId,
@@ -407,9 +429,11 @@ export class ModuleService {
                     ?.isCompleted
                 : 0;
 
+            const { examId, ...plainModule1 } = plainModule;
             return {
-              ...plainModule,
-              questions: plainModule.questions.map((q: any) => {
+              ...plainModule1,
+              exam: examId,
+              questions: plainModule1.questions.map((q: any) => {
                 const correctOption = q.options.find(
                   (opt: any) => opt.answer === true
                 );
@@ -423,9 +447,9 @@ export class ModuleService {
               questionAttempted:
                 attemptedQuestion.length > 0 ? attemptedQuestion : [],
               student_time:
-                plainModule.student_time.filter(
+                plainModule1.student_time.filter(
                   (st) => st.studentId === studentId
-                )[0].totalTime ?? 0,
+                )?.totalTime ?? 0,
             };
           });
       } else {
@@ -629,7 +653,7 @@ export class ModuleService {
   }
   public async updateResultIdInModule(
     id: string,
-    data: {id: string, studentId: string}
+    data: { id: string; studentId: string }
   ) {
     try {
       const module = await Module.findByIdAndUpdate(
