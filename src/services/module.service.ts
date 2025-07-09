@@ -500,7 +500,12 @@ export class ModuleService {
       // Step 1: Check if student_time entry exists
       const module = await Module.findOne({
         _id: id,
-        "student_time.studentId": res.studentId,
+        questionAttempted: {
+          $elemMatch: {
+            studentId: res.studentId,
+            questionId: res.questionId,
+          },
+        },
       });
 
       // Step 1: Push new question attempt if entry not present
@@ -603,30 +608,36 @@ export class ModuleService {
     try {
       const updatedDoc = await Module.findOneAndUpdate(
         { _id: id },
-        { $pull: { questionAttempted: { studentId: studentId } } },
+        {
+          $pull: {
+            questionAttempted: { studentId: studentId },
+            student_time: { studentId: studentId },
+            isCompleted: { studentId: studentId },
+          },
+        },
         { new: true }
       );
 
       // Step 2: Check if student_time entry exists
       const module = await Module.findOne({
         _id: id,
-        "student_time.studentId": studentId,
+        "questionAttempted.studentId": studentId,
       });
       if (!module) {
         return { status: 404, message: "Module already re-appeared!!" };
       }
 
-      if (module && updatedDoc) {
-        // Student already exists — update totalTime
-        await Module.findOneAndUpdate(
-          { _id: id, "student_time.studentId": studentId },
-          {
-            $set: {
-              "student_time.$.totalTime": updatedDoc.totalTime,
-            },
-          }
-        );
-      }
+      // if (module && updatedDoc) {
+      //   // Student already exists — update totalTime
+      //   await Module.findOneAndUpdate(
+      //     { _id: id, "student_time.studentId": studentId },
+      //     {
+      //       $set: {
+      //         "student_time.$.totalTime": updatedDoc.totalTime,
+      //       },
+      //     }
+      //   );
+      // }
 
       return { status: 200, message: "Student removed!!" };
     } catch (error) {

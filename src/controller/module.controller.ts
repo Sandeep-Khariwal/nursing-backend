@@ -7,6 +7,7 @@ import { ResultService } from "../services/result.service";
 import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
+import mongoose from "mongoose";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -94,19 +95,14 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
     modules = response["modules"];
   } else if (examId) {
-
-    if(!moduleType && examId){
-      
-          response = await moduleService.getAllModulesByExamId(
-        examId,
-        studentId
-      );
+    if (!moduleType && examId) {
+      response = await moduleService.getAllModulesByExamId(examId, studentId);
       if (response["status"] === 200) {
         modules = response["modules"];
       }
     }
 
-    if (ModuleType.MINI_TEST === moduleType ) {
+    if (ModuleType.MINI_TEST === moduleType) {
       response = await examService.getAllMiniTestModulesFromExam(
         examId,
         studentId
@@ -114,7 +110,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
       if (response["status"] === 200) {
         modules = response["modules"];
       }
-    } else if(ModuleType.MOCK_DRILLS === moduleType ) {
+    } else if (ModuleType.MOCK_DRILLS === moduleType) {
       response = await examService.getAllMockDrillModulesFromExam(
         examId,
         studentId
@@ -123,7 +119,6 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         modules = response["modules"];
       }
     }
-
   } else {
     response = await moduleService.getAllModules(studentId);
     modules = response["modules"];
@@ -166,38 +161,129 @@ export const SubmitModuleResponse = async (
   res: Response
 ) => {
   const { id } = req.params;
-  const { _id } = req.user;
+  const studentId = req.user._id;
 
   const moduleService = new ModuleService();
 
-  const response = await moduleService.submitModuleById(id, _id);
+  const response = await moduleService.submitModuleById(id, studentId);
 
   if (response["status"] === 200) {
-    const module = response["module"].toObject();
+    const moduleService = new ModuleService();
+    const resultService = new ResultService();
+    const questionService = new QuestionService();
+    const studentService = new StudentService();
 
-    const totalTime =
-      module.student_time.length > 0
-        ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
-        : 0;
+      const module = response["module"].toObject();
 
-    const isCompleted =
-      module.isCompleted.length > 0
-        ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
-        : 0;
+      // const totalTimeTakenByStudent = module.student_time
+      //   .filter((s) => s.studentId === studentId)
+      //   .map((st) => st.totalTime)[0];
 
-    const newModule = {
-      ...module,
-      isCompleted: isCompleted ? isCompleted : false,
-      student_time: totalTime ? totalTime : 0,
-    };
+      const attemptedQuestionIdsByStudent = module.questionAttempted
+        .filter((q) => q.studentId === studentId)
+        .map((q) => q.questionId);
+      const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
 
-    res.status(200).json({
-      status: 200,
-      message: response["message"],
-    });
-  } else {
-    res.status(response["status"]).json(response["message"]);
-  }
+      let promises = [];
+      attemptedQuestionIdsByStudent.forEach((id) => {
+        const result = questionService.getQuestionById(id);
+        promises.push(result);
+      });
+
+      const allQuestions = await Promise.all(promises);
+
+      let totalCorrectAnswers;
+      if (allQuestions.length > 0) {
+        totalCorrectAnswers = allQuestions.reduce((acc, curr) => {
+          const question = curr.question.toObject();
+
+          // 1. Find the correct option ID
+          const correctOption = question.options.find(
+            (o: any) => o.answer === true
+          );
+
+          if (!correctOption) return acc;
+
+          // 2. Find the student's attempt for this question
+          const studentAttempt = question.attempt.find(
+            (a: any) => a.studentId === studentId
+          );
+
+          if (!studentAttempt) return acc; // No attempt made by this student
+
+          // 3. Convert studentAttempt.optionId and correctOption._id to the same type (ObjectId)
+          const studentOptionId = new mongoose.Types.ObjectId(
+            studentAttempt.optionId
+          );
+          const correctOptionId = correctOption._id;
+
+          // 4. Compare the student's selected option ID with the correct option ID
+          const isCorrect = studentOptionId.equals(correctOptionId);
+
+          return isCorrect ? acc + 1 : acc;
+        }, 0);
+      }
+
+      // const accuracy =
+      //   totalAttemptedQuestions > 0
+      //     ? (totalCorrectAnswers / totalAttemptedQuestions) * 100
+      //     : 0;
+
+      const result = {
+        studentId: studentId,
+        examId: module.examId,
+        moduleId: module._id,
+        chapterId: module.chapterId,
+
+        totalQuestions: module.questions.length,
+        attemptedQuestions: totalAttemptedQuestions,
+        correctAnswers: totalCorrectAnswers,
+        //   accuracy: accuracy,
+        //   totalTimeSpent: totalTimeTakenByStudent,
+        isCompleted: module.questions.length === totalAttemptedQuestions,
+        questionIds: attemptedQuestionIdsByStudent,
+      };
+
+      const resultResponse = await resultService.createResult(result);
+
+      if (resultResponse["status"] === 200) {
+        // update result in student profile
+        await studentService.updateResultInStudent(
+          studentId,
+          resultResponse["result"]._id
+        );
+        // update student result in module
+        await moduleService.updateResultIdInModule(id, {
+          id: resultResponse["result"]._id,
+          studentId,
+        });
+        res.status(response["status"]).json({
+          status: 200,
+          message: response["message"],
+          data: { resultId: resultResponse["result"]._id },
+        });
+      } else {
+        res.status(response["status"]).json(response["message"]);
+      }
+    } else {
+      res.status(response["status"]).json(response["message"]);
+    }
+
+    // const totalTime =
+    //   module.student_time.length > 0
+    //     ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
+    //     : 0;
+
+    // const isCompleted =
+    //   module.isCompleted.length > 0
+    //     ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
+    //     : 0;
+
+    // const newModule = {
+    //   ...module,
+    //   isCompleted: isCompleted ? isCompleted : false,
+    //   student_time: totalTime ? totalTime : 0,
+    // };
 };
 
 export const RestoreModules = async (req: Request, res: Response) => {
