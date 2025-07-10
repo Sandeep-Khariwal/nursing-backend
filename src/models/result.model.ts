@@ -33,7 +33,7 @@ const ResultSchema = new Schema<ResultModal>(
     examId: { type: String, required: true },
     moduleId: { type: String, required: true },
     chapterId: { type: String, required: true },
-    Questions: { type: [String], default:[] },
+    Questions: { type: [String], default:[] , ref:"question" },
 
     totalQuestions: { type: Number, required: true },
     attemptedQuestions: { type: Number, required: true },

@@ -370,10 +370,10 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
       //   res.status(response2["status"]).json(response2["message"]);
       // }
     } else {
-      res.status(resultResp["status"]).json(resultResp["message"]);
+      res.status(resultResp["status"]).json({status:resultResp["status"] , message:resultResp["message"]});
     }
   } else {
-    res.status(response1["status"]).json(response1["message"]);
+    res.status(response1["status"]).json({status:response1["status"] , message:response1["message"]});
   }
 };
 

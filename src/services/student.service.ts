@@ -12,10 +12,8 @@ export class StudentService {
         return { status: 404, message: "User not found!!" };
       }
 
-      const examExists = student.exams.length > 0 ? true : false;
-
       const updateExams = exams.map((e, i) => {
-        if (i === 0 && !examExists) {
+        if (i === 0 ) {
           return {
             _id: e,
             name: e.name,
@@ -32,7 +30,7 @@ export class StudentService {
       const updateExam = await studentModel.findByIdAndUpdate(
         id,
         {
-          $addToSet: { exams: updateExams },
+          $set: { exams: updateExams },
         },
         { new: true }
       );
@@ -101,13 +99,21 @@ export class StudentService {
         return { status: 404, message: "Student not found" };
       }
 
+      let name = ""
+      if(data.firstName){
+        name = data.firstName
+      }
+      if(data.lastName){
+        name = name + " " + data.firstName
+      }
+
       // Update exams: set is_primary true for matching examId, false for others
       student.exams = student.exams.map((exam: any) => ({
         ...exam.toObject(), // ensure we're working with plain objects
         is_primary: exam._id.toString() === data.examId,
       }));
-      (student.name = data.firstName + " " + data.lastName),
-        (student.email = data.email),
+      (student.name = name?name:student.name),
+        (student.email = data.email?data.email:student.email),
         await student.save();
 
       return { status: 200, student, message: "Exam updated!!" };

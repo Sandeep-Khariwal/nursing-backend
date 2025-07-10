@@ -65,13 +65,41 @@ export class ResultService {
       return { status: 500, message: error.message };
     }
   }
-  public async getResultById(id: string) {
+  public async getResultById(id: string, studentId: string) {
     try {
-      const result = await Result.findById(id);
-      if (!result) {
+      const result = await Result.findById(id).populate([
+        {
+          path: "Questions",
+          select: ["_id", "question", "options", "attempt"],
+        },
+      ]);
+      if (result && result.isDeleted) {
         return { status: 404, message: "Result not found!!" };
       }
-      return { status: 200, result };
+
+      // Process each question to find correct and selected answer
+
+      const processedQuestions = result.Questions.map((q: any) => {
+        const correctOption = q.options.find((opt: any) => opt.answer === true);
+
+        // Assuming attempt is an array like: [{ optionId: '...' }]
+        const selectedOption = q.attempt?.filter(
+          (att) => att.studentId === studentId
+        );
+        return {
+          _id: q._id,
+          question: q.question,
+          correctAnswer: correctOption || null,
+          selectedOption: selectedOption || null,
+        };
+      });
+
+      const newResult = result.toObject() as any;
+      newResult.Questions = processedQuestions;
+
+      const { Questions, ...rest } = newResult;
+
+      return { status: 200, result: { ...rest, questions: Questions } };
     } catch (error) {
       return { status: 500, message: error.message };
     }

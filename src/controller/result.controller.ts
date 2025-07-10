@@ -120,11 +120,12 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
   }
 };
 
-export const GetResult = async (req: Request, res: Response) => {
+export const GetResult = async (req: clientRequest, res: Response) => {
   const { id } = req.params;
+  const studentId = req.user._id
   const resultService = new ResultService();
 
-  const response = await resultService.getResultById(id);
+  const response = await resultService.getResultById(id,studentId);
 
   if (response["status"] === 200) {
     res

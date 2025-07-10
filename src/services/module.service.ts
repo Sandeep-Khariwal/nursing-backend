@@ -211,6 +211,9 @@ export class ModuleService {
               : 0;
 
           const { examId, ...plainModule1 } = plainModule;
+
+           const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id
+           
           return {
             ...plainModule1,
             exam: examId,
@@ -230,9 +233,7 @@ export class ModuleService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               ).totalTime ?? 0,
-            resultId:
-              plainModule1.resultId.filter((st) => st.studentId === studentId)
-                .id ?? "",
+            resultId:resultId
           };
         });
       } else {
@@ -322,6 +323,7 @@ export class ModuleService {
                   ?.isCompleted
               : 0;
           const { examId, ...plainModule1 } = plainModule;
+           const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id
           return {
             ...plainModule1,
             exam: examId,
@@ -342,9 +344,7 @@ export class ModuleService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               )?.totalTime ?? 0,
-            resultId:
-              plainModule1.resultId.filter((st) => st.studentId === studentId)
-                .id ?? "",
+            resultId:resultId
           };
         });
       } else {
@@ -430,6 +430,7 @@ export class ModuleService {
                 : 0;
 
             const { examId, ...plainModule1 } = plainModule;
+              const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id
             return {
               ...plainModule1,
               exam: examId,
@@ -450,6 +451,7 @@ export class ModuleService {
                 plainModule1.student_time.filter(
                   (st) => st.studentId === studentId
                 )?.totalTime ?? 0,
+                resultId:resultId
             };
           });
       } else {
