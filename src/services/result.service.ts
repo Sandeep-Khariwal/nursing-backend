@@ -27,6 +27,7 @@ export class ResultService {
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.correctAnswers = data.correctAnswers;
+      result.isDeleted = false;
       result.wrongAnswers =
         Number(data.attemptedQuestions) - Number(data.correctAnswers);
       result.isCompleted = data.isCompleted;
@@ -50,14 +51,15 @@ export class ResultService {
     moduleId: string
   ) {
     try {
+      console.log(studentId, moduleId);
+
       const result = await Result.findOne({
         studentId: studentId,
         moduleId: moduleId,
         isDeleted: false,
       });
-
       if (!result) {
-        return { status: 404, message: "Already re-appeared!!" };
+        return { status: 404, message: "Result not found!!" };
       }
 
       return { status: 200, resultId: result._id };
@@ -70,7 +72,7 @@ export class ResultService {
       const result = await Result.findById(id).populate([
         {
           path: "Questions",
-          select: ["_id", "question", "options", "attempt"],
+          select: ["_id", "question", "options", "attempt","explaination"],
         },
       ]);
       if (result && result.isDeleted) {
@@ -83,15 +85,22 @@ export class ResultService {
         const correctOption = q.options.find((opt: any) => opt.answer === true);
 
         // Assuming attempt is an array like: [{ optionId: '...' }]
-        const selectedOption = q.attempt?.filter(
-          (att) => att.studentId === studentId
+        const attempted = q.attempt?.find((att) => att.studentId === studentId);
+
+        const selectedOption = q.options.find(
+          (opt: any) => String(opt._id) === String(attempted?.optionId)
         );
-        return {
-          _id: q._id,
-          question: q.question,
-          correctAnswer: correctOption || null,
-          selectedOption: selectedOption || null,
-        };
+
+        const isSame = correctOption.answer && selectedOption.answer
+
+        if (selectedOption) {
+          return {
+            _id: q._id,
+            question: q.question,
+            options: isSame?[correctOption]: [correctOption, selectedOption],
+            explaination: q.explaination,
+          };
+        }
       });
 
       const newResult = result.toObject() as any;

@@ -42,7 +42,7 @@ const ResultSchema = new Schema<ResultModal>(
     accuracy: { type: Number, default:0},
     totalTimeSpent: { type: Number, default:0 },
     isCompleted: { type: Boolean, required: true },
-    isDeleted: { type: Boolean},
+    isDeleted: { type: Boolean , default:false},
   },
   {
     timestamps: true,

@@ -79,7 +79,6 @@ export class StudentService {
     try {
       
       const cleanResultId = resultId.trim();
-      console.log("resultId : ",id, cleanResultId);
       await studentModel.findByIdAndUpdate(id, {
         $pull: { results: resultId },
       },{new:true});

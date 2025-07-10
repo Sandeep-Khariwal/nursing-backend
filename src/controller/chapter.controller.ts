@@ -14,7 +14,7 @@ export const CreateChapter = async (req: Request, res: Response) => {
 
   let response;
   if (chapterId) {
-    response = await chapterService.updateChapterById(name, chapterId,examId);
+    response = await chapterService.updateChapterById(name, chapterId, examId);
   } else {
     response = await chapterService.createChapter({ name, examId });
   }
@@ -35,20 +35,20 @@ export const CreateChapter = async (req: Request, res: Response) => {
   }
 };
 export const GetAllChapter = async (req: Request, res: Response) => {
-  const examId = toStringParam(req.query.examId)
+  const examId = toStringParam(req.query.examId);
 
   const chapterService = new ChapterService();
 
-  let response 
-  if(examId){
+  let response;
+  if (examId) {
     response = await chapterService.getAllChaptersByExamId(examId);
   } else {
-   response = await chapterService.getAllChapters();
+    response = await chapterService.getAllChapters();
   }
 
   if (response["status"] === 200) {
     const chapters = response["chapters"].map((c) => {
-      const chapter = c
+      const chapter = c;
       return {
         ...chapter,
         modules: chapter.modules.length,
@@ -60,7 +60,13 @@ export const GetAllChapter = async (req: Request, res: Response) => {
       data: chapters,
     });
   } else {
-    res.status(response["status"]).json(response["message"]);
+    res
+      .status(response["status"])
+      .json({
+        status: response["status"],
+        data: { chapters: response["chapters"] },
+        message: response["message"],
+      });
   }
 };
 
@@ -84,6 +90,8 @@ export const RemoveChapter = async (req: Request, res: Response) => {
       .status(response["status"])
       .json({ status: 200, message: response["message"] });
   } else {
-    res.status(response["status"]).json({status:response["status"] , message:response["message"]});
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   }
 };
