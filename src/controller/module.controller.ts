@@ -89,9 +89,13 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         .status(response["status"])
         .json({ status: response["status"], message: response["message"] });
     }
-  } else if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
+  } else if (
+    (chapterId && examId) ||
+    ModuleType.QUESTION_FIELD === moduleType
+  ) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
+      examId,
       studentId
     );
 
@@ -142,10 +146,15 @@ export const GetAllQuetionFieldModules = async (
   res: Response
 ) => {
   const { id } = req.params;
+  const { examId } = req.body;
   const studentId = req.user._id;
   const moduleService = new ModuleService();
 
-  const response = await moduleService.getAllModulesByChapterId(id, studentId);
+  const response = await moduleService.getAllModulesByChapterId(
+    id,
+    examId,
+    studentId
+  );
 
   if (response["status"] === 200) {
     res
@@ -175,116 +184,116 @@ export const SubmitModuleResponse = async (
     const questionService = new QuestionService();
     const studentService = new StudentService();
 
-      const module = response["module"].toObject();
+    const module = response["module"].toObject();
 
-      // const totalTimeTakenByStudent = module.student_time
-      //   .filter((s) => s.studentId === studentId)
-      //   .map((st) => st.totalTime)[0];
+    // const totalTimeTakenByStudent = module.student_time
+    //   .filter((s) => s.studentId === studentId)
+    //   .map((st) => st.totalTime)[0];
 
-      const attemptedQuestionIdsByStudent = module.questionAttempted
-        .filter((q) => q.studentId === studentId)
-        .map((q) => q.questionId);
-      const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
+    const attemptedQuestionIdsByStudent = module.questionAttempted
+      .filter((q) => q.studentId === studentId)
+      .map((q) => q.questionId);
+    const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
 
-      let promises = [];
-      attemptedQuestionIdsByStudent.forEach((id) => {
-        const result = questionService.getQuestionById(id);
-        promises.push(result);
-      });
+    let promises = [];
+    attemptedQuestionIdsByStudent.forEach((id) => {
+      const result = questionService.getQuestionById(id);
+      promises.push(result);
+    });
 
-      const allQuestions = await Promise.all(promises);
+    const allQuestions = await Promise.all(promises);
 
-      let totalCorrectAnswers;
-      if (allQuestions.length > 0) {
-        totalCorrectAnswers = allQuestions.reduce((acc, curr) => {
-          const question = curr.question.toObject();
+    let totalCorrectAnswers;
+    if (allQuestions.length > 0) {
+      totalCorrectAnswers = allQuestions.reduce((acc, curr) => {
+        const question = curr.question.toObject();
 
-          // 1. Find the correct option ID
-          const correctOption = question.options.find(
-            (o: any) => o.answer === true
-          );
-
-          if (!correctOption) return acc;
-
-          // 2. Find the student's attempt for this question
-          const studentAttempt = question.attempt.find(
-            (a: any) => a.studentId === studentId
-          );
-
-          if (!studentAttempt) return acc; // No attempt made by this student
-
-          // 3. Convert studentAttempt.optionId and correctOption._id to the same type (ObjectId)
-          const studentOptionId = new mongoose.Types.ObjectId(
-            studentAttempt.optionId
-          );
-          const correctOptionId = correctOption._id;
-
-          // 4. Compare the student's selected option ID with the correct option ID
-          const isCorrect = studentOptionId.equals(correctOptionId);
-
-          return isCorrect ? acc + 1 : acc;
-        }, 0);
-      }
-
-      // const accuracy =
-      //   totalAttemptedQuestions > 0
-      //     ? (totalCorrectAnswers / totalAttemptedQuestions) * 100
-      //     : 0;
-
-      const result = {
-        studentId: studentId,
-        examId: module.examId,
-        moduleId: module._id,
-        chapterId: module.chapterId,
-
-        totalQuestions: module.questions.length,
-        attemptedQuestions: totalAttemptedQuestions,
-        correctAnswers: totalCorrectAnswers,
-        isCompleted: module.questions.length === totalAttemptedQuestions,
-        questionIds: attemptedQuestionIdsByStudent,
-        //   accuracy: accuracy,
-        //   totalTimeSpent: totalTimeTakenByStudent,
-      };
-      const resultResponse = await resultService.createResult(result);
-
-      if (resultResponse["status"] === 200) {
-        // update result in student profile
-        await studentService.updateResultInStudent(
-          studentId,
-          resultResponse["result"]._id
+        // 1. Find the correct option ID
+        const correctOption = question.options.find(
+          (o: any) => o.answer === true
         );
-        // update student result in module
-        await moduleService.updateResultIdInModule(id, {
-          id: resultResponse["result"]._id,
-          studentId,
-        });
-        res.status(response["status"]).json({
-          status: 200,
-          message: response["message"],
-          data: { resultId: resultResponse["result"]._id },
-        });
-      } else {
-        res.status(resultResponse["status"]).json(resultResponse["message"]);
-      }
-    } else {
-      res.status(response["status"]).json(response["message"]);
+
+        if (!correctOption) return acc;
+
+        // 2. Find the student's attempt for this question
+        const studentAttempt = question.attempt.find(
+          (a: any) => a.studentId === studentId
+        );
+
+        if (!studentAttempt) return acc; // No attempt made by this student
+
+        // 3. Convert studentAttempt.optionId and correctOption._id to the same type (ObjectId)
+        const studentOptionId = new mongoose.Types.ObjectId(
+          studentAttempt.optionId
+        );
+        const correctOptionId = correctOption._id;
+
+        // 4. Compare the student's selected option ID with the correct option ID
+        const isCorrect = studentOptionId.equals(correctOptionId);
+
+        return isCorrect ? acc + 1 : acc;
+      }, 0);
     }
 
-    // const totalTime =
-    //   module.student_time.length > 0
-    //     ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
+    // const accuracy =
+    //   totalAttemptedQuestions > 0
+    //     ? (totalCorrectAnswers / totalAttemptedQuestions) * 100
     //     : 0;
 
-    // const isCompleted =
-    //   module.isCompleted.length > 0
-    //     ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
-    //     : 0;
+    const result = {
+      studentId: studentId,
+      examId: module.examId,
+      moduleId: module._id,
+      chapterId: module.chapterId,
 
-    // const newModule = {
-    //   ...module,
-    //   isCompleted: isCompleted ? isCompleted : false,
-    //   student_time: totalTime ? totalTime : 0,
-    // };
+      totalQuestions: module.questions.length,
+      attemptedQuestions: totalAttemptedQuestions,
+      correctAnswers: totalCorrectAnswers,
+      isCompleted: module.questions.length === totalAttemptedQuestions,
+      questionIds: attemptedQuestionIdsByStudent,
+      //   accuracy: accuracy,
+      //   totalTimeSpent: totalTimeTakenByStudent,
+    };
+    const resultResponse = await resultService.createResult(result);
+
+    if (resultResponse["status"] === 200) {
+      // update result in student profile
+      await studentService.updateResultInStudent(
+        studentId,
+        resultResponse["result"]._id
+      );
+      // update student result in module
+      await moduleService.updateResultIdInModule(id, {
+        id: resultResponse["result"]._id,
+        studentId,
+      });
+      res.status(response["status"]).json({
+        status: 200,
+        message: response["message"],
+        data: { resultId: resultResponse["result"]._id },
+      });
+    } else {
+      res.status(resultResponse["status"]).json(resultResponse["message"]);
+    }
+  } else {
+    res.status(response["status"]).json(response["message"]);
+  }
+
+  // const totalTime =
+  //   module.student_time.length > 0
+  //     ? module.student_time.filter((c) => c.studentId === _id)[0]?.totalTime
+  //     : 0;
+
+  // const isCompleted =
+  //   module.isCompleted.length > 0
+  //     ? module.isCompleted.filter((c) => c.studentId === _id)[0]?.isCompleted
+  //     : 0;
+
+  // const newModule = {
+  //   ...module,
+  //   isCompleted: isCompleted ? isCompleted : false,
+  //   student_time: totalTime ? totalTime : 0,
+  // };
 };
 
 export const RestoreModules = async (req: Request, res: Response) => {
@@ -324,23 +333,19 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
     _id
   );
   if (response1["status"] === 200) {
-    
     // remove student response from questions
-     await questionService.removeStudentResponseFromQuestion(
-      id,
-      _id
-    );
+    await questionService.removeStudentResponseFromQuestion(id, _id);
 
     //find result and remove from student profile
     const resultResp = await resultService.getResultByStudentAndModule(_id, id);
-    
+
     if (resultResp["status"] === 200) {
       await studentService.removeResultFromStudent(_id, resultResp["resultId"]);
-       await resultService.removeResult(resultResp["resultId"])
-       res.status(200).json({
-            status: 200,
-            data:response1["module"] ,
-          });
+      await resultService.removeResult(resultResp["resultId"]);
+      res.status(200).json({
+        status: 200,
+        data: response1["module"],
+      });
       // if (response2["status"] === 200) {
       //   // update isCompleted false in module for a student
       //   const response3 = await moduleService.submitModuleById(id, _id);
@@ -371,10 +376,14 @@ export const ReAppearModule = async (req: clientRequest, res: Response) => {
       //   res.status(response2["status"]).json(response2["message"]);
       // }
     } else {
-      res.status(resultResp["status"]).json({status:resultResp["status"] , message:resultResp["message"]});
+      res
+        .status(resultResp["status"])
+        .json({ status: resultResp["status"], message: resultResp["message"] });
     }
   } else {
-    res.status(response1["status"]).json({status:response1["status"] , message:response1["message"]});
+    res
+      .status(response1["status"])
+      .json({ status: response1["status"], message: response1["message"] });
   }
 };
 

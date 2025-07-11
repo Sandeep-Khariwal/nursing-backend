@@ -43,8 +43,6 @@ export class DailyDoseService {
     const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
 
-    console.log("today : ", today);
-
     try {
       const question = await DailyDoseQuestion.findOne({
         examId: examId,

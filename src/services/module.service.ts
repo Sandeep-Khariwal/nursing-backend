@@ -141,7 +141,7 @@ export class ModuleService {
     }
   }
 
-  public async getAllModulesByChapterId(id: string, studentId: string) {
+  public async getAllModulesByChapterId(id: string, examId:string, studentId: string) {
     try {
       const isStudent = IsStudent(studentId);
 
@@ -149,6 +149,7 @@ export class ModuleService {
       if (isStudent) {
         modules = await Module.find({
           chapterId: id,
+          examId:examId,
           isDeleted: false,
         }).populate([
           {
