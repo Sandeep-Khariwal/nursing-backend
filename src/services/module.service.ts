@@ -129,7 +129,7 @@ export class ModuleService {
         }
       });
       if (!modules || modules.length === 0) {
-        return { status: 404, message: "Modules not found!!" };
+        return { status: 200, modules , message: "Modules not found!!" };
       }
 
       return {
@@ -184,7 +184,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200,modules, message: "Modules not found!!" };
         }
 
         modules = modules.map((module) => {
@@ -239,7 +239,7 @@ export class ModuleService {
         });
       } else {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200,modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -298,7 +298,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200,modules, message: "Modules not found!!" };
         }
         modules = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -350,7 +350,7 @@ export class ModuleService {
         });
       } else {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -403,7 +403,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         modules = modules
           .filter((m) => !m?.isDeleted)
@@ -457,7 +457,7 @@ export class ModuleService {
           });
       } else {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();

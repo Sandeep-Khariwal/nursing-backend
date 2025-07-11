@@ -169,7 +169,7 @@ export class ExamService {
       let result;
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -222,7 +222,7 @@ export class ExamService {
         });
       } else {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -296,7 +296,7 @@ export class ExamService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -349,7 +349,7 @@ export class ExamService {
         });
       } else {
         if (modules.length === 0) {
-          return { status: 404, message: "Modules not found!!" };
+          return { status: 200 , modules, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
