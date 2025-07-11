@@ -69,11 +69,13 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
 
   let response;
   let modules = [];
+
   if (!chapterId && !examId && moduleType) {
     response = await moduleService.getAllModulesByModuleType(
       studentId,
       moduleType
     );
+
     if (response["status"] === 200) {
       modules = response["modules"].map((m: any) => {
         const { examId, ...rest } = m;
@@ -243,7 +245,6 @@ export const SubmitModuleResponse = async (
         //   accuracy: accuracy,
         //   totalTimeSpent: totalTimeTakenByStudent,
       };
-
       const resultResponse = await resultService.createResult(result);
 
       if (resultResponse["status"] === 200) {
@@ -263,7 +264,7 @@ export const SubmitModuleResponse = async (
           data: { resultId: resultResponse["result"]._id },
         });
       } else {
-        res.status(response["status"]).json(response["message"]);
+        res.status(resultResponse["status"]).json(resultResponse["message"]);
       }
     } else {
       res.status(response["status"]).json(response["message"]);

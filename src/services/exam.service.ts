@@ -307,8 +307,6 @@ export class ExamService {
                 (std: any) => std.studentId === qAtt.studentId
               );
 
-              // console.log("student : ",student);
-
               if (student.studentId === studentId) {
                 return {
                   _id: qAtt.questionId._id,

@@ -23,7 +23,7 @@ export class ResultService {
       result.studentId = data.studentId;
       result.examId = data.examId;
       result.moduleId = data.moduleId;
-      result.chapterId = data.chapterId;
+      result.chapterId = data.chapterId??"";
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.correctAnswers = data.correctAnswers;
@@ -51,8 +51,6 @@ export class ResultService {
     moduleId: string
   ) {
     try {
-      console.log(studentId, moduleId);
-
       const result = await Result.findOne({
         studentId: studentId,
         moduleId: moduleId,

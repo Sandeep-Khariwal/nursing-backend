@@ -40,7 +40,7 @@ export class ChapterService {
       const chapters = await Chapter.find({ examId, isDeleted: false });
 
       if (chapters.length === 0) {
-        return { status: 404, chapters:[], message: "Chapters not found!!" };
+        return { status: 200, chapters:[], message: "Chapters list empty!!" };
       }
 
       const updatedChapters = chapters.map((chapter) => {
@@ -69,7 +69,7 @@ export class ChapterService {
       ]);
       chapters = chapters.filter((c) => !c?.isDeleted);
       if (chapters.length === 0) {
-        return { status: 404, message: "Chapters not found!!" };
+        return { status: 200, chapters , message: "Chapters list empty!!" };
       }
 
             const updatedChapters = chapters.map((chapter) => {

@@ -103,7 +103,7 @@ export class StudentService {
         name = data.firstName
       }
       if(data.lastName){
-        name = name + " " + data.firstName
+        name = name + " " + data.lastName
       }
 
       // Update exams: set is_primary true for matching examId, false for others
