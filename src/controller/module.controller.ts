@@ -141,6 +141,34 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   }
 };
 
+export const GetAllCompletedModules = async (
+  req: clientRequest,
+  res: Response
+) => {
+  const examId = req.params.id;
+  const studentId = req.user._id;
+
+  const modulesService = new ModuleService();
+
+  const response = await modulesService.getCompletedModulesByExamId(
+    examId,
+    studentId
+  );
+
+  if (response["status"] === 200) {
+     res.status(response["status"]).json({
+      status: response["status"],
+      data: { modules: response["modules"] },
+      message: response["message"],
+    });
+  } else {
+     res.status(response["status"]).json({
+      status: response["status"],
+      message: response["message"],
+    });
+  }
+};
+
 export const GetAllQuetionFieldModules = async (
   req: clientRequest,
   res: Response

@@ -129,7 +129,7 @@ export class ModuleService {
         }
       });
       if (!modules || modules.length === 0) {
-        return { status: 200, modules , message: "Modules not found!!" };
+        return { status: 200, modules, message: "Modules not found!!" };
       }
 
       return {
@@ -141,7 +141,11 @@ export class ModuleService {
     }
   }
 
-  public async getAllModulesByChapterId(id: string, examId:string, studentId: string) {
+  public async getAllModulesByChapterId(
+    id: string,
+    examId: string,
+    studentId: string
+  ) {
     try {
       const isStudent = IsStudent(studentId);
 
@@ -149,7 +153,7 @@ export class ModuleService {
       if (isStudent) {
         modules = await Module.find({
           chapterId: id,
-          examId:examId,
+          examId: examId,
           isDeleted: false,
         }).populate([
           {
@@ -184,7 +188,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 200,modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
 
         modules = modules.map((module) => {
@@ -213,8 +217,10 @@ export class ModuleService {
 
           const { examId, ...plainModule1 } = plainModule;
 
-           const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id??""
-           
+          const resultId =
+            plainModule1.resultId.filter((st) => st.studentId === studentId)[0]
+              ?.id ?? "";
+
           return {
             ...plainModule1,
             exam: examId,
@@ -234,12 +240,12 @@ export class ModuleService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               ).totalTime ?? 0,
-            resultId:resultId
+            resultId: resultId,
           };
         });
       } else {
         if (modules.length === 0) {
-          return { status: 200,modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -250,6 +256,8 @@ export class ModuleService {
           };
         });
       }
+
+      console.log("modules : ", modules);
 
       return { status: 200, modules: modules };
     } catch (error) {
@@ -298,7 +306,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 200,modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         modules = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -324,7 +332,9 @@ export class ModuleService {
                   ?.isCompleted
               : 0;
           const { examId, ...plainModule1 } = plainModule;
-           const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id??""
+          const resultId =
+            plainModule1.resultId.filter((st) => st.studentId === studentId)[0]
+              ?.id ?? "";
           return {
             ...plainModule1,
             exam: examId,
@@ -345,12 +355,12 @@ export class ModuleService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               )?.totalTime ?? 0,
-            resultId:resultId
+            resultId: resultId,
           };
         });
       } else {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -403,7 +413,7 @@ export class ModuleService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         modules = modules
           .filter((m) => !m?.isDeleted)
@@ -431,7 +441,9 @@ export class ModuleService {
                 : 0;
 
             const { examId, ...plainModule1 } = plainModule;
-              const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id
+            const resultId = plainModule1.resultId.filter(
+              (st) => st.studentId === studentId
+            )[0]?.id;
             return {
               ...plainModule1,
               exam: examId,
@@ -452,12 +464,12 @@ export class ModuleService {
                 plainModule1.student_time.filter(
                   (st) => st.studentId === studentId
                 )?.totalTime ?? 0,
-                resultId:resultId
+              resultId: resultId,
             };
           });
       } else {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         modules = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -638,9 +650,9 @@ export class ModuleService {
         },
         { new: true }
       );
- const newModule= updatedDoc.toObject() as any
-       
- newModule.isCompleted = false
+      const newModule = updatedDoc.toObject() as any;
+
+      newModule.isCompleted = false;
       // Step 2: Check if student_time entry exists
 
       // if (module && updatedDoc) {
@@ -720,6 +732,103 @@ export class ModuleService {
         status: 200,
         message: "Modules deleted!!",
         moduleIds,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: error.message || "Internal Server Error",
+      };
+    }
+  }
+
+  public async getCompletedModulesByExamId(id: string, studentId: string) {
+    try {
+      console.log(id, studentId);
+
+      const modules = await Module.find({
+        examId: id,
+        isDeleted: false,
+        isCompleted: {
+          $elemMatch: {
+            studentId: studentId,
+            isCompleted: true,
+          },
+        },
+      }).populate([
+        // {
+        //   path:"chapterId",
+        //   select:["_id","name"]
+        // },
+        {
+          path: "questions",
+          select: ["_id", "question", "options", "attempt", "explaination"],
+        },
+      ]);
+
+      if (!modules || modules.length === 0) {
+        return {
+          status: 200,
+          modules: [],
+          message: "List is empty",
+        };
+      }
+
+      // Process each question to find correct and selected answer
+
+      const processedQModules = modules.map((modules: any) => {
+        const module = modules.toObject();
+        const processedQuestions = module.questions.map((q: any) => {
+          const correctOption = q.options.find(
+            (opt: any) => opt.answer === true
+          );
+
+          // Assuming attempt is an array like: [{ optionId: '...' }]
+          const attempted = q.attempt?.find(
+            (att) => att.studentId === studentId
+          );
+
+          const selectedOption = q.options.find(
+            (opt: any) => String(opt._id) === String(attempted?.optionId)
+          );
+
+          const isWrongAnswer = correctOption.answer !== selectedOption.answer;
+
+          if (selectedOption && isWrongAnswer) {
+            return {
+              _id: q._id,
+              question: q.question,
+              options: [correctOption, selectedOption],
+              explaination: q.explaination,
+            };
+          }
+        });
+
+        const myAttempted = module.questionAttempted.filter(
+          (att) => att.studentId === studentId
+        );
+        const isCompleted = module.isCompleted.filter(
+          (att) => att.studentId === studentId
+        )[0].isCompleted;
+        const myTime = module.student_time.filter(
+          (att) => att.studentId === studentId
+        )[0].totalTime;
+        const resultId = module.resultId.filter(
+          (att) => att.studentId === studentId
+        )[0].id;
+        return {
+          ...module,
+          questions: processedQuestions.filter((q)=>q),
+          questionAttempted: myAttempted,
+          student_time: myTime,
+          isCompleted,
+          resultId,
+        };
+      });
+
+      return {
+        status: 200,
+        modules: processedQModules,
+        message: "List found!!",
       };
     } catch (error) {
       return {
