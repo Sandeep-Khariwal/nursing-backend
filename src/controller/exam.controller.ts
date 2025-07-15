@@ -3,15 +3,22 @@ import { ExamService } from "../services/exam.service";
 import { Request, Response } from "express";
 import { ModuleService } from "../services/module.service";
 import { QuestionService } from "../services/question.service";
+import { clientRequest } from "../middleware/jwtToken";
+import { StudentService } from "../services/student.service";
 
-export const CreateNewExam = async (req: Request, res: Response) => {
+export const CreateNewExam = async (req: clientRequest, res: Response) => {
+  const studentId = req.user._id
   const { name, examId } = req.body;
 
   const exam = new ExamService();
+  const studentService = new StudentService()
   let response;
 
   if (examId) {
     response = await exam.updateExamById(examId, name);
+
+    //update exam name in student selected exam
+    await studentService.updateExamNameForAllStudents(examId , name)
   } else {
     response = await exam.createExam(name);
   }

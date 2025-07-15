@@ -141,11 +141,7 @@ export class ModuleService {
     }
   }
 
-  public async getAllModulesByChapterId(
-    id: string,
-    examId: string,
-    studentId: string
-  ) {
+  public async getAllModulesByChapterId(id: string, studentId: string) {
     try {
       const isStudent = IsStudent(studentId);
 
@@ -153,7 +149,6 @@ export class ModuleService {
       if (isStudent) {
         modules = await Module.find({
           chapterId: id,
-          examId: examId,
           isDeleted: false,
         }).populate([
           {
@@ -256,9 +251,6 @@ export class ModuleService {
           };
         });
       }
-
-      console.log("modules : ", modules);
-
       return { status: 200, modules: modules };
     } catch (error) {
       return { status: 500, message: error.message };
@@ -743,8 +735,6 @@ export class ModuleService {
 
   public async getCompletedModulesByExamId(id: string, studentId: string) {
     try {
-      console.log(id, studentId);
-
       const modules = await Module.find({
         examId: id,
         isDeleted: false,
@@ -754,16 +744,27 @@ export class ModuleService {
             isCompleted: true,
           },
         },
-      }).populate([
-        // {
-        //   path:"chapterId",
-        //   select:["_id","name"]
-        // },
-        {
-          path: "questions",
-          select: ["_id", "question", "options", "attempt", "explaination"],
-        },
-      ]);
+      })
+        .select([
+          "_id",
+          "name",
+          "questions",
+          "isDeleted",
+          "isPro",
+          "resultId",
+          "isCompleted",
+          "student_time",
+        ])
+        .populate([
+          // {
+          //   path:"chapterId",
+          //   select:["_id","name"]
+          // },
+          {
+            path: "questions",
+            select: ["_id", "question", "options", "attempt"],
+          },
+        ]);
 
       if (!modules || modules.length === 0) {
         return {
@@ -790,22 +791,23 @@ export class ModuleService {
           const selectedOption = q.options.find(
             (opt: any) => String(opt._id) === String(attempted?.optionId)
           );
+          if (selectedOption) {
+            const isWrongAnswer =
+              correctOption.answer !== selectedOption.answer;
 
-          const isWrongAnswer = correctOption.answer !== selectedOption.answer;
-
-          if (selectedOption && isWrongAnswer) {
-            return {
-              _id: q._id,
-              question: q.question,
-              options: [correctOption, selectedOption],
-              explaination: q.explaination,
-            };
+            if (isWrongAnswer && attempted) {
+              return {
+                _id: q._id,
+                question: q.question,
+                options: [correctOption, selectedOption],
+              };
+            }
           }
         });
 
-        const myAttempted = module.questionAttempted.filter(
-          (att) => att.studentId === studentId
-        );
+        // const myAttempted = module.questionAttempted.filter(
+        //   (att) => att.studentId === studentId
+        // );
         const isCompleted = module.isCompleted.filter(
           (att) => att.studentId === studentId
         )[0].isCompleted;
@@ -817,8 +819,8 @@ export class ModuleService {
         )[0].id;
         return {
           ...module,
-          questions: processedQuestions.filter((q)=>q),
-          questionAttempted: myAttempted,
+          questions: processedQuestions.filter((q) => q).map((q) => q._id),
+          // questionAttempted: myAttempted,
           student_time: myTime,
           isCompleted,
           resultId,
@@ -835,6 +837,71 @@ export class ModuleService {
         status: 500,
         message: error.message || "Internal Server Error",
       };
+    }
+  }
+    public async getAllWrongQuestionsByModuleId(id:string,studentId:string) {
+    try {
+  
+      const modules = await Module.findById(id).populate([
+        {
+          path: "questions",
+          select: ["_id", "question", "options", "attempt"],
+        },
+      ]);
+      if (modules && modules.isDeleted) {
+        return { status: 404, message: "Module not found!!" };
+      }
+
+      // Process each question to find correct and selected answer
+        const module = modules.toObject();
+        const processedQuestions = module.questions.map((q: any) => {
+          const correctOption = q.options.find(
+            (opt: any) => opt.answer === true
+          );
+
+          // Assuming attempt is an array like: [{ optionId: '...' }]
+          const attempted = q.attempt?.find(
+            (att) => att.studentId === studentId
+          );
+
+          const selectedOption = q.options.find(
+            (opt: any) => String(opt._id) === String(attempted?.optionId)
+          );
+          if (selectedOption) {
+            const isWrongAnswer =
+              correctOption.answer !== selectedOption.answer;
+
+            if (isWrongAnswer && attempted) {
+              return {
+                _id: q._id,
+                question: q.question,
+                options: [correctOption, selectedOption],
+              };
+            }
+          }
+        });
+
+        const isCompleted = module.isCompleted.filter(
+          (att) => att.studentId === studentId
+        )[0].isCompleted;
+        const myTime = module.student_time.filter(
+          (att) => att.studentId === studentId
+        )[0].totalTime;
+        const resultId = module.resultId.filter(
+          (att) => att.studentId === studentId
+        )[0].id;
+
+        const newModule =  {
+          ...module,
+          questions: processedQuestions.filter((q) => q),
+          student_time: myTime,
+          isCompleted,
+          resultId,
+        };
+
+      return { status: 200, module:newModule, message: "Questions get!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
     }
   }
 }

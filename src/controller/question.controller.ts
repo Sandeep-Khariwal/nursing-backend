@@ -1,3 +1,4 @@
+import { clientRequest } from "../middleware/jwtToken";
 import { ModuleService } from "../services/module.service";
 import { QuestionService } from "../services/question.service";
 import { Request, Response } from "express";
@@ -98,6 +99,29 @@ export const GetAllQuestions = async (req: Request, res: Response) => {
     res
       .status(response["status"])
       .json({ status: 200, data: { questions: updatedQuestions } });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+
+export const GetWrongAttemptedQuestions = async (req: clientRequest, res: Response) => {
+  const { id } = req.params;
+  const studentId = req.user._id
+
+  const moduleService = new ModuleService();
+  const response = await moduleService.getAllWrongQuestionsByModuleId(id,studentId);
+
+  if (response["status"] === 200) {
+    const module = response["module"];
+
+      // Destructure to exclude 'attempt'
+      const { questionAttempted, ...rest } = module;
+    
+    res
+      .status(response["status"])
+      .json({ status: 200, data: { questions: rest } });
   } else {
     res
       .status(response["status"])

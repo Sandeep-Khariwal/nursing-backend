@@ -5,7 +5,7 @@ import { authenticateToken } from "../middleware/jwtToken";
 const examRouter = express.Router();
 
 // all post routes
-examRouter.post("/create", CreateNewExam);
+examRouter.post("/create",authenticateToken, CreateNewExam);
 
 // all get routes
 examRouter.get("/", authenticateToken ,GetAllExams);

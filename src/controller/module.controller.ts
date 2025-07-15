@@ -90,12 +90,11 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         .json({ status: response["status"], message: response["message"] });
     }
   } else if (
-    (chapterId && examId) ||
+    chapterId ||
     ModuleType.QUESTION_FIELD === moduleType
   ) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
-      examId,
       studentId
     );
 
@@ -180,7 +179,6 @@ export const GetAllQuetionFieldModules = async (
 
   const response = await moduleService.getAllModulesByChapterId(
     id,
-    examId,
     studentId
   );
 

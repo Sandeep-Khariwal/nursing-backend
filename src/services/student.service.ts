@@ -13,7 +13,7 @@ export class StudentService {
       }
 
       const updateExams = exams.map((e, i) => {
-        if (i === 0 ) {
+        if (i === 0) {
           return {
             _id: e,
             name: e.name,
@@ -77,16 +77,44 @@ export class StudentService {
   }
   public async removeResultFromStudent(id: string, resultId: string) {
     try {
-      
       const cleanResultId = resultId.trim();
-      await studentModel.findByIdAndUpdate(id, {
-        $pull: { results: resultId },
-      },{new:true});
+      await studentModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: { results: resultId },
+        },
+        { new: true }
+      );
       return { status: 200, message: "Result removed from student!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }
   }
+  public async updateExamNameForAllStudents(examId: string, name: string) {
+    try {
+      const result = await studentModel.updateMany(
+        {
+          "exams._id": examId,
+        },
+        {
+          $set: {
+            "exams.$.name": name,
+          },
+        }
+      );
+
+      return {
+        status: 200,
+        message: `Updated exam name for ${result.modifiedCount} student(s)`,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: error.message || "Internal Server Error",
+      };
+    }
+  }
+
   public async updateStudentExam(
     id: string,
     data: { examId: string; firstName: string; lastName: string; email: string }
@@ -98,12 +126,12 @@ export class StudentService {
         return { status: 404, message: "Student not found" };
       }
 
-      let name = ""
-      if(data.firstName){
-        name = data.firstName
+      let name = "";
+      if (data.firstName) {
+        name = data.firstName;
       }
-      if(data.lastName){
-        name = name + " " + data.lastName
+      if (data.lastName) {
+        name = name + " " + data.lastName;
       }
 
       // Update exams: set is_primary true for matching examId, false for others
@@ -111,8 +139,8 @@ export class StudentService {
         ...exam.toObject(), // ensure we're working with plain objects
         is_primary: exam._id.toString() === data.examId,
       }));
-      (student.name = name?name:student.name),
-        (student.email = data.email?data.email:student.email),
+      (student.name = name ? name : student.name),
+        (student.email = data.email ? data.email : student.email),
         await student.save();
 
       return { status: 200, student, message: "Exam updated!!" };

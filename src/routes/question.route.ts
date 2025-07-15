@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middleware/jwtToken";
-import { CreateQuestion, GetAllQuestions, GetQuestion, RemoveQuestion, UpdateStudentResponse } from "../controller/question.controller";
+import { CreateQuestion, GetAllQuestions, GetQuestion, GetWrongAttemptedQuestions, RemoveQuestion, UpdateStudentResponse } from "../controller/question.controller";
 const questionRouter = express.Router();
 
 questionRouter.post("/create",CreateQuestion)
@@ -8,5 +8,6 @@ questionRouter.put("/updateStudentResponse/:id",authenticateToken,UpdateStudentR
 questionRouter.put("/removeQuestion/:id",authenticateToken,RemoveQuestion)
 questionRouter.get("/get/:id", authenticateToken , GetQuestion)
 questionRouter.get("/getAll/:id", authenticateToken , GetAllQuestions)
+questionRouter.get("/getWrongAttempted/:id", authenticateToken , GetWrongAttemptedQuestions)
 
 export default questionRouter;

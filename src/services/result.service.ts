@@ -83,15 +83,19 @@ export class ResultService {
         const correctOption = q.options.find((opt: any) => opt.answer === true);
 
         // Assuming attempt is an array like: [{ optionId: '...' }]
+        console.log(correctOption,studentId,q.attempt);
         const attempted = q.attempt?.find((att) => att.studentId === studentId);
+
 
         const selectedOption = q.options.find(
           (opt: any) => String(opt._id) === String(attempted?.optionId)
         );
 
-        const isSame = correctOption.answer && selectedOption.answer
-
+        // console.log(correctOption,selectedOption);
+        
+        
         if (selectedOption) {
+          const isSame = correctOption.answer && selectedOption.answer
           return {
             _id: q._id,
             question: q.question,
@@ -106,11 +110,12 @@ export class ResultService {
 
       const { Questions, ...rest } = newResult;
 
-      return { status: 200, result: { ...rest, questions: Questions } };
+      return { status: 200, result: { ...rest, questions: Questions.filter((q)=>q) } };
     } catch (error) {
       return { status: 500, message: error.message };
     }
   }
+
   public async removeResult(id: string) {
     try {
       const result = await Result.findByIdAndUpdate(id, {
