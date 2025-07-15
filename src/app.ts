@@ -13,6 +13,7 @@ import chapterRouter from "./routes/chapter.route";
 import moduleRouter from "./routes/module.route";
 import questionRouter from "./routes/question.route";
 import resultRouter from "./routes/result.route";
+import queryRouter from "./routes/query.route";
 
 dotenv.config();
 
@@ -44,7 +45,7 @@ app.use(`/api/${VERSION}/chapter`,chapterRouter)
 app.use(`/api/${VERSION}/module`,moduleRouter)
 app.use(`/api/${VERSION}/question`,questionRouter)
 app.use(`/api/${VERSION}/result`,resultRouter)
-
+app.use(`/api/${VERSION}/query`,queryRouter)
 
 //DataBase
 DataBase()
