@@ -1,10 +1,10 @@
+import { StudentService } from './../services/student.service';
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 import { clientRequest } from "../middleware/jwtToken";
 import { ModuleService } from "../services/module.service";
 import { ResultService } from "../services/result.service";
 import { QuestionService } from "../services/question.service";
-import { StudentService } from "../services/student.service";
 
 export const CreateResult = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
@@ -131,6 +131,21 @@ export const GetResult = async (req: clientRequest, res: Response) => {
     res
       .status(response["status"])
       .json({ status: 200, data: response["result"] });
+  } else {
+    res.status(response["status"]).json(response["message"]);
+  }
+};
+export const GetAllResultsForExam = async (req: clientRequest, res: Response) => {
+  const { id } = req.params;
+  const studentId = req.user._id
+  const studentService = new StudentService()
+
+  const response = await studentService.getResultsForExams(id,studentId);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: 200, data: response["results"] });
   } else {
     res.status(response["status"]).json(response["message"]);
   }

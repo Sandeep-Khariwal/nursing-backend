@@ -90,6 +90,58 @@ export class StudentService {
       return { message: error.message, status: 500 };
     }
   }
+  public async getResultsForExams(examId: string, studentId: string) {
+    try {
+      const student = await studentModel
+        .findById(studentId)
+        .select(["_id", "results"])
+        .populate([
+          {
+            path: "results",
+            match: { isDeleted: false },
+            populate: [
+              {
+                path: "examId",
+                match: { isDeleted: false },
+                select: ["_id", "name"],
+              },
+              {
+                path: "chapterId",
+                match: { isDeleted: false },
+                select: ["_id", "name"],
+              },
+              {
+                path: "moduleId",
+                match: { isDeleted: false },
+                select: ["_id", "name"],
+              },
+            ],
+          },
+        ]);
+
+      if (!student) {
+        return { status: 404, message: "Student not found" };
+      }
+
+      const filteredResults = student.results
+        .filter((res: any) => examId === res.examId._id)
+        .map((res: any) => {
+          const newRes = res.toObject();
+          const { examId, chapterId, moduleId, Questions, ...rest } = newRes;
+
+          return {
+            ...rest,
+            exam: examId.name,
+            chapter: chapterId ? chapterId.name : "",
+            module: moduleId.name,
+          };
+        });
+
+      return { status: 200, results: filteredResults };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
   public async updateExamNameForAllStudents(examId: string, name: string) {
     try {
       const result = await studentModel.updateMany(

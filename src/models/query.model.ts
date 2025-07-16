@@ -19,7 +19,7 @@ const querySchema = new Schema<QueryModel>(
     query: {
       type: String,
       required: true,
-      minlength: 3,
+      default:""
     },
     studentId: {
       type: String,
