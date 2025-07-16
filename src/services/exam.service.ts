@@ -216,7 +216,7 @@ export class ExamService {
             student_time:
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )?.totalTime ?? 0,
+              )[0]?.totalTime ?? 0,
             resultId:resultId
           };
         });
@@ -343,7 +343,7 @@ export class ExamService {
             student_time:
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )?.totalTime ?? 0,
+              )[0]?.totalTime ?? 0,
             resultId:resultId
           };
         });

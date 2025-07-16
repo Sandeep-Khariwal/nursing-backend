@@ -234,7 +234,7 @@ export class ModuleService {
             student_time:
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              ).totalTime ?? 0,
+              )[0]?.totalTime ?? 0,
             resultId: resultId,
           };
         });
@@ -346,7 +346,7 @@ export class ModuleService {
             student_time:
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
-              )?.totalTime ?? 0,
+              )[0]?.totalTime ?? 0,
             resultId: resultId,
           };
         });
@@ -455,7 +455,7 @@ export class ModuleService {
               student_time:
                 plainModule1.student_time.filter(
                   (st) => st.studentId === studentId
-                )?.totalTime ?? 0,
+                )[0]?.totalTime ?? 0,
               resultId: resultId,
             };
           });
@@ -561,39 +561,39 @@ export class ModuleService {
 
   public async submitModuleById(moduleId: string, studentId: string) {
     try {
-      const module = await Module.findOne({
-        _id: moduleId,
-        "isCompleted.studentId": studentId,
-      });
+      // const module = await Module.findOne({
+      //   _id: moduleId,
+      //   "isCompleted.studentId": studentId,
+      // });
 
-      if (module) {
-        // Find the current isCompleted value
-        const studentEntry = module.isCompleted.find(
-          (entry) => entry.studentId === studentId
-        );
+      // if (module) {
+      //   // Find the current isCompleted value
+      //   const studentEntry = module.isCompleted.find(
+      //     (entry) => entry.studentId === studentId
+      //   );
 
-        const newStatus = !studentEntry?.isCompleted; // toggle the value
+      //   const newStatus = !studentEntry?.isCompleted; // toggle the value
 
-        // Update the specific student entry's isCompleted value
-        const updatedModule = await Module.findOneAndUpdate(
-          {
-            _id: moduleId,
-            "isCompleted.studentId": studentId,
-          },
-          {
-            $set: {
-              "isCompleted.$.isCompleted": newStatus,
-            },
-          },
-          { new: true }
-        );
+      //   // Update the specific student entry's isCompleted value
+      //   const updatedModule = await Module.findOneAndUpdate(
+      //     {
+      //       _id: moduleId,
+      //       "isCompleted.studentId": studentId,
+      //     },
+      //     {
+      //       $set: {
+      //         "isCompleted.$.isCompleted": newStatus,
+      //       },
+      //     },
+      //     { new: true }
+      //   );
 
-        return {
-          status: 200,
-          message: "Module submitted!!",
-          module: updatedModule,
-        };
-      }
+      //   return {
+      //     status: 200,
+      //     message: "Module submit updated!!",
+      //     module: updatedModule,
+      //   };
+      // }
 
       // If student entry does not exist, add with isCompleted: true
       const updatedModule = await Module.findByIdAndUpdate(
@@ -645,6 +645,8 @@ export class ModuleService {
       const newModule = updatedDoc.toObject() as any;
 
       newModule.isCompleted = false;
+      newModule.student_time = 0;
+      newModule.resultId = "";
       // Step 2: Check if student_time entry exists
 
       // if (module && updatedDoc) {
@@ -734,6 +736,7 @@ export class ModuleService {
   }
 
   public async getCompletedModulesByExamId(id: string, studentId: string) {
+    
     try {
       const modules = await Module.find({
         examId: id,
@@ -814,9 +817,10 @@ export class ModuleService {
         const myTime = module.student_time.filter(
           (att) => att.studentId === studentId
         )[0].totalTime;
+        
         const resultId = module.resultId.filter(
           (att) => att.studentId === studentId
-        )[0].id;
+        ).map((res)=>res?.id)[0];
         return {
           ...module,
           questions: processedQuestions.filter((q) => q).map((q) => q._id),
@@ -833,6 +837,8 @@ export class ModuleService {
         message: "List found!!",
       };
     } catch (error) {
+      console.log(error);
+      
       return {
         status: 500,
         message: error.message || "Internal Server Error",
@@ -845,7 +851,7 @@ export class ModuleService {
       const modules = await Module.findById(id).populate([
         {
           path: "questions",
-          select: ["_id", "question", "options", "attempt"],
+          select: ["_id", "question", "options", "attempt","explaination"],
         },
       ]);
       if (modules && modules.isDeleted) {
@@ -876,6 +882,7 @@ export class ModuleService {
                 _id: q._id,
                 question: q.question,
                 options: [correctOption, selectedOption],
+                explaination:q.explaination
               };
             }
           }

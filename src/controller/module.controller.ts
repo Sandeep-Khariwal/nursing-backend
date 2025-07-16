@@ -89,10 +89,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         .status(response["status"])
         .json({ status: response["status"], message: response["message"] });
     }
-  } else if (
-    chapterId ||
-    ModuleType.QUESTION_FIELD === moduleType
-  ) {
+  } else if (chapterId || ModuleType.QUESTION_FIELD === moduleType) {
     response = await moduleService.getAllModulesByChapterId(
       chapterId,
       studentId
@@ -155,13 +152,13 @@ export const GetAllCompletedModules = async (
   );
 
   if (response["status"] === 200) {
-     res.status(response["status"]).json({
+    res.status(response["status"]).json({
       status: response["status"],
       data: { modules: response["modules"] },
       message: response["message"],
     });
   } else {
-     res.status(response["status"]).json({
+    res.status(response["status"]).json({
       status: response["status"],
       message: response["message"],
     });
@@ -177,10 +174,7 @@ export const GetAllQuetionFieldModules = async (
   const studentId = req.user._id;
   const moduleService = new ModuleService();
 
-  const response = await moduleService.getAllModulesByChapterId(
-    id,
-    studentId
-  );
+  const response = await moduleService.getAllModulesByChapterId(id, studentId);
 
   if (response["status"] === 200) {
     res

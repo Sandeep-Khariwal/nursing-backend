@@ -121,7 +121,7 @@ export const GetWrongAttemptedQuestions = async (req: clientRequest, res: Respon
     
     res
       .status(response["status"])
-      .json({ status: 200, data: { questions: rest } });
+      .json({ status: 200, data: { questions: module.questions } });
   } else {
     res
       .status(response["status"])
