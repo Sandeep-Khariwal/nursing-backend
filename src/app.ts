@@ -18,7 +18,7 @@ import queryRouter from "./routes/query.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT = 5070 // process.env.PORT || 8080
+const PORT =  process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
