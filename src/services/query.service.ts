@@ -3,7 +3,11 @@ import Query from "../models/query.model";
 import { Stats } from "fs";
 
 export class QueryService {
-  public async createQuery(data: { studentId: string; query: string , examId:string }) {
+  public async createQuery(data: {
+    studentId: string;
+    query: string;
+    examId: string;
+  }) {
     try {
       const query = new Query();
       query._id = `QURY-${randomUUID()}`;
@@ -19,9 +23,18 @@ export class QueryService {
     }
   }
 
-  public async getQueryForStudent(id: string,examId:string) {
+  public async getQueryForStudent(id: string, exam: string) {
+    
     try {
-      const queries = await Query.find({ examId , isDeleted: false });
+      const queries = await Query.find({
+        examId: exam,
+        isDeleted: false,
+      }).populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);
 
       const query = queries.filter((qry) => {
         if (qry.isPublic || qry.studentId === id) {
@@ -33,20 +46,44 @@ export class QueryService {
         return { status: 200, query: [], message: "List is empty!!" };
       }
 
-      return { status: 200, query };
+      // const newQuery = query.toObject() as any
+      const querie = query.map((q) => {
+        const { examId, ...rest } = q.toObject() as any;
+
+        return {
+          ...rest,
+          examName: examId.name,
+        };
+      });
+
+      return { status: 200, query: querie };
     } catch (error) {
       return { status: 500, message: error.message };
     }
   }
   public async getQueryForAdmin() {
     try {
-      const queries = await Query.find({ isDeleted: false });
+      const queries = await Query.find({ isDeleted: false })
+      .populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);;
 
       if (queries && queries.length === 0) {
         return { status: 200, query: [], message: "List is empty!!" };
       }
+      // const newQuery = query.toObject() as any
+      const querie = queries.map((q) => {
+        const { examId, ...rest } = q.toObject() as any;
 
-      return { status: 200, query: queries };
+        return {
+          ...rest,
+          examName: examId.name,
+        };
+      });
+      return { status: 200, query: querie };
     } catch (error) {
       return { status: 500, message: error.message };
     }
