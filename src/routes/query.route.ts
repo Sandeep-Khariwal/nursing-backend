@@ -6,6 +6,6 @@ const queryRouter = express.Router();
 queryRouter.post("/create", authenticateToken , CreateQuery);
 
 queryRouter.get("/getAll", authenticateToken , GetAllQuery);
-queryRouter.put("/postReply/:id", authenticateToken , PostReply);
+queryRouter.put("/postReply", authenticateToken , PostReply);
 
 export default queryRouter
