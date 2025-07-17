@@ -3,12 +3,13 @@ import Query from "../models/query.model";
 import { Stats } from "fs";
 
 export class QueryService {
-  public async createQuery(data: { studentId: string; query: string }) {
+  public async createQuery(data: { studentId: string; query: string , examId:string }) {
     try {
       const query = new Query();
       query._id = `QURY-${randomUUID()}`;
       query.query = data.query;
       query.studentId = data.studentId;
+      query.examId = data.examId;
       query.isDeleted = false;
 
       const newQuery = await query.save();
@@ -18,9 +19,9 @@ export class QueryService {
     }
   }
 
-  public async getQueryForStudent(id: string) {
+  public async getQueryForStudent(id: string,examId:string) {
     try {
-      const queries = await Query.find({ isDeleted: false });
+      const queries = await Query.find({ examId , isDeleted: false });
 
       const query = queries.filter((qry) => {
         if (qry.isPublic || qry.studentId === id) {

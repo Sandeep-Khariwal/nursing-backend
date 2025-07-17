@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { clientRequest } from "../middleware/jwtToken";
+import { clientRequest, toStringParam } from "../middleware/jwtToken";
 import { QueryService } from "../services/query.service";
 import { IsStudent } from "../HelperFunction";
 
 export const CreateQuery = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
-  const { query } = req.body;
+  const { query , examId } = req.body;
 
   const queryService = new QueryService();
-  const response = await queryService.createQuery({ studentId, query });
+  const response = await queryService.createQuery({ studentId, query , examId });
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({
@@ -25,12 +25,13 @@ export const CreateQuery = async (req: clientRequest, res: Response) => {
 
 export const GetAllQuery = async (req: clientRequest, res: Response) => {
   const userId = req.user._id;
+const examId = toStringParam(req.query.examId);
   const isStudent = IsStudent(userId);
   const queryService = new QueryService();
 
   let response;
   if (isStudent) {
-    response = await queryService.getQueryForStudent(userId);
+    response = await queryService.getQueryForStudent(userId,examId);
   } else {
     response = await queryService.getQueryForAdmin();
   }

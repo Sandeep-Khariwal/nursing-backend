@@ -3,6 +3,7 @@ import { model, Schema } from "mongoose";
 interface QueryModel {
   _id: string;
   query: string;
+  examId: string;
   studentId: string;
   reply: string;
   isPublic: boolean;
@@ -20,6 +21,12 @@ const querySchema = new Schema<QueryModel>(
       type: String,
       required: true,
       default:""
+    },
+    examId: {
+      type: String,
+      required: true,
+      default:"",
+      ref:"exams"
     },
     studentId: {
       type: String,
