@@ -25,7 +25,6 @@ export const CreateQuery = async (req: clientRequest, res: Response) => {
 
 export const GetAllQuery = async (req: clientRequest, res: Response) => {
   const userId = req.user._id;
-
   const isStudent = IsStudent(userId);
   const queryService = new QueryService();
 
@@ -49,12 +48,11 @@ export const GetAllQuery = async (req: clientRequest, res: Response) => {
   }
 };
 export const PostReply = async (req: clientRequest, res: Response) => {
-  const {id} = req.params
-  const {isPublic,reply} = req.body;
+  const {isPublic,reply , queryId} = req.body;
 
   const queryService = new QueryService();
 
-  const response = await queryService.updateQueryById(id,{isPublic,reply})
+  const response = await queryService.updateQueryById(queryId,{isPublic,reply})
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({

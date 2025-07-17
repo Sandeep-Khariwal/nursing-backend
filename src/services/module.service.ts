@@ -757,12 +757,13 @@ export class ModuleService {
           "resultId",
           "isCompleted",
           "student_time",
+          "chapterId"
         ])
         .populate([
-          // {
-          //   path:"chapterId",
-          //   select:["_id","name"]
-          // },
+          {
+            path:"chapterId",
+            select:["_id","name"]
+          },
           {
             path: "questions",
             select: ["_id", "question", "options", "attempt"],
@@ -821,13 +822,15 @@ export class ModuleService {
         const resultId = module.resultId.filter(
           (att) => att.studentId === studentId
         ).map((res)=>res?.id)[0];
+        const {chapterId , ...rest} = module
         return {
-          ...module,
+          ...rest,
           questions: processedQuestions.filter((q) => q).map((q) => q._id),
           // questionAttempted: myAttempted,
           student_time: myTime,
           isCompleted,
           resultId,
+          chapterName:chapterId?.name?chapterId.name:""
         };
       });
 
@@ -878,10 +881,23 @@ export class ModuleService {
               correctOption.answer !== selectedOption.answer;
 
             if (isWrongAnswer && attempted) {
+              const options = q.options.map((opt)=>{
+                if(String(opt._id) === String(attempted?.optionId)){
+                  return {
+                    ...opt,
+                    attempt:true
+                  }
+                } else {
+                   return {
+                    ...opt,
+                    attempt:false
+                  }
+                }
+              })
               return {
                 _id: q._id,
                 question: q.question,
-                options: [correctOption, selectedOption],
+                options: options,
                 explaination:q.explaination
               };
             }

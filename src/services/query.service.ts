@@ -45,7 +45,7 @@ export class QueryService {
         return { status: 200, query: [], message: "List is empty!!" };
       }
 
-      return { Status: 200, query: queries };
+      return { status: 200, query: queries };
     } catch (error) {
       return { status: 500, message: error.message };
     }
