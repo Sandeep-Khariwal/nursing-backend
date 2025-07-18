@@ -1,4 +1,4 @@
-import { StudentService } from './../services/student.service';
+import { StudentService } from "./../services/student.service";
 import mongoose from "mongoose";
 import { Request, Response } from "express";
 import { clientRequest } from "../middleware/jwtToken";
@@ -28,7 +28,9 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
       .filter((q) => q.studentId === studentId)
       .map((q) => q.questionId);
     const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
-
+    const skippedQuestions = module.questions.filter(
+      (q) => !attemptedQuestionIdsByStudent.includes(q)
+    );
     let promises = [];
     attemptedQuestionIdsByStudent.forEach((id) => {
       const result = questionService.getQuestionById(id);
@@ -82,11 +84,12 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
 
       totalQuestions: module.questions.length,
       attemptedQuestions: totalAttemptedQuestions,
+      skippedQuestions: module.questions.length - totalAttemptedQuestions,
       correctAnswers: totalCorrectAnswers,
       //   accuracy: accuracy,
       //   totalTimeSpent: totalTimeTakenByStudent,
       isCompleted: module.questions.length === totalAttemptedQuestions,
-      questionIds:attemptedQuestionIdsByStudent
+      questionIds: [...attemptedQuestionIdsByStudent, ...skippedQuestions],
     };
 
     const resultResponse = await resultService.createResult(result);
@@ -98,20 +101,15 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
         resultResponse["result"]._id
       );
       // update student result in module
-      await moduleService.updateResultIdInModule(
-        id,
-        {
-          id:resultResponse["result"]._id,
-          studentId
-        }
-      );
-      res
-        .status(response["status"])
-        .json({
-          status: 200,
-          message: response["message"],
-          data: { result_id: resultResponse["result"]._id },
-        });
+      await moduleService.updateResultIdInModule(id, {
+        id: resultResponse["result"]._id,
+        studentId,
+      });
+      res.status(response["status"]).json({
+        status: 200,
+        message: response["message"],
+        data: { result_id: resultResponse["result"]._id },
+      });
     } else {
       res.status(response["status"]).json(response["message"]);
     }
@@ -122,10 +120,10 @@ export const CreateResult = async (req: clientRequest, res: Response) => {
 
 export const GetResult = async (req: clientRequest, res: Response) => {
   const { id } = req.params;
-  const studentId = req.user._id
+  const studentId = req.user._id;
   const resultService = new ResultService();
 
-  const response = await resultService.getResultById(id,studentId);
+  const response = await resultService.getResultById(id, studentId);
 
   if (response["status"] === 200) {
     res
@@ -135,12 +133,15 @@ export const GetResult = async (req: clientRequest, res: Response) => {
     res.status(response["status"]).json(response["message"]);
   }
 };
-export const GetAllResultsForExam = async (req: clientRequest, res: Response) => {
+export const GetAllResultsForExam = async (
+  req: clientRequest,
+  res: Response
+) => {
   const { id } = req.params;
-  const studentId = req.user._id
-  const studentService = new StudentService()
+  const studentId = req.user._id;
+  const studentService = new StudentService();
 
-  const response = await studentService.getResultsForExams(id,studentId);
+  const response = await studentService.getResultsForExams(id, studentId);
 
   if (response["status"] === 200) {
     res

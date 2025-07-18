@@ -10,6 +10,7 @@ export class ResultService {
 
     totalQuestions: number;
     attemptedQuestions: number;
+    skippedQuestions: number;
     correctAnswers: number;
 
     accuracy?: number;
@@ -26,6 +27,7 @@ export class ResultService {
       result.chapterId = data.chapterId??"";
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
+      result.skippedQuestions = data.skippedQuestions;
       result.correctAnswers = data.correctAnswers;
       result.isDeleted = false;
       result.wrongAnswers =
@@ -78,12 +80,11 @@ export class ResultService {
       }
 
       // Process each question to find correct and selected answer
-
+ console.log(result.Questions);
       const processedQuestions = result.Questions.map((q: any) => {
         const correctOption = q.options.find((opt: any) => opt.answer === true);
 
         // Assuming attempt is an array like: [{ optionId: '...' }]
-        console.log(correctOption,studentId,q.attempt);
         const attempted = q.attempt?.find((att) => att.studentId === studentId);
 
 
@@ -98,8 +99,17 @@ export class ResultService {
           const isSame = correctOption.answer && selectedOption.answer
           return {
             _id: q._id,
+            skip:isSame?false:true,
             question: q.question,
-            options: isSame?[correctOption]: [correctOption, selectedOption],
+            options: q.options,
+            explaination: q.explaination,
+          };
+        } else {
+               return {
+            _id: q._id,
+            skip:true,
+            question: q.question,
+            options: q.options,
             explaination: q.explaination,
           };
         }

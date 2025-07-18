@@ -215,6 +215,8 @@ export const SubmitModuleResponse = async (
       .map((q) => q.questionId);
     const totalAttemptedQuestions = attemptedQuestionIdsByStudent.length;
 
+    const skippedQuestions = module.questions.filter((q)=> !attemptedQuestionIdsByStudent.includes(q))
+
     let promises = [];
     attemptedQuestionIdsByStudent.forEach((id) => {
       const result = questionService.getQuestionById(id);
@@ -268,9 +270,10 @@ export const SubmitModuleResponse = async (
 
       totalQuestions: module.questions.length,
       attemptedQuestions: totalAttemptedQuestions,
+      skippedQuestions: module.questions.length - totalAttemptedQuestions,
       correctAnswers: totalCorrectAnswers,
       isCompleted: module.questions.length === totalAttemptedQuestions,
-      questionIds: attemptedQuestionIdsByStudent,
+      questionIds: [...attemptedQuestionIdsByStudent , ...skippedQuestions],
       //   accuracy: accuracy,
       //   totalTimeSpent: totalTimeTakenByStudent,
     };
