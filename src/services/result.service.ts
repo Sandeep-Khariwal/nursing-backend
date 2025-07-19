@@ -24,7 +24,7 @@ export class ResultService {
       result.studentId = data.studentId;
       result.examId = data.examId;
       result.moduleId = data.moduleId;
-      result.chapterId = data.chapterId??"";
+      result.chapterId = data.chapterId ?? "";
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.skippedQuestions = data.skippedQuestions;
@@ -72,7 +72,7 @@ export class ResultService {
       const result = await Result.findById(id).populate([
         {
           path: "Questions",
-          select: ["_id", "question", "options", "attempt","explaination"],
+          select: ["_id", "question", "options", "attempt", "explaination"],
         },
       ]);
       if (result && result.isDeleted) {
@@ -80,34 +80,45 @@ export class ResultService {
       }
 
       // Process each question to find correct and selected answer
- console.log(result.Questions);
       const processedQuestions = result.Questions.map((q: any) => {
         const correctOption = q.options.find((opt: any) => opt.answer === true);
 
         // Assuming attempt is an array like: [{ optionId: '...' }]
         const attempted = q.attempt?.find((att) => att.studentId === studentId);
 
-
         const selectedOption = q.options.find(
           (opt: any) => String(opt._id) === String(attempted?.optionId)
         );
 
         // console.log(correctOption,selectedOption);
-        
-        
+
+          const options = q.options.map((option) => {
+            const opt = option.toObject()
+            if (String(opt._id) === String(attempted?.optionId)) {
+              return {
+                ...opt,
+                attempt: true,
+              };
+            } else {
+              return {
+                ...opt,
+                attempt: false,
+              };
+            }
+          });
         if (selectedOption) {
-          const isSame = correctOption.answer && selectedOption.answer
+          const isSame = correctOption.answer && selectedOption.answer;
           return {
             _id: q._id,
-            skip:isSame?false:true,
+            skip: false,
             question: q.question,
-            options: q.options,
+            options: options,
             explaination: q.explaination,
           };
         } else {
-               return {
+          return {
             _id: q._id,
-            skip:true,
+            skip: true,
             question: q.question,
             options: q.options,
             explaination: q.explaination,
@@ -120,7 +131,10 @@ export class ResultService {
 
       const { Questions, ...rest } = newResult;
 
-      return { status: 200, result: { ...rest, questions: Questions.filter((q)=>q) } };
+      return {
+        status: 200,
+        result: { ...rest, questions: Questions.filter((q) => q) },
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }

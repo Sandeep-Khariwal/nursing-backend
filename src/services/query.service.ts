@@ -16,25 +16,38 @@ export class QueryService {
       query.examId = data.examId;
       query.isDeleted = false;
 
-      const newQuery = await query.save();
-      return { status: 200, query: newQuery, message: "Query created!!" };
+      const savedQuery = await query.save(); // Save first
+
+      const newQuery = await savedQuery.populate({
+        path: "examId",
+        select: ["_id", "name"],
+      });
+
+      const { examId, ...rest } = newQuery.toObject() as any;
+
+      return {
+        status: 200,
+        query: { ...rest, examName: examId?.name ? examId?.name : "" },
+        message: "Query created!!",
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
   }
 
   public async getQueryForStudent(id: string, exam: string) {
-    
     try {
       const queries = await Query.find({
         examId: exam,
         isDeleted: false,
-      }).populate([
-        {
-          path: "examId",
-          select: ["_id", "name"],
-        },
-      ]);
+      })
+        .populate([
+          {
+            path: "examId",
+            select: ["_id", "name"],
+          },
+        ])
+        .sort({ createdAt: -1 });
 
       const query = queries.filter((qry) => {
         if (qry.isPublic || qry.studentId === id) {
@@ -64,12 +77,13 @@ export class QueryService {
   public async getQueryForAdmin() {
     try {
       const queries = await Query.find({ isDeleted: false })
-      .populate([
-        {
-          path: "examId",
-          select: ["_id", "name"],
-        },
-      ]);;
+        .populate([
+          {
+            path: "examId",
+            select: ["_id", "name"],
+          },
+        ])
+        .sort({ createdAt: -1 });
 
       if (queries && queries.length === 0) {
         return { status: 200, query: [], message: "List is empty!!" };
