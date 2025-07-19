@@ -58,7 +58,7 @@ export const PostReply = async (req: clientRequest, res: Response) => {
   if (response["status"] === 200) {
     res.status(response["status"]).json({
       status: response["status"],
-      query: response["query"],
+      data: response["query"],
       mesaage: response["message"],
     });
   } else {
