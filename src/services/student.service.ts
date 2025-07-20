@@ -102,17 +102,17 @@ export class StudentService {
             populate: [
               {
                 path: "examId",
-                match: { isDeleted: false },
+                // match: { isDeleted: false },
                 select: ["_id", "name"],
               },
               {
                 path: "chapterId",
-                match: { isDeleted: false },
+                // match: { isDeleted: false },
                 select: ["_id", "name"],
               },
               {
                 path: "moduleId",
-                match: { isDeleted: false },
+                // match: { isDeleted: false },
                 select: ["_id", "name"],
               },
             ],
@@ -129,16 +129,20 @@ export class StudentService {
           const newRes = res.toObject();
           const { examId, chapterId, moduleId, Questions, ...rest } = newRes;
 
-          return {
-            ...rest,
-            exam: examId.name,
-            chapter: chapterId ? chapterId.name : "",
-            module: moduleId.name,
-          };
-        });
+          if(moduleId){
+            return {
+              ...rest,
+              exam: examId.name,
+              chapter: chapterId ? chapterId.name : "",
+              module: moduleId?.name?moduleId.name:"",
+            };
+          }
+        }).filter((r)=>r);
 
       return { status: 200, results: filteredResults };
     } catch (error) {
+      console.log(error);
+      
       return { message: error.message, status: 500 };
     }
   }
