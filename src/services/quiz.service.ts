@@ -216,7 +216,7 @@ export class QuizService {
       } else {
         if (!quiz.isQuizLive) {
           quiz = await Quiz.findByIdAndUpdate(quiz._id, {
-            $set: { isQuizLive: true },
+            $set: { isQuizLive: true , isRegistrationOpen:false },
           });
 
           // close quizlive after its time
