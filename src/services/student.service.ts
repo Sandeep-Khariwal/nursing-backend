@@ -75,6 +75,16 @@ export class StudentService {
       return { message: error.message, status: 500 };
     }
   }
+  public async updateQuizResultInStudent(id: string, resultId: string) {
+    try {
+      await studentModel.findByIdAndUpdate(id, {
+        $push: { quizResults: resultId },
+      });
+      return { status: 200, message: "Result created!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
   public async removeResultFromStudent(id: string, resultId: string) {
     try {
       const cleanResultId = resultId.trim();

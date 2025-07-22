@@ -1,12 +1,13 @@
 import { randomUUID } from "crypto";
 import Result from "../models/result.model";
+import { IsQuiz } from "../HelperFunction";
 
 export class ResultService {
   public async createResult(data: {
     studentId: string;
-    examId: string;
+    examId?: string;
     moduleId: string;
-    chapterId: string;
+    chapterId?: string;
 
     totalQuestions: number;
     attemptedQuestions: number;
@@ -22,9 +23,7 @@ export class ResultService {
       const result = new Result();
       result._id = `RSLT-${randomUUID()}`;
       result.studentId = data.studentId;
-      result.examId = data.examId;
-      result.moduleId = data.moduleId;
-      result.chapterId = data.chapterId ?? "";
+
       result.totalQuestions = data.totalQuestions;
       result.attemptedQuestions = data.attemptedQuestions;
       result.skippedQuestions = data.skippedQuestions;
@@ -34,6 +33,17 @@ export class ResultService {
         Number(data.attemptedQuestions) - Number(data.correctAnswers);
       result.isCompleted = data.isCompleted;
       result.Questions = data.questionIds;
+      if (data.examId) {
+        result.examId = data.examId;
+      }
+      if (IsQuiz(data.moduleId)) {
+        result.quizId = data.moduleId;
+      } else {
+        result.moduleId = data.moduleId;
+      }
+      if (data.chapterId) {
+        result.chapterId = data.chapterId;
+      }
       if (data.accuracy) {
         result.accuracy = data.accuracy;
       }
@@ -92,20 +102,20 @@ export class ResultService {
 
         // console.log(correctOption,selectedOption);
 
-          const options = q.options.map((option) => {
-            const opt = option.toObject()
-            if (String(opt._id) === String(attempted?.optionId)) {
-              return {
-                ...opt,
-                attempt: true,
-              };
-            } else {
-              return {
-                ...opt,
-                attempt: false,
-              };
-            }
-          });
+        const options = q.options.map((option) => {
+          const opt = option.toObject();
+          if (String(opt._id) === String(attempted?.optionId)) {
+            return {
+              ...opt,
+              attempt: true,
+            };
+          } else {
+            return {
+              ...opt,
+              attempt: false,
+            };
+          }
+        });
         if (selectedOption) {
           const isSame = correctOption.answer && selectedOption.answer;
           return {
@@ -149,6 +159,23 @@ export class ResultService {
         return { status: 404, message: "Result not found!!" };
       }
       return { status: 200, result };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
+    public async getAllResultByQuizId(quizId: string) {
+    try {
+      const results = await Result.find({
+        quizId,
+        isDeleted: false,
+      });
+
+      if (results && results.length) {
+        return { status: 404, message: "Result not found!!" };
+      }
+
+      return { status: 200, results };
     } catch (error) {
       return { status: 500, message: error.message };
     }

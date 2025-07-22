@@ -14,11 +14,14 @@ import moduleRouter from "./routes/module.route";
 import questionRouter from "./routes/question.route";
 import resultRouter from "./routes/result.route";
 import queryRouter from "./routes/query.route";
+import quizRouter from "./routes/quiz.route";
+import quizQuestionRouter from "./routes/quizQuestion.rote";
+import { redisConnection, testRedis } from "./bullmq/redisConnection";
 
 dotenv.config();
 
 const app: Express = express();
-const PORT =   process.env.PORT || 8080
+const PORT =  process.env.PORT || 8080
 const VERSION = "v1"
 
 app.use(cors());
@@ -46,9 +49,14 @@ app.use(`/api/${VERSION}/module`,moduleRouter)
 app.use(`/api/${VERSION}/question`,questionRouter)
 app.use(`/api/${VERSION}/result`,resultRouter)
 app.use(`/api/${VERSION}/query`,queryRouter)
+app.use(`/api/${VERSION}/quiz`,quizRouter)
+app.use(`/api/${VERSION}/quizQuestion`,quizQuestionRouter)
 
 //DataBase
 DataBase()
+
+// redis
+testRedis();
 // server creation
 app.listen(PORT, () => {
   console.log(`Server is running at ${PORT}`);

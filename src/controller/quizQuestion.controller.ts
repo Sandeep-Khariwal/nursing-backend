@@ -1,14 +1,12 @@
-import { QuizService } from "../services/quiz.service";
+import { QuizService } from './../services/quiz.service';
 import { clientRequest } from "../middleware/jwtToken";
-import { ModuleService } from "../services/module.service";
-import { QuestionService } from "../services/question.service";
 import { Request, Response } from "express";
+import { QuizQuestionService } from "../services/quizQuestion.service";
 
-export const CreateQuestion = async (req: Request, res: Response) => {
-  const { question, questionId } = req.body;
+export const CreateQuizQuestion = async (req: Request, res: Response) => {
+  const { question , questionId } = req.body;
 
-  const questionService = new QuestionService();
-  const moduleService = new ModuleService();
+  const questionService = new QuizQuestionService();
   const quizService = new QuizService()
 
   let response;
@@ -21,8 +19,8 @@ export const CreateQuestion = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     // update Question in module
     if (!questionId) {
-      await moduleService.addNewQuestionInModal(
-        question.moduleId,
+      await quizService.addNewQuestionInQuiz(
+        question.quizId,
         response["question"]._id
       );
     }
@@ -37,12 +35,12 @@ export const CreateQuestion = async (req: Request, res: Response) => {
       .json({ status: response["status"], message: response["message"] });
   }
 };
-export const UpdateStudentResponse = async (req: Request, res: Response) => {
+export const UpdateQuizStudentResponse = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { student, pendingTime } = req.body;
 
-  const questionService = new QuestionService();
-  const moduleService = new ModuleService();
+  const questionService = new QuizQuestionService();
+  const quizService = new QuizService();
   const response = await questionService.updateStudentResponseById(id, student);
 
   if (response["status"] === 200) {
@@ -51,8 +49,8 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
       questionId: id,
     };
     
-    await moduleService.updateStudentResponse(
-      response["question"].moduleId,
+    await quizService.updateStudentResponse(
+      response["question"]._id,
       resp,
       pendingTime
     );
@@ -60,16 +58,17 @@ export const UpdateStudentResponse = async (req: Request, res: Response) => {
     res
       .status(response["status"])
       .json({ status: 200, data: { question: response["question"] } });
+
   } else {
     res
       .status(response["status"])
       .json({ status: response["status"], message: response["message"] });
   }
 };
-export const GetQuestion = async (req: Request, res: Response) => {
+export const GetQuizQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const questionService = new QuestionService();
+  const questionService = new QuizQuestionService();
   const response = await questionService.getQuestionById(id);
 
   if (response["status"] === 200) {
@@ -83,10 +82,10 @@ export const GetQuestion = async (req: Request, res: Response) => {
   }
 };
 
-export const GetAllQuestions = async (req: Request, res: Response) => {
+export const GetAllQuizQuestions = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const questionService = new QuestionService();
+  const questionService = new QuizQuestionService();
   const response = await questionService.getAllQuestionById(id);
 
   if (response["status"] === 200) {
@@ -108,33 +107,10 @@ export const GetAllQuestions = async (req: Request, res: Response) => {
   }
 };
 
-export const GetWrongAttemptedQuestions = async (req: clientRequest, res: Response) => {
-  const { id } = req.params;
-  const studentId = req.user._id
-
-  const moduleService = new ModuleService();
-  const response = await moduleService.getAllWrongQuestionsByModuleId(id,studentId);
-
-  if (response["status"] === 200) {
-    const module = response["module"];
-
-      // Destructure to exclude 'attempt'
-      const { questionAttempted, ...rest } = module;
-    
-    res
-      .status(response["status"])
-      .json({ status: 200, data: { questions: module.questions } });
-  } else {
-    res
-      .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
-  }
-};
-
-export const RemoveQuestion = async (req: Request, res: Response) => {
+export const RemoveQuizQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const questionService = new QuestionService();
+  const questionService = new QuizQuestionService();
   const response = await questionService.removeQuestionById(id);
 
   if (response["status"] === 200) {

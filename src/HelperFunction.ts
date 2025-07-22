@@ -7,3 +7,11 @@ export const IsStudent = (id:string) =>{
         return false
     }
 }
+export const IsQuiz = (id:string) =>{
+ 
+    if(id.startsWith("QUIZ")){
+        return true
+    } else {
+        return false
+    }
+}

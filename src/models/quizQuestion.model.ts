@@ -1,8 +1,8 @@
 import { model, Schema } from "mongoose";
-
-interface DailyDose {
+interface QuizQuestionsModel {
   _id: string;
   question: string;
+  quizId: string;
   options: {
     name: string;
     answer: boolean;
@@ -12,13 +12,11 @@ interface DailyDose {
     optionId: string;
   }[];
   correctAns: string;
-  examId: string;
-  dailyDoseWisdom: string;
   explaination: string;
-  showAt: Date;
-  isDeleted:boolean
+  isDeleted: boolean;
 }
-const dailyDoseSchema = new Schema<DailyDose>({
+
+const quizQuestionSchema = new Schema<QuizQuestionsModel>({
   _id: {
     type: String,
     required: true,
@@ -57,11 +55,11 @@ const dailyDoseSchema = new Schema<DailyDose>({
       },
     ],
   },
-  correctAns: {
+  quizId: {
     type: String,
-    default: "",
+    ref: "quiz",
   },
-  dailyDoseWisdom: {
+  correctAns: {
     type: String,
     default: "",
   },
@@ -73,14 +71,5 @@ const dailyDoseSchema = new Schema<DailyDose>({
     type: Boolean,
     default: false,
   },
-  examId: {
-    type: String,
-    ref: "exams",
-  },
-  showAt: {
-    type: Date,
-    required: true,
-  },
 });
-
-export default model<DailyDose>("dailyDose", dailyDoseSchema);
+export default model<QuizQuestionsModel>("quizQuestion", quizQuestionSchema);

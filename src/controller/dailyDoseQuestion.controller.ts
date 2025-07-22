@@ -3,7 +3,7 @@ import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
 export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
-  const { question, examId, dailyDoseWisdom, questionId } = req.body;
+  const { question, examId, dailyDoseWisdom, questionId , explaination } = req.body;
 
   const dailyDoseService = new DailyDoseService();
   const examService = new ExamService()
@@ -12,7 +12,8 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
     response = await dailyDoseService.createDailyDoseQuestion(
       question,
       examId,
-      dailyDoseWisdom
+      dailyDoseWisdom,
+      explaination
     );
 
     // update daily dose in exam
@@ -24,7 +25,8 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
       questionId,
       question,
       examId,
-      dailyDoseWisdom
+      dailyDoseWisdom,
+      explaination
     );
   }
 

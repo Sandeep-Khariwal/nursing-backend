@@ -32,6 +32,7 @@ interface StudentModel {
   };
   token: string;
   results:string[];
+  quizResults:string[];
   userType:String;
 }
 
@@ -161,6 +162,11 @@ const studentSchema = new Schema<StudentModel>({
     required: false,
   },
   results: {
+    type: [String],
+    ref:"result",
+    required: false,
+  },
+  quizResults: {
     type: [String],
     ref:"result",
     required: false,

@@ -5,9 +5,11 @@ export interface ResultModal {
   studentId: string;
   examId: string;
   moduleId: string;
+  quizId: string;
   chapterId: string;
 
   totalQuestions: number;
+  totalMarks: number;
   attemptedQuestions: number;
   skippedQuestions: number;
   correctAnswers: number;
@@ -31,12 +33,14 @@ const ResultSchema = new Schema<ResultModal>(
         required:true
     },
     studentId: { type: String, required: true },
-    examId: { type: String, required: true , ref:"exams" },
-    moduleId: { type: String, required: true , ref:"module" },
+    examId: { type: String, ref:"exams" },
+    moduleId: { type: String, ref:"module" },
+    quizId: { type: String, required: true , ref:"quiz" },
     chapterId: { type: String, default:"" , ref:"chapter" },
     Questions: { type: [String], default:[] , ref:"question" },
 
     totalQuestions: { type: Number, required: true },
+    totalMarks: { type: Number,default:0 },
     attemptedQuestions: { type: Number, required: true },
     skippedQuestions: { type: Number, required: true },
     correctAnswers: { type: Number, required: true },

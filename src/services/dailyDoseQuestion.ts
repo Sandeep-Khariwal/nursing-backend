@@ -13,7 +13,8 @@ export class DailyDoseService {
       showAt: string;
     },
     examId: string,
-    dailyDoseWisdom: string
+    dailyDoseWisdom: string,
+    explaination: string
   ) {
     try {
       const dailyDose = new DailyDoseQuestion();
@@ -24,6 +25,7 @@ export class DailyDoseService {
       dailyDose.showAt = new Date(data.showAt);
       dailyDose.examId = examId;
       dailyDose.dailyDoseWisdom = dailyDoseWisdom;
+      dailyDose.explaination = explaination;
       dailyDose.isDeleted = false;
 
       const savedQuestion = await dailyDose.save();
@@ -69,14 +71,15 @@ export class DailyDoseService {
       showAt: string;
     },
     examId: string,
-    dailyDoseWisdom: string
+    dailyDoseWisdom: string,
+    explaination: string
   ) {
     try {
       const question = await DailyDoseQuestion.findByIdAndUpdate(
         questionId,
         {
           ...data,
-          $set: { examId, dailyDoseWisdom },
+          $set: { examId, dailyDoseWisdom , explaination },
         },
         { new: true }
       );
