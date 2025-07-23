@@ -14,6 +14,10 @@ export class ResultService {
     skippedQuestions: number;
     correctAnswers: number;
 
+    totalMarks?: number;
+    obtainedMarks?: number;
+    totalTimeTaken?: number;
+
     accuracy?: number;
     totalTimeSpent?: number;
     isCompleted: boolean;
@@ -49,6 +53,12 @@ export class ResultService {
       }
       if (data.totalTimeSpent) {
         result.totalTimeSpent = data.totalTimeSpent;
+      }
+      if (data.totalMarks) {
+        result.totalMarks = data.totalMarks;
+      }
+      if (data.obtainedMarks) {
+        result.obtainedMarks = data.obtainedMarks;
       }
 
       const savedResult = await result.save();
@@ -171,7 +181,7 @@ export class ResultService {
         isDeleted: false,
       });
 
-      if (results && results.length) {
+      if (results && results.length === 0) {
         return { status: 404, message: "Result not found!!" };
       }
 

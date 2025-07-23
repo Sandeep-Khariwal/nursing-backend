@@ -19,7 +19,7 @@ export class QuizService {
       quiz.name = data.name;
       quiz.examId = data.examId;
       quiz.totalTime = data.totalTime * 60 * 1000;
-      quiz.totalTime = data.quizFees;
+      quiz.quizFees = data.quizFees;
       quiz.startAt = data.startAt;
       quiz.endAt = data.endAt;
       quiz.registerStartDate = data.registerStartDate;
@@ -196,10 +196,12 @@ export class QuizService {
 
   public async getQuiz(examId: string, studentId: string) {
     try {
+      const now = new Date();
+
       let quiz = await Quiz.findOne({
         examId,
-        startAt: { $lte: new Date() },
-        endAt: { $gte: new Date() },
+        startAt: { $lte: now.toISOString() },
+        endAt: { $gte: now.toISOString() },
         registeredStudent: {
           $elemMatch: {
             studentId: studentId,
@@ -216,7 +218,7 @@ export class QuizService {
       } else {
         if (!quiz.isQuizLive) {
           quiz = await Quiz.findByIdAndUpdate(quiz._id, {
-            $set: { isQuizLive: true , isRegistrationOpen:false },
+            $set: { isQuizLive: true, isRegistrationOpen: false },
           });
 
           // close quizlive after its time
@@ -328,11 +330,32 @@ export class QuizService {
       return { status: 500, message: error.message };
     }
   }
+  public async getQuizForRegistration(examId: string) {
+    try {
+      const now = new Date();
+
+      const quiz = await Quiz.find({
+        examId,
+        registerStartDate: { $lte: now.toISOString() },
+        registerEndDate: { $gte: now.toISOString() },
+        isRegistrationOpen: true,
+        isDeleted: false,
+      });
+
+      if (!quiz) {
+        return { status: 404, message: "quiz not found!!" };
+      }
+
+      return { status: 200, quiz };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
   public async getQuizById(quizId: string) {
     try {
       const quiz = await Quiz.findById(quizId);
 
-      if (quiz) {
+      if (!quiz) {
         return { status: 404, message: "Quize not found!!" };
       }
 

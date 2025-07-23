@@ -50,7 +50,7 @@ export const UpdateQuizStudentResponse = async (req: Request, res: Response) => 
     };
     
     await quizService.updateStudentResponse(
-      response["question"]._id,
+      response["question"].quizId,
       resp,
       pendingTime
     );

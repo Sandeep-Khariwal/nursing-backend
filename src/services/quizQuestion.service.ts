@@ -84,9 +84,9 @@ export class QuizQuestionService {
       }
 
       question.attempt.push(student);
-      await question.save();
+      const updatedQuestion = await question.save();
 
-      return { status: 200, question };
+      return { status: 200, question : updatedQuestion };
     } catch (error) {
       return { status: 200, message: error.message };
     }

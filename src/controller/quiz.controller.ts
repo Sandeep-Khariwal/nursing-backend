@@ -168,6 +168,26 @@ export const GetAllQuizes = async (req: clientRequest, res: Response) => {
       .json({ status: response["status"], message: response["message"] });
   }
 };
+export const GetQuizForRegistration = async (
+  req: clientRequest,
+  res: Response
+) => {
+  const examId = toStringParam(req.query.examId);
+  const quizService = new QuizService();
+
+  const response = await quizService.getQuizForRegistration(examId);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: { quiz: response["quiz"] },
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
 export const RemoveQuiz = async (req: Request, res: Response) => {
   const quizId = toStringParam(req.query.quizId);
   const quizService = new QuizService();
@@ -178,7 +198,7 @@ export const RemoveQuiz = async (req: Request, res: Response) => {
     res.status(response["status"]).json({
       status: response["status"],
       data: { quiz: response["quize"] },
-      message:response["message"]
+      message: response["message"],
     });
   } else {
     res
@@ -186,17 +206,13 @@ export const RemoveQuiz = async (req: Request, res: Response) => {
       .json({ status: response["status"], message: response["message"] });
   }
 };
-export const GetPostionsInQuiz = async (req: clientRequest, res: Response) => {
+export const GetPostionsInQuiz = async (req: Request, res: Response) => {
   const quizId = req.params.id;
   const quizService = new QuizService();
   const resultService = new ResultService();
 
   const resultResponse = await resultService.getAllResultByQuizId(quizId);
   const quizResponse = await quizService.getQuizById(quizId);
-
-  //   const results = await Result.find({ quizId }).lean();
-  // const quiz = await Quiz.findById(quizId).lean();
-
   if (resultResponse["status"] === 200 && quizResponse["status"] === 200) {
     const results = resultResponse["results"];
     const quiz = quizResponse["quiz"];
@@ -211,7 +227,8 @@ export const GetPostionsInQuiz = async (req: clientRequest, res: Response) => {
         studentId: res.studentId,
         correctAnswers: res.correctAnswers,
         totalMarks: res.totalMarks,
-        timeTaken: timeMap.get(res.studentId) || Infinity,
+        obtainedMarks: res.obtainedMarks,
+        timeTaken: res.totalTimeSpent,
       }))
       .sort((a, b) => {
         // Rank by marks or correct answers
@@ -233,12 +250,10 @@ export const GetPostionsInQuiz = async (req: clientRequest, res: Response) => {
       data: { positions: top3 },
     });
   } else {
-    res
-      .status(resultResponse["status"])
-      .json({
-        status: resultResponse["status"],
-        message: resultResponse["message"],
-      });
+    res.status(resultResponse["status"]).json({
+      status: resultResponse["status"],
+      message: resultResponse["message"],
+    });
   }
 };
 
@@ -325,9 +340,11 @@ export const SubmitQuizResponse = async (req: clientRequest, res: Response) => {
       correctAnswers: totalCorrectAnswers,
       isCompleted: quiz.questions.length === totalAttemptedQuestions,
       questionIds: [...attemptedQuestionIdsByStudent, ...skippedQuestions],
-      //   accuracy: accuracy,
-      //   totalTimeSpent: totalTimeTakenByStudent,
+      totalMarks: quiz.questions.length,
+      obtainedMarks :totalCorrectAnswers,
+      totalTimeSpent : quiz.totalTime - quiz.student_time.filter((s)=>s.studentId === studentId)[0].totalTime
     };
+
     const resultResponse = await resultService.createResult(result);
 
     if (resultResponse["status"] === 200) {
