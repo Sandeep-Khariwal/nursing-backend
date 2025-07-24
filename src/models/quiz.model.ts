@@ -24,7 +24,6 @@ export interface QuizModal {
   startAt: Date;
   registerStartDate: Date;
   registerEndDate: Date;
-  endAt: Date;
 
   isDeleted: boolean;
 }
@@ -143,10 +142,6 @@ const quizSchema = new Schema<QuizModal>(
       default: null,
     },
     registerEndDate: {
-      type: Date,
-      default: null,
-    },
-    endAt: {
       type: Date,
       default: null,
     },

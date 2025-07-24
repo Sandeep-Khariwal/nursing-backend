@@ -9,7 +9,6 @@ export class QuizService {
     totalTime: number;
     quizFees: number;
     startAt: Date;
-    endAt: Date;
     registerStartDate: Date;
     registerEndDate: Date;
   }) {
@@ -21,7 +20,6 @@ export class QuizService {
       quiz.totalTime = data.totalTime * 60 * 1000;
       quiz.quizFees = data.quizFees;
       quiz.startAt = data.startAt;
-      quiz.endAt = data.endAt;
       quiz.registerStartDate = data.registerStartDate;
       quiz.registerEndDate = data.registerEndDate;
 
@@ -54,6 +52,18 @@ export class QuizService {
     try {
       const quiz = await Quiz.findByIdAndUpdate(id, newData, { new: true });
       return { status: 200, quiz, message: "Quiz updated!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async registerInQuiz(data: { studentId: string; quizId: string }) {
+    try {
+      await Quiz.findByIdAndUpdate(data.quizId, {
+        $push: {
+          registeredStudent: { studentId: data.studentId, isEligible: true },
+        },
+      });
+      return { status: 200, message: "Registred in quiz!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -194,43 +204,148 @@ export class QuizService {
     }
   }
 
-  public async getQuiz(examId: string, studentId: string) {
+  public async getQuiz(exam: string, studentId: string) {
     try {
+      // find quiz for registration
+      const today = new Date();
+      const startOfDay = new Date(
+        Date.UTC(
+          today.getUTCFullYear(),
+          today.getUTCMonth(),
+          today.getUTCDate(),
+          0,
+          0,
+          0
+        )
+      );
+      const endOfDay = new Date(
+        Date.UTC(
+          today.getUTCFullYear(),
+          today.getUTCMonth(),
+          today.getUTCDate(),
+          23,
+          59,
+          59,
+          999
+        )
+      );
+
+      const quizeForRegistration = await Quiz.findOne({
+        examId: exam,
+        registerStartDate: { $lte: endOfDay },
+        registerEndDate: { $gte: startOfDay },
+        isDeleted: false,
+      }).populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);
+      if (quizeForRegistration) {
+        const { examId, ...newQuizeForRegistration } =
+          quizeForRegistration.toObject() as any;
+        const isIamRegistered =
+          quizeForRegistration.registeredStudent.filter(
+            (std) => std.studentId === studentId
+          )[0]?.isEligible ?? false;
+        return {
+          status: 200,
+          quiz: {
+            ...newQuizeForRegistration,
+            isRegistrationOpen: true,
+            registeredStudent: isIamRegistered,
+            examName: examId.name,
+          },
+        };
+      }
+
+      // code for getting live quiz
       const now = new Date();
 
+      // Step 1: Find the quiz by examId and eligible student
       let quiz = await Quiz.findOne({
-        examId,
-        startAt: { $lte: now.toISOString() },
-        endAt: { $gte: now.toISOString() },
+        examId: exam,
+        isDeleted: false,
         registeredStudent: {
           $elemMatch: {
             studentId: studentId,
             isEligible: true,
           },
         },
-      });
+      }).populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);
 
+      // Step 2: Return 404 if not found
       if (!quiz) {
         return {
           status: 404,
-          message: "Quiz not found!!",
+          message: "Quiz not found!",
         };
-      } else {
-        if (!quiz.isQuizLive) {
-          quiz = await Quiz.findByIdAndUpdate(quiz._id, {
-            $set: { isQuizLive: true, isRegistrationOpen: false },
-          });
-
-          // close quizlive after its time
-          AddCloseQuizJob({ totalTime: quiz.totalTime, quizId: quiz._id });
-        }
       }
 
-      return { status: 200, quiz };
+      // Step 3: Calculate end time in code (startAt + totalTime)
+      const startAt = new Date(quiz.startAt.getTime() - 5.5 * 60 * 60 * 1000);
+      const endAt = new Date(startAt.getTime() + quiz.totalTime);
+
+      // Step 4: Check if current time is within quiz time window
+      const isLiveNow = now >= startAt && now <= endAt;
+
+      if (!isLiveNow) {
+        return {
+          status: 404,
+          message: "Quiz is not live right now.",
+        };
+      }
+
+      // Step 5: If quiz is now live, update DB flags once
+      if (!quiz.isQuizLive) {
+        await Quiz.findByIdAndUpdate(quiz._id, {
+          $set: {
+            isQuizLive: true,
+            isRegistrationOpen: false,
+          },
+        });
+
+        // Step 6: Schedule the job to close the quiz later
+        AddCloseQuizJob({
+          totalTime: quiz.totalTime,
+          quizId: quiz._id,
+        });
+
+        // Optional: refetch updated quiz if needed
+        quiz = await Quiz.findById(quiz._id).populate([
+          {
+            path: "examId",
+            select: ["_id", "name"],
+          },
+        ]);
+      }
+
+      const { examId, ...rest } = quiz.toObject() as any;
+      const isIamRegistered =
+        quiz.registeredStudent.filter((std) => std.studentId === studentId)[0]
+          ?.isEligible ?? false;
+
+      return {
+        status: 200,
+        quiz: {
+          ...rest,
+          registeredStudent: isIamRegistered,
+          examName: examId.name,
+        },
+      };
     } catch (error) {
-      return { status: 500, message: error.message };
+      return {
+        status: 500,
+        message: error.message,
+      };
     }
   }
+
   public async addNewQuestionInQuiz(id: string, questionId: string) {
     try {
       await Quiz.findByIdAndUpdate(id, {
@@ -314,16 +429,37 @@ export class QuizService {
         quizes = await Quiz.find({
           examId,
           isDeleted: false,
-        });
+        }).populate([
+          {
+            path: "examId",
+            select: ["_id", "name"],
+          },
+        ]);
       } else {
         quizes = await Quiz.find({
           isDeleted: false,
-        });
+        }).populate([
+          {
+            path: "examId",
+            select: ["_id", "name"],
+          },
+        ]);
       }
 
-      if (quizes && quizes.length) {
-        return { status: 404, message: "Quizes not found!!" };
+      if (quizes && quizes.length === 0) {
+        return { status: 200, quizes, message: "Quizes not found!!" };
       }
+
+      quizes = quizes.map((quiz: any) => {
+        const newQuiz = quiz.toObject();
+        const { examId, ...rest } = newQuiz;
+
+        return {
+          ...rest,
+          examName: examId.name,
+          registeredStudent: newQuiz.registeredStudent.length,
+        };
+      });
 
       return { status: 200, quizes };
     } catch (error) {
@@ -332,12 +468,14 @@ export class QuizService {
   }
   public async getQuizForRegistration(examId: string) {
     try {
-      const now = new Date();
+      const today = new Date();
+      const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
 
-      const quiz = await Quiz.find({
+      const quiz = await Quiz.findOne({
         examId,
-        registerStartDate: { $lte: now.toISOString() },
-        registerEndDate: { $gte: now.toISOString() },
+        registerStartDate: { $lte: startOfDay },
+        registerEndDate: { $gte: endOfDay },
         isRegistrationOpen: true,
         isDeleted: false,
       });

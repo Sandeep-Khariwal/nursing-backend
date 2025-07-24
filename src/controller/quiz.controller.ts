@@ -27,7 +27,6 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
       examId,
       totalTime,
       startAt,
-      endAt,
       registerStartDate,
       registerEndDate,
       quizFees,
@@ -198,6 +197,24 @@ export const RemoveQuiz = async (req: Request, res: Response) => {
     res.status(response["status"]).json({
       status: response["status"],
       data: { quiz: response["quize"] },
+      message: response["message"],
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const RegisterInQuiz = async (req: clientRequest, res: Response) => {
+  const quizId = toStringParam(req.query.quizId);
+  const studentId = req.user._id
+  const quizService = new QuizService();
+
+  const response = await quizService.registerInQuiz({studentId,quizId});
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: response["status"],
       message: response["message"],
     });
   } else {
