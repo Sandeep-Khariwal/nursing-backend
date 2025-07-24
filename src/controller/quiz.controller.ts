@@ -39,6 +39,8 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
       startAt,
       endAt,
       quizFees,
+      registerStartDate,
+      registerEndDate,
     });
   }
 
@@ -159,7 +161,7 @@ export const GetAllQuizes = async (req: clientRequest, res: Response) => {
   if (response["status"] === 200) {
     res.status(response["status"]).json({
       status: response["status"],
-      data: { quizes: response["quizes"] },
+      data: response["quizes"],
     });
   } else {
     res
@@ -207,10 +209,10 @@ export const RemoveQuiz = async (req: Request, res: Response) => {
 };
 export const RegisterInQuiz = async (req: clientRequest, res: Response) => {
   const quizId = toStringParam(req.query.quizId);
-  const studentId = req.user._id
+  const studentId = req.user._id;
   const quizService = new QuizService();
 
-  const response = await quizService.registerInQuiz({studentId,quizId});
+  const response = await quizService.registerInQuiz({ studentId, quizId });
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({
@@ -264,7 +266,7 @@ export const GetPostionsInQuiz = async (req: Request, res: Response) => {
 
     res.status(200).json({
       status: 200,
-      data: { positions: top3 },
+      data: top3,
     });
   } else {
     res.status(resultResponse["status"]).json({
@@ -358,8 +360,10 @@ export const SubmitQuizResponse = async (req: clientRequest, res: Response) => {
       isCompleted: quiz.questions.length === totalAttemptedQuestions,
       questionIds: [...attemptedQuestionIdsByStudent, ...skippedQuestions],
       totalMarks: quiz.questions.length,
-      obtainedMarks :totalCorrectAnswers,
-      totalTimeSpent : quiz.totalTime - quiz.student_time.filter((s)=>s.studentId === studentId)[0].totalTime
+      obtainedMarks: totalCorrectAnswers,
+      totalTimeSpent:
+        quiz.totalTime -
+        quiz.student_time.filter((s) => s.studentId === studentId)[0].totalTime,
     };
 
     const resultResponse = await resultService.createResult(result);

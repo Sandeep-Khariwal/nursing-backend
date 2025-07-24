@@ -28,8 +28,18 @@ export class QuizService {
       quiz.isDeleted = false;
 
       const savedQuiz = await quiz.save();
+      const newQuiz = await savedQuiz.populate({
+        path: "examId",
+        select: ["_id", "name"],
+      });
 
-      return { status: 200, quiz: savedQuiz };
+      const { examId, ...rest } = newQuiz.toObject() as any;
+
+      return {
+        status: 200,
+        quiz: { ...rest, exam: examId },
+        message: "Quiz created!!",
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -43,6 +53,8 @@ export class QuizService {
       quizFees: number;
       startAt: Date;
       endAt: Date;
+      registerStartDate: Date;
+      registerEndDate: Date;
     }
   ) {
     const newData = {
@@ -50,8 +62,20 @@ export class QuizService {
       totalTime: data.totalTime * 60 * 1000,
     };
     try {
-      const quiz = await Quiz.findByIdAndUpdate(id, newData, { new: true });
-      return { status: 200, quiz, message: "Quiz updated!!" };
+      const quiz = await Quiz.findByIdAndUpdate(id, newData, {
+        new: true,
+      }).populate([
+        {
+          path: "examId",
+          select: ["_id", "name"],
+        },
+      ]);
+      const { examId, ...rest } = quiz.toObject();
+      return {
+        status: 200,
+        quiz: { ...rest, exam: examId },
+        message: "Quiz updated!!",
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -456,7 +480,7 @@ export class QuizService {
 
         return {
           ...rest,
-          examName: examId.name,
+          exam: examId,
           registeredStudent: newQuiz.registeredStudent.length,
         };
       });
