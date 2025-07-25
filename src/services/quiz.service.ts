@@ -264,6 +264,11 @@ export class QuizService {
           path: "examId",
           select: ["_id", "name"],
         },
+        {
+          path: "questions",
+          match: { isDeleted: false },
+          select: ["_id", "name"],
+        },
       ]);
       if (quizeForRegistration) {
         const { examId, ...newQuizeForRegistration } =
@@ -272,6 +277,12 @@ export class QuizService {
           quizeForRegistration.registeredStudent.filter(
             (std) => std.studentId === studentId
           )[0]?.isEligible ?? false;
+        const isCompleted =
+          quizeForRegistration.isCompleted.filter(
+            (std) => std.studentId === studentId
+          )[0]?.isCompleted ?? false;
+        const questions = quizeForRegistration.questions.map((q: any) => q._id);
+
         return {
           status: 200,
           quiz: {
@@ -279,6 +290,8 @@ export class QuizService {
             isRegistrationOpen: true,
             registeredStudent: isIamRegistered,
             examName: examId.name,
+            isCompleted: isCompleted,
+            questions: questions,
           },
         };
       }
@@ -346,6 +359,11 @@ export class QuizService {
             path: "examId",
             select: ["_id", "name"],
           },
+          {
+            path: "questions",
+            match: { isDeleted: false },
+            select: ["_id", "name"],
+          },
         ]);
       }
 
@@ -354,11 +372,23 @@ export class QuizService {
         quiz.registeredStudent.filter((std) => std.studentId === studentId)[0]
           ?.isEligible ?? false;
 
+      const isCompleted =
+        quiz.isCompleted.filter((std) => std.studentId === studentId)[0]
+          ?.isCompleted ?? false;
+      const resultId =
+        quiz.resultId.filter((std) => std.studentId === studentId)[0]
+          ?.id ?? "";
+
+      const questions = quiz.questions.map((q: any) => q._id);
+
       return {
         status: 200,
         quiz: {
           ...rest,
           registeredStudent: isIamRegistered,
+          isCompleted: isCompleted,
+          questions: questions,
+          resultId:resultId,
           examName: examId.name,
         },
       };
@@ -458,7 +488,7 @@ export class QuizService {
             path: "examId",
             select: ["_id", "name"],
           },
-        ]);
+        ]).sort({ createdAt: -1 });
       } else {
         quizes = await Quiz.find({
           isDeleted: false,
@@ -467,7 +497,7 @@ export class QuizService {
             path: "examId",
             select: ["_id", "name"],
           },
-        ]);
+        ]).sort({ createdAt: -1 });
       }
 
       if (quizes && quizes.length === 0) {

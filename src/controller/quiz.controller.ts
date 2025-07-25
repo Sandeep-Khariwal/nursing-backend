@@ -190,7 +190,7 @@ export const GetQuizForRegistration = async (
   }
 };
 export const RemoveQuiz = async (req: Request, res: Response) => {
-  const quizId = toStringParam(req.query.quizId);
+  const quizId = req.body;
   const quizService = new QuizService();
 
   const response = await quizService.removeQuizById(quizId);
