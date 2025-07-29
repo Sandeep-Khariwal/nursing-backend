@@ -80,11 +80,11 @@ export class QuizService {
       return { status: 500, message: error.message };
     }
   }
-  public async registerInQuiz(data: { studentId: string; quizId: string }) {
+  public async registerInQuiz(data: { studentId: string, quizId: string, paymentId:string }) {
     try {
       await Quiz.findByIdAndUpdate(data.quizId, {
         $push: {
-          registeredStudent: { studentId: data.studentId, isEligible: true },
+          registeredStudent: { studentId: data.studentId,paymentId:data.paymentId , isEligible: true },
         },
       });
       return { status: 200, message: "Registred in quiz!!" };

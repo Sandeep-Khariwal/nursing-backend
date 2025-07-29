@@ -16,7 +16,10 @@ import resultRouter from "./routes/result.route";
 import queryRouter from "./routes/query.route";
 import quizRouter from "./routes/quiz.route";
 import quizQuestionRouter from "./routes/quizQuestion.rote";
-import { redisConnection, testRedis } from "./bullmq/redisConnection";
+import { testRedis } from "./bullmq/redisConnection";
+import paymentRouter from "./routes/payment.route";
+import Razorpay from "razorpay";
+import nurtureRouter from "./routes/nurture.route";
 
 dotenv.config();
 
@@ -51,12 +54,22 @@ app.use(`/api/${VERSION}/result`,resultRouter)
 app.use(`/api/${VERSION}/query`,queryRouter)
 app.use(`/api/${VERSION}/quiz`,quizRouter)
 app.use(`/api/${VERSION}/quizQuestion`,quizQuestionRouter)
+app.use(`/api/${VERSION}/payment`,paymentRouter)
+app.use(`/api/${VERSION}/nurture`,nurtureRouter)
 
 //DataBase
 DataBase()
 
 // redis
 testRedis();
+
+//razorpay
+export const myRazorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET,
+});
+
+
 // server creation
 app.listen(PORT, () => {
   console.log(`Server is running at ${PORT}`);

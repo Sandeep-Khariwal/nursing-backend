@@ -139,20 +139,21 @@ export class StudentService {
           const newRes = res.toObject();
           const { examId, chapterId, moduleId, Questions, ...rest } = newRes;
 
-          if(moduleId){
+          if (moduleId) {
             return {
               ...rest,
               exam: examId.name,
               chapter: chapterId ? chapterId.name : "",
-              module: moduleId?.name?moduleId.name:"",
+              module: moduleId?.name ? moduleId.name : "",
             };
           }
-        }).filter((r)=>r);
+        })
+        .filter((r) => r);
 
       return { status: 200, results: filteredResults };
     } catch (error) {
       console.log(error);
-      
+
       return { message: error.message, status: 500 };
     }
   }
@@ -212,6 +213,22 @@ export class StudentService {
       return { status: 200, student, message: "Exam updated!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
+    }
+  }
+
+  public async updateQuizStudentInfo(
+    id: string,
+    data: {
+      email: string;
+      collegeName: string;
+    }
+  ) {
+    try {
+      await studentModel.findByIdAndUpdate(id, data);
+
+      return { status: 200, message: "student update!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
     }
   }
 }

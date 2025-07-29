@@ -19,6 +19,7 @@ interface StudentModel {
   createdAt: Date;
   isDeleted: boolean;
   paymentRecords: string[];
+  collegeName:string;
 
   lastOtp: string;
   gender: string;
@@ -82,6 +83,10 @@ const studentSchema = new Schema<StudentModel>({
   dateOfBirth: {
     type: Date,
     default: new Date(),
+  },
+  collegeName: {
+    type: String,
+    default: "",
   },
   address: {
     type: String,

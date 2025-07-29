@@ -17,7 +17,7 @@ export interface QuizModal {
   quizFees: number;
   totalTime: number;
   isCompleted: { studentId: string; isCompleted: boolean }[];
-  registeredStudent: { studentId: string; isEligible: boolean }[];
+  registeredStudent: { studentId: string, paymentId:string, isEligible: boolean }[];
   student_time: { studentId: string; totalTime: number }[];
   resultId: { id: string; studentId: string }[];
 
@@ -91,6 +91,10 @@ const quizSchema = new Schema<QuizModal>(
             type: String,
             default: "",
             ref: "students",
+          },
+          paymentId: {
+            type: String,
+            default: "",
           },
           isEligible: {
             type: Boolean,

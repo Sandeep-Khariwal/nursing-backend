@@ -1,5 +1,5 @@
 import express  from "express";
-import { CreateQuiz, GetAllQuizes, GetPostionsInQuiz, GetQuizForRegistration, GetToQuiz, RegisterInQuiz, RegistrationClose, RegistrationOpen, RemoveQuiz, SetQuizClose, SetQuizLive, SubmitQuizResponse } from "../controller/quiz.controller";
+import { CreateQuiz, GetAllQuizes, GetPostionsInQuiz, GetQuizForRegistration, GetToQuiz, RegistrationClose, RegistrationOpen, RemoveQuiz, SetQuizClose, SetQuizLive, SubmitQuizResponse } from "../controller/quiz.controller";
 import { authenticateToken } from "../middleware/jwtToken";
 const quizRouter = express.Router();
 
@@ -11,7 +11,6 @@ quizRouter.put("/registrationOpen" ,authenticateToken, RegistrationOpen);
 quizRouter.put("/registrationClose" ,authenticateToken, RegistrationClose);
 quizRouter.put("/submit/:id" , authenticateToken , SubmitQuizResponse);
 quizRouter.put("/removeQuiz" , authenticateToken , RemoveQuiz);
-quizRouter.put("/register" , authenticateToken , RegisterInQuiz);
 
 quizRouter.get("/getQuiz" ,authenticateToken, GetToQuiz);
 quizRouter.get("/getAll" ,authenticateToken, GetAllQuizes);
