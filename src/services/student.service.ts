@@ -221,6 +221,7 @@ export class StudentService {
     data: {
       email: string;
       collegeName: string;
+      address: string;
     }
   ) {
     try {

@@ -36,7 +36,7 @@ const ResultSchema = new Schema<ResultModal>(
     studentId: { type: String, required: true },
     examId: { type: String, ref:"exams" },
     moduleId: { type: String, ref:"module" },
-    quizId: { type: String, required: true , ref:"quiz" },
+    quizId: { type: String, ref:"quiz" },
     chapterId: { type: String, default:"" , ref:"chapter" },
     Questions: { type: [String], default:[] , ref:"question" },
 

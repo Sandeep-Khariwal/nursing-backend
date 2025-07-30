@@ -346,6 +346,7 @@ export const SubmitQuizResponse = async (req: clientRequest, res: Response) => {
       totalTimeSpent:
         quiz.totalTime -
         quiz.student_time.filter((s) => s.studentId === studentId)[0].totalTime,
+        accuracy:(totalCorrectAnswers / quiz.questions.length) * 100
     };
 
     const resultResponse = await resultService.createResult(result);

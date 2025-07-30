@@ -34,6 +34,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
 };
 
 export const WebhookEvent = async (req: Request, res: Response) => {
+  
   const secret = process.env.WEBHOOK_SECRET;
   const signature = req.headers["x-razorpay-signature"];
   const body = JSON.stringify(req.body);
@@ -44,10 +45,9 @@ export const WebhookEvent = async (req: Request, res: Response) => {
     .digest("hex");
 
   if (signature === expectedSignature) {
-    console.log("✅ Webhook verified");
     const event = req.body;
     // Handle event like payment.captured
-    // if (event.event === "payment.captured") {
+    if (event.event === "payment.authorized") {
       const payment = req.body.payload.payment.entity;
       const notes = payment.notes;
 
@@ -64,7 +64,6 @@ export const WebhookEvent = async (req: Request, res: Response) => {
         amount: payment.amount,
         status: payment.status,
       };
-      console.log("user : ", user);
 
       const quizService = new QuizService();
       const studentService = new StudentService();
@@ -80,14 +79,14 @@ export const WebhookEvent = async (req: Request, res: Response) => {
       await studentService.updateQuizStudentInfo(user.studentId, {
         email: user.email,
         collegeName: user.collegeName,
+        address:user.address
       });
 
       res.status(200).json({ status: 200, message: "payment is success!!" });
-    // } else {
+    } else {
       res.status(404).json({ status: 404, message: "payment failed" });
-    // }
+    }
   } else {
-    console.log("❌ Invalid webhook signature");
     res.status(500).json({ status: 500, error: "Invalid signature" });
   }
 };
