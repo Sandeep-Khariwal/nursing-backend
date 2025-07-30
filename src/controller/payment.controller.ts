@@ -47,7 +47,7 @@ export const WebhookEvent = async (req: Request, res: Response) => {
     console.log("✅ Webhook verified");
     const event = req.body;
     // Handle event like payment.captured
-    if (event.event === "payment.captured") {
+    // if (event.event === "payment.captured") {
       const payment = req.body.payload.payment.entity;
       const notes = payment.notes;
 
@@ -83,9 +83,9 @@ export const WebhookEvent = async (req: Request, res: Response) => {
       });
 
       res.status(200).json({ status: 200, message: "payment is success!!" });
-    } else {
+    // } else {
       res.status(404).json({ status: 404, message: "payment failed" });
-    }
+    // }
   } else {
     console.log("❌ Invalid webhook signature");
     res.status(500).json({ status: 500, error: "Invalid signature" });
