@@ -15,6 +15,7 @@ export class QueryService {
       query.studentId = data.studentId;
       query.examId = data.examId;
       query.isDeleted = false;
+      query.isPublic = false;
 
       const savedQuery = await query.save(); // Save first
 

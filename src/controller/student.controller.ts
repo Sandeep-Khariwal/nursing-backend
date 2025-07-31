@@ -62,6 +62,7 @@ export const UpdateStudent = async (req: clientRequest, res: Response) => {
     res.status(200).json({
       status: response["status"],
       data: response["student"],
+      message:response["message"]
     });
   } else {
     res

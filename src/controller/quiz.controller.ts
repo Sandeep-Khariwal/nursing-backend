@@ -230,6 +230,7 @@ export const GetPostionsInQuiz = async (req: Request, res: Response) => {
         totalMarks: res.totalMarks,
         obtainedMarks: res.obtainedMarks,
         timeTaken: res.totalTimeSpent,
+        accuracy:res.accuracy
       }))
       .sort((a, b) => {
         // Rank by marks or correct answers
@@ -244,11 +245,11 @@ export const GetPostionsInQuiz = async (req: Request, res: Response) => {
       student.rank = index + 1;
     });
 
-    const top3 = ranked.slice(0, 3);
+    const top10 = ranked.slice(0, 10);
 
     res.status(200).json({
       status: 200,
-      data: top3,
+      data: top10,
     });
   } else {
     res.status(resultResponse["status"]).json({

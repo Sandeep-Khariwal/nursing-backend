@@ -647,6 +647,7 @@ export class ModuleService {
       newModule.isCompleted = false;
       newModule.student_time = 0;
       newModule.resultId = "";
+      newModule.questionAttempted = []
       // Step 2: Check if student_time entry exists
 
       // if (module && updatedDoc) {

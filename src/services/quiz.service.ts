@@ -80,11 +80,19 @@ export class QuizService {
       return { status: 500, message: error.message };
     }
   }
-  public async registerInQuiz(data: { studentId: string, quizId: string, paymentId:string }) {
+  public async registerInQuiz(data: {
+    studentId: string;
+    quizId: string;
+    paymentId: string;
+  }) {
     try {
       await Quiz.findByIdAndUpdate(data.quizId, {
         $push: {
-          registeredStudent: { studentId: data.studentId,paymentId:data.paymentId , isEligible: true },
+          registeredStudent: {
+            studentId: data.studentId,
+            paymentId: data.paymentId,
+            isEligible: true,
+          },
         },
       });
       return { status: 200, message: "Registred in quiz!!" };
@@ -267,10 +275,20 @@ export class QuizService {
         {
           path: "questions",
           match: { isDeleted: false },
-          select: ["_id", "name"],
+          select: ["_id", "options"],
+        },
+        {
+          path: "questionAttempted.questionId", // Populate nested questionId
+          select: ["_id", "attempt"],
         },
       ]);
       if (quizeForRegistration) {
+        await Quiz.findByIdAndUpdate(quizeForRegistration._id, {
+          $set: {
+            isQuizLive: false,
+            isRegistrationOpen: true,
+          },
+        });
         const { examId, ...newQuizeForRegistration } =
           quizeForRegistration.toObject() as any;
         const isIamRegistered =
@@ -281,7 +299,35 @@ export class QuizService {
           quizeForRegistration.isCompleted.filter(
             (std) => std.studentId === studentId
           )[0]?.isCompleted ?? false;
-        const questions = quizeForRegistration.questions.map((q: any) => q._id);
+        const resultId =
+          quizeForRegistration.resultId.filter(
+            (std) => std.studentId === studentId
+          )[0]?.id ?? "";
+        const student_time =
+          quizeForRegistration.student_time.filter(
+            (std) => std.studentId === studentId
+          )[0]?.totalTime ?? quizeForRegistration.totalTime;
+        const questions = quizeForRegistration.questions.map((q: any) => {
+          const correctOption = q.options.find((op) => op.answer === true);
+          return {
+            _id: q._id,
+            optionId: correctOption._id,
+          };
+        });
+        const attemptedQuestion = quizeForRegistration.questionAttempted
+          .map((qAtt: any) => {
+            const student = qAtt.questionId.attempt.find(
+              (std: any) => std.studentId === qAtt.studentId
+            );
+            if (student.studentId === studentId) {
+              return {
+                _id: qAtt.questionId._id,
+                studentId: student.studentId,
+                optionId: student.optionId,
+              };
+            }
+          })
+          .filter((s) => s);
 
         return {
           status: 200,
@@ -292,6 +338,10 @@ export class QuizService {
             examName: examId.name,
             isCompleted: isCompleted,
             questions: questions,
+            isQuizLive: false,
+            questionAttempted: attemptedQuestion,
+            resultId: resultId,
+            student_time: student_time,
           },
         };
       }
@@ -313,6 +363,15 @@ export class QuizService {
         {
           path: "examId",
           select: ["_id", "name"],
+        },
+        {
+          path: "questions",
+          match: { isDeleted: false },
+          select: ["_id", "options"],
+        },
+        {
+          path: "questionAttempted.questionId", // Populate nested questionId
+          select: ["_id", "attempt"],
         },
       ]);
 
@@ -362,7 +421,11 @@ export class QuizService {
           {
             path: "questions",
             match: { isDeleted: false },
-            select: ["_id", "name"],
+            select: ["_id", "options"],
+          },
+          {
+            path: "questionAttempted.questionId", // Populate nested questionId
+            select: ["_id", "attempt"],
           },
         ]);
       }
@@ -376,10 +439,32 @@ export class QuizService {
         quiz.isCompleted.filter((std) => std.studentId === studentId)[0]
           ?.isCompleted ?? false;
       const resultId =
-        quiz.resultId.filter((std) => std.studentId === studentId)[0]
-          ?.id ?? "";
+        quiz.resultId.filter((std) => std.studentId === studentId)[0]?.id ?? "";
+      const student_time =
+        quiz.student_time.filter((std) => std.studentId === studentId)[0]
+          ?.totalTime ?? quiz.totalTime;
 
-      const questions = quiz.questions.map((q: any) => q._id);
+      const questions = quizeForRegistration.questions.map((q: any) => {
+        const correctOption = q.options.find((op) => op.answer === true);
+        return {
+          _id: q._id,
+          optionId: correctOption._id,
+        };
+      });
+      const attemptedQuestion = quizeForRegistration.questionAttempted
+        .map((qAtt: any) => {
+          const student = qAtt.questionId.attempt.find(
+            (std: any) => std.studentId === qAtt.studentId
+          );
+          if (student.studentId === studentId) {
+            return {
+              _id: qAtt.questionId._id,
+              studentId: student.studentId,
+              optionId: student.optionId,
+            };
+          }
+        })
+        .filter((s) => s);
 
       return {
         status: 200,
@@ -388,8 +473,10 @@ export class QuizService {
           registeredStudent: isIamRegistered,
           isCompleted: isCompleted,
           questions: questions,
-          resultId:resultId,
+          resultId: resultId,
           examName: examId.name,
+          student_time: student_time,
+          questionAttempted: attemptedQuestion,
         },
       };
     } catch (error) {
@@ -483,21 +570,25 @@ export class QuizService {
         quizes = await Quiz.find({
           examId,
           isDeleted: false,
-        }).populate([
-          {
-            path: "examId",
-            select: ["_id", "name"],
-          },
-        ]).sort({ createdAt: -1 });
+        })
+          .populate([
+            {
+              path: "examId",
+              select: ["_id", "name"],
+            },
+          ])
+          .sort({ createdAt: -1 });
       } else {
         quizes = await Quiz.find({
           isDeleted: false,
-        }).populate([
-          {
-            path: "examId",
-            select: ["_id", "name"],
-          },
-        ]).sort({ createdAt: -1 });
+        })
+          .populate([
+            {
+              path: "examId",
+              select: ["_id", "name"],
+            },
+          ])
+          .sort({ createdAt: -1 });
       }
 
       if (quizes && quizes.length === 0) {

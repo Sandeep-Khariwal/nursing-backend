@@ -210,7 +210,7 @@ export class StudentService {
         (student.email = data.email ? data.email : student.email),
         await student.save();
 
-      return { status: 200, student, message: "Exam updated!!" };
+      return { status: 200, student, message: "Student updated!!" };
     } catch (error) {
       return { message: error.message, status: 500 };
     }
