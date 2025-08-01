@@ -22,7 +22,12 @@ export const GetNurture = async (req: Request, res: Response) => {
   const response = await nurtureService.getNurtureInfo();
 
   if (response["status"] === 200) {
-    res.status(200).json({ status: 200, data: response["nurture"] });
+    res
+      .status(200)
+      .json({
+        status: 200,
+        data: response["nurture"]
+      });
   } else {
     res
       .status(response["status"])
