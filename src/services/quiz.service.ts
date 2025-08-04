@@ -384,7 +384,7 @@ export class QuizService {
       }
 
       // Step 3: Calculate end time in code (startAt + totalTime)
-      const startAt = new Date(quiz.startAt.getTime() - 5.5 * 60 * 60 * 1000);
+      const startAt = new Date(quiz.startAt.getTime() - 6.5 * 60 * 60 * 1000);
       const endAt = new Date(startAt.getTime() + quiz.totalTime);
 
       // Step 4: Check if current time is within quiz time window
