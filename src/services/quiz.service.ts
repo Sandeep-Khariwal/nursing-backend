@@ -347,7 +347,7 @@ export class QuizService {
       }
 
       // code for getting live quiz
-      const now = new Date();
+      const now: Date = new Date();
 
       // Step 1: Find the quiz by examId and eligible student
       let quiz = await Quiz.findOne({
@@ -383,12 +383,15 @@ export class QuizService {
         };
       }
 
-      // Step 3: Calculate end time in code (startAt + totalTime)
-      const startAt = new Date(quiz.startAt.getTime() - 6.5 * 60 * 60 * 1000);
-      const endAt = new Date(startAt.getTime() + quiz.totalTime);
+      const date = new Date();
+      const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
+      const newDate = new Date(date.getTime() + fiveAndHalfHoursInMs);
 
-      // Step 4: Check if current time is within quiz time window
-      const isLiveNow = now >= startAt && now <= endAt;
+      const startAt = new Date(quiz.startAt); // Stored in DB as UTC
+      const endAt = new Date(startAt.getTime() + quiz.totalTime); // quiz.totalTime is in milliseconds
+
+      // ✅ Compare Date objects directly (UTC-safe)
+      const isLiveNow = newDate >= startAt && newDate <= endAt;
 
       if (!isLiveNow) {
         return {
@@ -444,14 +447,15 @@ export class QuizService {
         quiz.student_time.filter((std) => std.studentId === studentId)[0]
           ?.totalTime ?? quiz.totalTime;
 
-      const questions = quizeForRegistration.questions.map((q: any) => {
+      const questions = quiz.questions.map((q: any) => {
         const correctOption = q.options.find((op) => op.answer === true);
         return {
           _id: q._id,
           optionId: correctOption._id,
         };
       });
-      const attemptedQuestion = quizeForRegistration.questionAttempted
+
+      const attemptedQuestion = quiz.questionAttempted
         .map((qAtt: any) => {
           const student = qAtt.questionId.attempt.find(
             (std: any) => std.studentId === qAtt.studentId
