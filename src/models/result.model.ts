@@ -19,6 +19,7 @@ export interface ResultModal {
   totalTimeSpent: number;
   isCompleted: boolean;
   Questions:string[]
+  quizQuestions:string[]
 
   isDeleted:boolean;
   createdAt: Date;
@@ -39,6 +40,7 @@ const ResultSchema = new Schema<ResultModal>(
     quizId: { type: String, ref:"quiz" },
     chapterId: { type: String, default:"" , ref:"chapter" },
     Questions: { type: [String], default:[] , ref:"question" },
+    quizQuestions: { type: [String], default:[] , ref:"quizQuestion" },
 
     totalQuestions: { type: Number, required: true },
     totalMarks: { type: Number,default:0 },

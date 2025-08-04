@@ -35,8 +35,12 @@ export class ResultService {
       result.isDeleted = false;
       result.wrongAnswers =
         Number(data.attemptedQuestions) - Number(data.correctAnswers);
+      if (IsQuiz(data.moduleId)) {
+        result.quizQuestions = data.questionIds;
+      } else {
+        result.Questions = data.questionIds;
+      }
       result.isCompleted = data.isCompleted;
-      result.Questions = data.questionIds;
       if (data.examId) {
         result.examId = data.examId;
       }
@@ -94,13 +98,18 @@ export class ResultService {
           path: "Questions",
           select: ["_id", "question", "options", "attempt", "explaination"],
         },
+        {
+          path: "quizQuestions",
+          select: ["_id", "question", "options", "attempt", "explaination"],
+        },
       ]);
       if (result && result.isDeleted) {
         return { status: 404, message: "Result not found!!" };
       }
 
       // Process each question to find correct and selected answer
-      const processedQuestions = result.Questions.map((q: any) => {
+      if(result.quizId){
+      const processedQuestions = result.quizQuestions.map((q: any) => {
         const correctOption = q.options.find((opt: any) => opt.answer === true);
 
         // Assuming attempt is an array like: [{ optionId: '...' }]
@@ -109,9 +118,6 @@ export class ResultService {
         const selectedOption = q.options.find(
           (opt: any) => String(opt._id) === String(attempted?.optionId)
         );
-
-        // console.log(correctOption,selectedOption);
-
         const options = q.options.map((option) => {
           const opt = option.toObject();
           if (String(opt._id) === String(attempted?.optionId)) {
@@ -147,6 +153,61 @@ export class ResultService {
       });
 
       const newResult = result.toObject() as any;
+      newResult.quizQuestions = processedQuestions;
+
+      const { quizQuestions, ...rest } = newResult;
+
+      return {
+        status: 200,
+        result: { ...rest, questions: quizQuestions.filter((q) => q) },
+      };
+      } else {
+      const processedQuestions = result.Questions.map((q: any) => {
+        const correctOption = q.options.find((opt: any) => opt.answer === true);
+
+        // Assuming attempt is an array like: [{ optionId: '...' }]
+        const attempted = q.attempt?.find((att) => att.studentId === studentId);
+
+        const selectedOption = q.options.find(
+          (opt: any) => String(opt._id) === String(attempted?.optionId)
+        );
+
+        const options = q.options.map((option) => {
+          const opt = option.toObject();
+          if (String(opt._id) === String(attempted?.optionId)) {
+            return {
+              ...opt,
+              attempt: true,
+            };
+          } else {
+            return {
+              ...opt,
+              attempt: false,
+            };
+          }
+        });
+
+        if (selectedOption) {
+          const isSame = correctOption.answer && selectedOption.answer;
+          return {
+            _id: q._id,
+            skip: false,
+            question: q.question,
+            options: options,
+            explaination: q.explaination,
+          };
+        } else {
+          return {
+            _id: q._id,
+            skip: true,
+            question: q.question,
+            options: q.options,
+            explaination: q.explaination,
+          };
+        }
+      });
+
+      const newResult = result.toObject() as any;
       newResult.Questions = processedQuestions;
 
       const { Questions, ...rest } = newResult;
@@ -155,6 +216,7 @@ export class ResultService {
         status: 200,
         result: { ...rest, questions: Questions.filter((q) => q) },
       };
+      }
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -174,7 +236,7 @@ export class ResultService {
     }
   }
 
-    public async getAllResultByQuizId(quizId: string) {
+  public async getAllResultByQuizId(quizId: string) {
     try {
       const results = await Result.find({
         quizId,
