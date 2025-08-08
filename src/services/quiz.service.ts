@@ -95,7 +95,7 @@ export class QuizService {
           },
         },
       });
-      return { status: 200, message: "Registred in quiz!!" };
+      return { status: 200, message: "You have successfully registered for the Quiz!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

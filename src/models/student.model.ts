@@ -12,14 +12,23 @@ interface StudentModel {
   dateOfJoining: Date;
   address: string;
   isLogedIn: boolean;
-  password:string;
+  password: string;
 
   testAnswers: { testId: string; answerSheetId: string }[];
   studentResults: string[];
   createdAt: Date;
   isDeleted: boolean;
   paymentRecords: string[];
-  collegeName:string;
+  collegeName: string;
+
+  subscription: {
+    examId: string;
+    subscriptionStart: Date;
+    subscriptionEnd: Date;
+    features:{
+      accessProModules:boolean
+    }
+  }[];
 
   lastOtp: string;
   gender: string;
@@ -32,9 +41,9 @@ interface StudentModel {
     pro: boolean;
   };
   token: string;
-  results:string[];
-  quizResults:string[];
-  userType:String;
+  results: string[];
+  quizResults: string[];
+  userType: String;
 }
 
 const studentSchema = new Schema<StudentModel>({
@@ -168,12 +177,12 @@ const studentSchema = new Schema<StudentModel>({
   },
   results: {
     type: [String],
-    ref:"result",
+    ref: "result",
     required: false,
   },
   quizResults: {
     type: [String],
-    ref:"result",
+    ref: "result",
     required: false,
   },
   dateOfJoining: {

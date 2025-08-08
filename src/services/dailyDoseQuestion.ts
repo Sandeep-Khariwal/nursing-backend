@@ -41,9 +41,14 @@ export class DailyDoseService {
     }
   }
   public async getTodayQuestion(examId: string) {
+
     const today = new Date();
-    const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
+      const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
+      const newDate = new Date(today.getTime() + fiveAndHalfHoursInMs);
+    
+    const startOfDay = new Date(newDate.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(newDate.setUTCHours(23, 59, 59, 999));
+    
 
     try {
       const question = await DailyDoseQuestion.findOne({
