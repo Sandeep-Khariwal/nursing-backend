@@ -5,7 +5,7 @@ export class SubscriptionService {
   public async createSubscription(data: {
     name: string;
     examId: string;
-    prizing: { originalPrize: number; oldPeize: number; duration: string }[];
+    plans: { price: number; discountPrice: number; duration: string }[];
     planTag: string;
     includes: string[];
   }) {
@@ -14,7 +14,7 @@ export class SubscriptionService {
       subscription._id = `SUBS-${randomUUID()}`;
       subscription.name = data.name;
       subscription.examId = data.examId;
-      subscription.prizing = data.prizing;
+      subscription.plans = data.plans;
       subscription.planTag = data.planTag;
       subscription.includes = data.includes;
 

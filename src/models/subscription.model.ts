@@ -4,7 +4,7 @@ interface Subscription {
   _id: string;
   name: string;
   examId: string;
-  prizing: { originalPrize: number; oldPeize: number; duration: string }[];
+  plans: { price: number; discountPrice: number; duration: string }[];
   planTag: string;
   includes: string[];
 }
@@ -25,14 +25,14 @@ const subscriptionSchema = new Schema<Subscription>(
       required: true,
       ref: "exam",
     },
-    prizing: {
+    plans: {
       type: [
         {
-          originalPrize: {
+          price: {
             type: Number,
             default: 0,
           },
-          oldPeize: {
+          discountPrice: {
             type: Number,
             default: 0,
           },
