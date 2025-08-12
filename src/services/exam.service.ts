@@ -169,7 +169,7 @@ export class ExamService {
       let result;
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -196,7 +196,9 @@ export class ExamService {
               : 0;
 
           const { examId, ...plainModule1 } = plainModule;
-          const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id??""
+          const resultId =
+            plainModule1.resultId.filter((st) => st.studentId === studentId)[0]
+              ?.id ?? "";
           return {
             ...plainModule1,
             exam: examId,
@@ -217,12 +219,12 @@ export class ExamService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               )[0]?.totalTime ?? 0,
-            resultId:resultId
+            resultId: resultId,
           };
         });
       } else {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -296,7 +298,7 @@ export class ExamService {
 
       if (isStudent) {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         result = modules.map((module) => {
           const plainModule = module.toObject(); // This avoids the _doc error
@@ -323,7 +325,9 @@ export class ExamService {
               : 0;
 
           const { examId, ...plainModule1 } = plainModule;
-           const resultId =plainModule1.resultId.filter((st) => st.studentId === studentId)[0]?.id??""
+          const resultId =
+            plainModule1.resultId.filter((st) => st.studentId === studentId)[0]
+              ?.id ?? "";
           return {
             ...plainModule1,
             exam: examId,
@@ -344,12 +348,12 @@ export class ExamService {
               plainModule1.student_time.filter(
                 (st) => st.studentId === studentId
               )[0]?.totalTime ?? 0,
-            resultId:resultId
+            resultId: resultId,
           };
         });
       } else {
         if (modules.length === 0) {
-          return { status: 200 , modules, message: "Modules not found!!" };
+          return { status: 200, modules, message: "Modules not found!!" };
         }
         result = modules.map((m: any) => {
           const { examId, ...rest } = m.toObject();
@@ -362,6 +366,19 @@ export class ExamService {
       }
 
       return { status: 200, modules: result };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
+
+  public async addSubscriptionInExam(id: string, subscriptionId: string) {
+    try {
+      await examsModel.findByIdAndUpdate(id, {
+        $addToSet: { subscriptions: subscriptionId },
+      });
+
+      return { status: 200, message: "Subscription added in exam!!" };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

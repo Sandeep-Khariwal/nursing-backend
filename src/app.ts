@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import cors from "cors"
-import bodyParser from "body-parser"
+import cors from "cors";
+import bodyParser from "body-parser";
 import authRouter from "./routes/auth.route";
 import adminRouter from "./routes/admin.route";
 import teacherRouter from "./routes/teacher.route";
@@ -20,45 +20,49 @@ import { testRedis } from "./bullmq/redisConnection";
 import paymentRouter from "./routes/payment.route";
 import Razorpay from "razorpay";
 import nurtureRouter from "./routes/nurture.route";
+import subscriptionRouter from "./routes/subscription.route";
 
 dotenv.config();
 
 const app: Express = express();
-const PORT =  process.env.PORT || 8080
-const VERSION = "v1"
+const PORT = process.env.PORT || 8080;
+const VERSION = "v1";
 
 app.use(cors());
-app.use(express.json({
-  strict: false,  // allows non-object JSON values like "" (not recommended long-term)
-  verify: (req:Request, res:Response, buf) => {
-    if (!buf.length) {
-      req.body = {}; 
-    }
-  }
-}));
-app.use(express.urlencoded({ extended: true })); 
+app.use(
+  express.json({
+    strict: false, // allows non-object JSON values like "" (not recommended long-term)
+    verify: (req: Request, res: Response, buf) => {
+      if (!buf.length) {
+        req.body = {};
+      }
+    },
+  })
+);
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: "50mb" }));
 
 // all routes are here
-app.use(`/api/${VERSION}/auth`,authRouter)
-app.use(`/api/${VERSION}/admin`,adminRouter)
-app.use(`/api/${VERSION}/student`,studentRouter)
-app.use(`/api/${VERSION}/teacher`,teacherRouter)
+app.use(`/api/${VERSION}/auth`, authRouter);
+app.use(`/api/${VERSION}/admin`, adminRouter);
+app.use(`/api/${VERSION}/student`, studentRouter);
+app.use(`/api/${VERSION}/teacher`, teacherRouter);
 
-app.use(`/api/${VERSION}/exam`,examRouter)
-app.use(`/api/${VERSION}/dailyDose`,dailyDoseRouter)
-app.use(`/api/${VERSION}/chapter`,chapterRouter)
-app.use(`/api/${VERSION}/module`,moduleRouter)
-app.use(`/api/${VERSION}/question`,questionRouter)
-app.use(`/api/${VERSION}/result`,resultRouter)
-app.use(`/api/${VERSION}/query`,queryRouter)
-app.use(`/api/${VERSION}/quiz`,quizRouter)
-app.use(`/api/${VERSION}/quizQuestion`,quizQuestionRouter)
-app.use(`/api/${VERSION}/payment`,paymentRouter)
-app.use(`/api/${VERSION}/nurture`,nurtureRouter)
+app.use(`/api/${VERSION}/exam`, examRouter);
+app.use(`/api/${VERSION}/dailyDose`, dailyDoseRouter);
+app.use(`/api/${VERSION}/chapter`, chapterRouter);
+app.use(`/api/${VERSION}/module`, moduleRouter);
+app.use(`/api/${VERSION}/question`, questionRouter);
+app.use(`/api/${VERSION}/result`, resultRouter);
+app.use(`/api/${VERSION}/query`, queryRouter);
+app.use(`/api/${VERSION}/quiz`, quizRouter);
+app.use(`/api/${VERSION}/quizQuestion`, quizQuestionRouter);
+app.use(`/api/${VERSION}/payment`, paymentRouter);
+app.use(`/api/${VERSION}/nurture`, nurtureRouter);
+app.use(`/api/${VERSION}/subscription`, subscriptionRouter);
 
 //DataBase
-DataBase()
+DataBase();
 
 // redis
 testRedis();
@@ -68,7 +72,6 @@ export const myRazorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_API_KEY,
   key_secret: process.env.RAZORPAY_API_SECRET,
 });
-
 
 // server creation
 app.listen(PORT, () => {
