@@ -173,7 +173,7 @@ export const GetAllResultsForExam = async (
         .json({ status: 200, data: response["results"] });
     } else {
       res.status(response["status"]).json({
-        status: 200,
+        status: 404,
         data: [],
         message: "Please purchase a subscription to unlock this feature !!",
       });
