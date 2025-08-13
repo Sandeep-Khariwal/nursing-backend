@@ -66,6 +66,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
   const moduleService = new ModuleService();
   const examService = new ExamService();
+  const studentService = new StudentService();
 
   let response;
   let modules = [];
@@ -124,6 +125,38 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   } else {
     response = await moduleService.getAllModules(studentId);
     modules = response["modules"];
+  }
+
+  // checking subscription
+  const studentSubscriptionResp = await studentService.getStudentById(
+    studentId
+  );
+
+  let studentSubscription = null;
+  let isProModulesAccessible = false;
+
+  if (studentSubscriptionResp["status"] === 200) {
+    if (
+      studentSubscriptionResp["student"].subscriptions &&
+      studentSubscriptionResp["student"].subscriptions.length > 0
+    ) {
+      studentSubscription = studentSubscriptionResp[
+        "student"
+      ].subscriptions.find((subs: any) => subs.examId === examId);
+    }
+
+    if (studentSubscription) {
+      isProModulesAccessible =
+        studentSubscription.featuresAccess.accessProModules;
+    }
+  }
+  if (isProModulesAccessible) {
+    modules = modules.map((mod: any) => {
+      return {
+        ...mod,
+        isPro: false,
+      };
+    });
   }
 
   if (response["status"] === 200) {

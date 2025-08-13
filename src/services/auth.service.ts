@@ -16,7 +16,7 @@ export class AuthService {
   ) {
     try {
       const checkStudent = await studentModel.findOne({
-        $or: [{ email: email }, { phoneNumber: countryCode + phone }],
+        $or: [{ email: email }, { phoneNumber: phone }],
       });
       if (checkStudent) {
         return { status: 404, message: "User already exist!!" };
@@ -60,7 +60,7 @@ export class AuthService {
       student.token = "";
       student.email = email;
 
-      student.phoneNumber = countryCode + phone;
+      student.phoneNumber = phone;
       student.password = password;
       student.countryCode = countryCode;
       student.isLogedIn = true;
@@ -165,12 +165,12 @@ export class AuthService {
       let isStudent = true;
       let user;
       user = await studentModel.findOne({
-        phoneNumber: countryCode + phone,
+        phoneNumber: phone,
       });
 
       if (!user) {
         user = await adminModel.findOne({
-          phoneNumber: countryCode + phone,
+          phoneNumber: phone,
         });
         if (user) {
           isStudent = false;

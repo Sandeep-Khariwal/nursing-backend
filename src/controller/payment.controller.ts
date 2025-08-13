@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { myRazorpayInstance } from "../app";
 import { QuizService } from "../services/quiz.service";
 import { StudentService } from "../services/student.service";
+import { SubscriptionService } from "../services/subscription.service";
+import { SubscriptionType } from "../enums/subscription";
 
 export const GetRazorpayKeys = (req: Request, res: Response) => {
   res.status(200).json({
@@ -34,7 +36,6 @@ export const CreateOrder = async (req: Request, res: Response) => {
 };
 
 export const WebhookEvent = async (req: Request, res: Response) => {
-  
   const secret = process.env.WEBHOOK_SECRET;
   const signature = req.headers["x-razorpay-signature"];
   const body = JSON.stringify(req.body);
@@ -79,8 +80,110 @@ export const WebhookEvent = async (req: Request, res: Response) => {
       await studentService.updateQuizStudentInfo(user.studentId, {
         email: user.email,
         collegeName: user.collegeName,
-        address:user.address
+        address: user.address,
       });
+
+      res.status(200).json({ status: 200, message: "payment is success!!" });
+    } else {
+      res.status(404).json({ status: 404, message: "payment failed" });
+    }
+  } else {
+    res.status(500).json({ status: 500, error: "Invalid signature" });
+  }
+};
+export const PurchaseSubscription = async (req: Request, res: Response) => {
+  const secret = process.env.WEBHOOK_SECRET;
+  const signature = req.headers["x-razorpay-signature"];
+  const body = JSON.stringify(req.body);
+
+  const expectedSignature = crypto
+    .createHmac("sha256", secret || "")
+    .update(body.toString())
+    .digest("hex");
+
+  if (signature === expectedSignature) {
+    const event = req.body;
+    // Handle event like payment.captured
+    if (event.event === "payment.authorized") {
+      const payment = req.body.payload.payment.entity;
+      const notes = payment.notes;
+
+      const user = {
+        studentId: notes.studentId,
+        examId: notes.examId,
+        mainPlanId: notes.mainPlanId,
+        planId: notes.planId,
+      };
+
+      const studentService = new StudentService();
+      const subscriptionService = new SubscriptionService();
+
+      const subscriptionResp = await subscriptionService.getSubscriptionsById(
+        notes.mainPlanId
+      );
+
+      let newSubscription;
+      if (subscriptionResp["status"] === 200) {
+        const subscription = subscriptionResp["subscription"];
+        const plan = subscription.plans.find(
+          (plan: any) => plan._id === notes.planId
+        );
+
+        if (SubscriptionType.MONTHLY === plan.subscriptionType) {
+          const totalMonths = plan.duration.split(" ")[0];
+          const months = Number(totalMonths);
+
+          const now = new Date();
+          const subscriptionEnd = new Date(now);
+          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
+
+          newSubscription = {
+            examId: user.examId,
+            subscriptionStart: now,
+            subscriptionEnd: subscriptionEnd,
+            subscriptionId: user.mainPlanId,
+            planId: user.planId,
+            features: {
+              accessProModules: true,
+              accessJournerSoFar: true,
+              accessAdFree: true,
+              accessSupportAndNotifications: true,
+              accessVideoLibrary: false,
+              accessVideoCombo: false,
+              accessPrioritySupport: false,
+            },
+          };
+        } else {
+          const years = plan.duration.split(" ")[0];
+          const months = Number(years) * 12;
+
+          const now = new Date();
+          const subscriptionEnd = new Date(now);
+          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
+
+          newSubscription = {
+            examId: user.examId,
+            subscriptionStart: now,
+            subscriptionEnd: subscriptionEnd,
+            subscriptionId: user.mainPlanId,
+            planId: user.planId,
+            featuresAccess: {
+              accessProModules: true,
+              accessJournerSoFar: true,
+              accessAdFree: true,
+              accessSupportAndNotifications: true,
+              accessVideoLibrary: true,
+              accessVideoCombo: true,
+              accessPrioritySupport: true,
+            },
+          };
+        }
+      }
+
+      await studentService.updateSubscriptionInStudent(
+        user.studentId,
+        newSubscription
+      );
 
       res.status(200).json({ status: 200, message: "payment is success!!" });
     } else {

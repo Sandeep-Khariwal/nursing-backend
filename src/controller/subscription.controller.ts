@@ -45,7 +45,7 @@ export const GetSubscription = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: 200, data: response["subscriptions"] });
+      .json({ status: 200, data: response["subscriptions"].reverse() });
   } else {
     res.status(response["status"]).json(response["message"]);
   }

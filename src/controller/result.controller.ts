@@ -137,16 +137,47 @@ export const GetAllResultsForExam = async (
   req: clientRequest,
   res: Response
 ) => {
-  const { id } = req.params;
+  const examId = req.params.id;
   const studentId = req.user._id;
   const studentService = new StudentService();
 
-  const response = await studentService.getResultsForExams(id, studentId);
+  const response = await studentService.getResultsForExams(examId, studentId);
+
+  // check subscription
+  const studentSubscriptionResp = await studentService.getStudentById(
+    studentId
+  );
+  let studentSubscription = null;
+  let isDashboardAccessible = false;
+
+  if (studentSubscriptionResp["status"] === 200) {
+    if (
+      studentSubscriptionResp["student"].subscriptions &&
+      studentSubscriptionResp["student"].subscriptions.length > 0
+    ) {
+      studentSubscription = studentSubscriptionResp[
+        "student"
+      ].subscriptions.find((subs: any) => subs.examId === examId);
+    }
+
+    if (studentSubscription) {
+      isDashboardAccessible =
+        studentSubscription.featuresAccess.accessJournerSoFar;
+    }
+  }
 
   if (response["status"] === 200) {
-    res
-      .status(response["status"])
-      .json({ status: 200, data: response["results"] });
+    if (isDashboardAccessible) {
+      res
+        .status(response["status"])
+        .json({ status: 200, data: response["results"] });
+    } else {
+      res.status(response["status"]).json({
+        status: 200,
+        data: [],
+        message: "Please purchase a subscription to unlock this feature !!",
+      });
+    }
   } else {
     res.status(response["status"]).json(response["message"]);
   }

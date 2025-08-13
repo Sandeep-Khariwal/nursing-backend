@@ -10,7 +10,8 @@ interface ExamsModel {
   tests: string[];
   isDeleted: boolean;
   dailyDoses: string[];
-  subscriptions:string[]
+  subscriptions: string[];
+  roadmapToSuccess: string;
 }
 
 const examsSchema = new Schema<ExamsModel>({
@@ -51,11 +52,15 @@ const examsSchema = new Schema<ExamsModel>({
     type: Boolean,
     default: false,
   },
-  subscriptions:{
-    type:[String],
-    ref:"subscription",
-    default:[]
-  }
+  subscriptions: {
+    type: [String],
+    ref: "subscription",
+    default: [],
+  },
+  roadmapToSuccess: {
+    type: String,
+    default: "",
+  },
 });
 
 export default model<ExamsModel>("exams", examsSchema);

@@ -21,13 +21,21 @@ interface StudentModel {
   paymentRecords: string[];
   collegeName: string;
 
-  subscription: {
+  subscriptions: {
     examId: string;
+    subscriptionId: string;
+    planId: string;
     subscriptionStart: Date;
     subscriptionEnd: Date;
-    features:{
-      accessProModules:boolean
-    }
+    featuresAccess: {
+      accessProModules: boolean;
+      accessJournerSoFar: boolean;
+      accessAdFree: boolean;
+      accessSupportAndNotifications: boolean;
+      accessVideoLibrary: boolean;
+      accessVideoCombo: boolean;
+      accessPrioritySupport: boolean;
+    };
   }[];
 
   lastOtp: string;
@@ -189,11 +197,67 @@ const studentSchema = new Schema<StudentModel>({
     type: Date,
     default: Date.now(),
   },
-  featureAccess: {
-    pro: {
-      type: Boolean,
-      default: false,
-    },
+  subscriptions: {
+    type: [
+      {
+        examId: {
+          type: String,
+          ref: "exams",
+          default: "",
+        },
+        subscriptionId: {
+          type: String,
+          ref: "subscription",
+          default: "",
+        },
+        planId: {
+          type: String,
+          ref: "subscription",
+          default: "",
+        },
+        subscriptionStart: {
+          type: Date,
+          default: new Date(),
+        },
+        subscriptionEnd: {
+          type: Date,
+          default: new Date(),
+        },
+        featuresAccess: {
+          type: {
+            accessProModules: {
+              type: Boolean,
+              default: false,
+            },
+            accessJournerSoFar: {
+              type: Boolean,
+              default: false,
+            },
+            accessAdFree: {
+              type: Boolean,
+              default: false,
+            },
+            accessSupportAndNotifications: {
+              type: Boolean,
+              default: false,
+            },
+            accessVideoLibrary: {
+              type: Boolean,
+              default: false,
+            },
+            accessVideoCombo: {
+              type: Boolean,
+              default: false,
+            },
+            accessPrioritySupport: {
+              type: Boolean,
+              default: false,
+            },
+          },
+        },
+      },
+    ],
+    default: [],
   },
 });
 

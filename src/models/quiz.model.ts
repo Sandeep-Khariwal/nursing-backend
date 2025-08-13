@@ -17,13 +17,25 @@ export interface QuizModal {
   quizFees: number;
   totalTime: number;
   isCompleted: { studentId: string; isCompleted: boolean }[];
-  registeredStudent: { studentId: string, paymentId:string, isEligible: boolean }[];
+  registeredStudent: {
+    studentId: string;
+    paymentId: string;
+    isEligible: boolean;
+  }[];
   student_time: { studentId: string; totalTime: number }[];
   resultId: { id: string; studentId: string }[];
 
   startAt: Date;
   registerStartDate: Date;
   registerEndDate: Date;
+
+  winnerPrices: {
+    firstPrize: string;
+    secondPrize: string;
+    thirdPrize: string;
+    images: string[];
+  };
+  priceStaticContent: string;
 
   isDeleted: boolean;
 }
@@ -151,7 +163,32 @@ const quizSchema = new Schema<QuizModal>(
     },
 
     isDeleted: { type: Boolean, default: false },
+    winnerPrices: {
+      type: {
+        firstPrize: {
+          type: String,
+          default: "",
+        },
+        secondPrize: {
+          type: String,
+          default: "",
+        },
+        thirdPrize: {
+          type: String,
+          default: "",
+        },
+        images: {
+          type: [String],
+          default: [],
+        },
+      },
+    },
+    priceStaticContent: {
+      type: String,
+      default: "",
+    },
   },
+
   {
     timestamps: true,
   }

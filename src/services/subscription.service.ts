@@ -5,7 +5,7 @@ export class SubscriptionService {
   public async createSubscription(data: {
     name: string;
     examId: string;
-    plans: { price: number; discountPrice: number; duration: string }[];
+    plans: { price: number; discountPrice: number; duration: string , subscriptionType }[];
     planTag: string;
     includes: string[];
   }) {
@@ -68,6 +68,19 @@ export class SubscriptionService {
       }
 
       return { status: 200, subscriptions };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
+  public async getSubscriptionsById(id: string) {
+    try {
+      const subscriptions = await Subscription.findById(id);
+      if (!subscriptions) {
+        return { status: 404, message: "Subsceription not found!!" };
+      }
+
+      return { status: 200, subscription: subscriptions };
     } catch (error) {
       return { status: 500, message: error.message };
     }

@@ -232,4 +232,33 @@ export class StudentService {
       return { status: 500, message: error.message };
     }
   }
+  public async updateSubscriptionInStudent(
+    id: string,
+    subscriptions: {
+      examId: string;
+      subscriptionId: string;
+      planId: string;
+      subscriptionStart: Date;
+      subscriptionEnd: Date;
+      featuresAccess: {
+        accessProModules: boolean;
+        accessJournerSoFar: boolean;
+        accessAdFree: boolean;
+        accessSupportAndNotifications: boolean;
+        accessVideoLibrary: boolean;
+        accessVideoCombo: boolean;
+        accessPrioritySupport: boolean;
+      };
+    }
+  ) {
+    try {
+      await studentModel.findByIdAndUpdate(id, {
+        $push: { subscriptions: subscriptions },
+      });
+
+      return { status: 200, message: "student update!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
 }
