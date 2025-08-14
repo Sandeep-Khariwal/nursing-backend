@@ -36,6 +36,8 @@ export interface QuizModal {
     images: string[];
   };
   priceStaticContent: string;
+  miniTestInstructions: string;
+  mockDrillInstructions: string;
 
   isDeleted: boolean;
 }
@@ -184,6 +186,14 @@ const quizSchema = new Schema<QuizModal>(
       },
     },
     priceStaticContent: {
+      type: String,
+      default: "",
+    },
+    miniTestInstructions: {
+      type: String,
+      default: "",
+    },
+    mockDrillInstructions: {
       type: String,
       default: "",
     },

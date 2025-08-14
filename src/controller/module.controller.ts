@@ -8,6 +8,7 @@ import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
 import mongoose from "mongoose";
+import { IsProModulesAccessible } from "../HelperFunction";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -136,19 +137,10 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   let isProModulesAccessible = false;
 
   if (studentSubscriptionResp["status"] === 200) {
-    if (
-      studentSubscriptionResp["student"].subscriptions &&
-      studentSubscriptionResp["student"].subscriptions.length > 0
-    ) {
-      studentSubscription = studentSubscriptionResp[
-        "student"
-      ].subscriptions.find((subs: any) => subs.examId === examId);
-    }
-
-    if (studentSubscription) {
-      isProModulesAccessible =
-        studentSubscription.featuresAccess.accessProModules;
-    }
+    isProModulesAccessible = IsProModulesAccessible(
+      studentSubscriptionResp["student"],
+      examId
+    );
   }
   if (isProModulesAccessible) {
     modules = modules.map((mod: any) => {

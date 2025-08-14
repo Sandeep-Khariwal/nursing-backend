@@ -5,6 +5,8 @@ import { ResultService } from "../services/result.service";
 import { QuizQuestionService } from "../services/quizQuestion.service";
 import { StudentService } from "../services/student.service";
 import mongoose from "mongoose";
+import cloudinary from "../config/cloudinary";
+import fs from "fs/promises";
 
 export const CreateQuiz = async (req: Request, resp: Response) => {
   const {
@@ -55,6 +57,28 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
   }
 };
 
+export const GetQuiz = async (req: clientRequest, res: Response) => {
+  const { id } = req.params;
+
+  const quizService = new QuizService();
+
+  const response = await quizService.getQuizById(id);
+
+  if (response["status"] === 200) {
+    const { priceStaticContent, winnerPrices, ...rest } =
+      response["quiz"].toObject();
+
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: { priceStaticContent, winnerPrices },
+      message: response["message"],
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
 export const GetToQuiz = async (req: clientRequest, res: Response) => {
   const examId = toStringParam(req.query.examId);
   const studentId = req.user._id;
@@ -64,9 +88,13 @@ export const GetToQuiz = async (req: clientRequest, res: Response) => {
   const response = await quizService.getQuiz(examId, studentId);
 
   if (response["status"] === 200) {
+
+       const { priceStaticContent, winnerPrices, ...rest } =
+      response["quiz"].toObject();
+
     res.status(response["status"]).json({
       status: response["status"],
-      data: response["quiz"],
+      data: rest,
       message: response["message"],
     });
   } else {
@@ -155,7 +183,6 @@ export const SetQuizCloseAuto = async (quizId: string) => {
 export const GetAllQuizes = async (req: clientRequest, res: Response) => {
   const examId = toStringParam(req.query.examId);
   const quizService = new QuizService();
-
   const response = await quizService.getAllQuizByExamId(examId);
 
   if (response["status"] === 200) {
@@ -187,6 +214,73 @@ export const GetQuizForRegistration = async (
     res
       .status(response["status"])
       .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const AddWinnerPrize = async (req: Request, res: Response) => {
+  const quizId = req.params.id;
+  const data = req.body;
+  const quizService = new QuizService();
+
+  const response = await quizService.addWinnerPrizeInQuizById(quizId, data);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: { quiz: response["quize"] },
+      message: response["message"],
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
+  const quizId = req.params.id;
+  try {
+    const file = (req as any).file as Express.Multer.File | undefined;
+
+    if (!file) {
+      res.status(400).json({
+        status: 400,
+        message: "Prize image is required (field: 'prizeImage')",
+      });
+    }
+
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "winner_prize_images",
+      resource_type: "image",
+    });
+
+    try {
+      await fs.unlink(file.path);
+    } catch (e) {
+      console.warn("Temp file cleanup failed:", e);
+    }
+
+    //update images in quiz
+    const quizService = new QuizService();
+
+    const response = await quizService.uploadPrizeImages(
+      quizId,
+      result.secure_url
+    );
+    if (response["status"] === 200) {
+      res.status(200).json({
+        status: 200,
+        message: "Image uploaded successfully",
+        data: response["images"],
+      });
+    } else {
+      res
+        .status(response["status"])
+        .json({ status: response["status"], message: response["message"] });
+    }
+  } catch (error: any) {
+    console.error("Error uploading logo:", error);
+    res
+      .status(500)
+      .json({ status: 500, message: error.message || "Failed to upload logo" });
   }
 };
 export const RemoveQuiz = async (req: Request, res: Response) => {
@@ -230,7 +324,7 @@ export const GetPostionsInQuiz = async (req: Request, res: Response) => {
         totalMarks: res.totalMarks,
         obtainedMarks: res.obtainedMarks,
         timeTaken: res.totalTimeSpent,
-        accuracy:res.accuracy
+        accuracy: res.accuracy,
       }))
       .sort((a, b) => {
         // Rank by marks or correct answers
@@ -347,7 +441,7 @@ export const SubmitQuizResponse = async (req: clientRequest, res: Response) => {
       totalTimeSpent:
         quiz.totalTime -
         quiz.student_time.filter((s) => s.studentId === studentId)[0].totalTime,
-        accuracy:(totalCorrectAnswers / quiz.questions.length) * 100
+      accuracy: (totalCorrectAnswers / quiz.questions.length) * 100,
     };
 
     const resultResponse = await resultService.createResult(result);

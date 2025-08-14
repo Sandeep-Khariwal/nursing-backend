@@ -1,6 +1,7 @@
 import express  from "express";
-import { CreateQuiz, GetAllQuizes, GetPostionsInQuiz, GetQuizForRegistration, GetToQuiz, RegistrationClose, RegistrationOpen, RemoveQuiz, SetQuizClose, SetQuizLive, SubmitQuizResponse } from "../controller/quiz.controller";
+import { AddWinnerPrize, AddWinnerPrizeImage, CreateQuiz, GetAllQuizes, GetPostionsInQuiz, GetQuiz, GetQuizForRegistration, GetToQuiz, RegistrationClose, RegistrationOpen, RemoveQuiz, SetQuizClose, SetQuizLive, SubmitQuizResponse } from "../controller/quiz.controller";
 import { authenticateToken } from "../middleware/jwtToken";
+import upload from "../middleware/multer";
 const quizRouter = express.Router();
 
 quizRouter.post("/create" ,authenticateToken , CreateQuiz);
@@ -11,7 +12,10 @@ quizRouter.put("/registrationOpen" ,authenticateToken, RegistrationOpen);
 quizRouter.put("/registrationClose" ,authenticateToken, RegistrationClose);
 quizRouter.put("/submit/:id" , authenticateToken , SubmitQuizResponse);
 quizRouter.put("/removeQuiz" , authenticateToken , RemoveQuiz);
+quizRouter.put("/addWinnerPrize/:id" , authenticateToken , AddWinnerPrize);
+quizRouter.put("/uploadWinnerPrizeImage/:id" , upload.single("prizeImage") , AddWinnerPrizeImage);
 
+quizRouter.get("/get/:id" ,authenticateToken, GetQuiz);
 quizRouter.get("/getQuiz" ,authenticateToken, GetToQuiz);
 quizRouter.get("/getAll" ,authenticateToken, GetAllQuizes);
 quizRouter.get("/getQuizForRegistration" ,authenticateToken, GetQuizForRegistration);

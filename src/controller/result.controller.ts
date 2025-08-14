@@ -5,6 +5,7 @@ import { clientRequest } from "../middleware/jwtToken";
 import { ModuleService } from "../services/module.service";
 import { ResultService } from "../services/result.service";
 import { QuestionService } from "../services/question.service";
+import { IsDashboardAccessible } from "../HelperFunction";
 
 export const CreateResult = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
@@ -147,23 +148,12 @@ export const GetAllResultsForExam = async (
   const studentSubscriptionResp = await studentService.getStudentById(
     studentId
   );
-  let studentSubscription = null;
   let isDashboardAccessible = false;
-
   if (studentSubscriptionResp["status"] === 200) {
-    if (
-      studentSubscriptionResp["student"].subscriptions &&
-      studentSubscriptionResp["student"].subscriptions.length > 0
-    ) {
-      studentSubscription = studentSubscriptionResp[
-        "student"
-      ].subscriptions.find((subs: any) => subs.examId === examId);
-    }
-
-    if (studentSubscription) {
-      isDashboardAccessible =
-        studentSubscription.featuresAccess.accessJournerSoFar;
-    }
+    isDashboardAccessible = IsDashboardAccessible(
+      studentSubscriptionResp["student"],
+      examId
+    );
   }
 
   if (response["status"] === 200) {

@@ -95,7 +95,10 @@ export class QuizService {
           },
         },
       });
-      return { status: 200, message: "You have successfully registered for the Quiz!!" };
+      return {
+        status: 200,
+        message: "You have successfully registered for the Quiz!!",
+      };
     } catch (error) {
       return { status: 500, message: error.message };
     }
@@ -549,6 +552,27 @@ export class QuizService {
       return { status: 500, message: error.message };
     }
   }
+  public async addWinnerPrizeInQuizById(
+    id: string,
+    data: {
+      winnerPrices: {
+        firstPrize: string;
+        secondPrize: string;
+        thirdPrize: string;
+      };
+      priceStaticContent: string;
+    }
+  ) {
+    try {
+      const quiz = await Quiz.findByIdAndUpdate(id, data, { new: true });
+      if (!quiz) {
+        return { status: 404, message: "quiz not found!!" };
+      }
+      return { status: 200, quiz, message: "quiz Winner Prize updated!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
   public async removeQuizById(id: string) {
     try {
       const quiz = await Quiz.findByIdAndUpdate(
@@ -601,7 +625,7 @@ export class QuizService {
 
       quizes = quizes.map((quiz: any) => {
         const newQuiz = quiz.toObject();
-        const { examId, ...rest } = newQuiz;
+        const { examId, priceStaticContent, winnerPrices, ...rest } = newQuiz;
 
         return {
           ...rest,
@@ -648,6 +672,25 @@ export class QuizService {
 
       return { status: 200, quiz };
     } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async uploadPrizeImages(quizId: string, imageUrl: string) {
+    try {
+      const quiz = await Quiz.findByIdAndUpdate(
+        quizId,
+        {
+          $push: { "winnerPrices.images": imageUrl },
+        },
+        { new: true }
+      );
+
+      if (!quiz) {
+        return { status: 404, message: "Quiz not found!!" };
+      }
+
+      return { status: 200, images: quiz.winnerPrices.images };
+    } catch (error: any) {
       return { status: 500, message: error.message };
     }
   }
