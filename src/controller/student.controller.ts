@@ -36,8 +36,8 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
   }
 };
 
-export const GetStudent = async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const GetStudent = async (req: clientRequest, res: Response) => {
+  const  id  = req.user._id;
   const studentService = new StudentService();
 
   const response = await studentService.getStudentById(id);

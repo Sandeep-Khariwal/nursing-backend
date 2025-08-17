@@ -384,4 +384,21 @@ export class ExamService {
       return errorObj;
     }
   }
+  public async getExamById(id: string) {
+    try {
+      const exam = await examsModel.findById(id);
+
+      console.log("exam : ",exam);
+      
+
+      if (!exam) {
+        return { status: 404, message: "Exam not found!!" };
+      }
+
+      return { status: 200, exam: exam };
+    } catch (error) {
+      const errorObj = { message: error.message, status: 500 };
+      return errorObj;
+    }
+  }
 }

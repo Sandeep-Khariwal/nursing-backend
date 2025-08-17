@@ -57,9 +57,7 @@ export class StudentService {
   public async getStudentById(id: string) {
     try {
       const student = await studentModel.findById(id, { isDeleted: false });
-      const studentObj = student.toObject();
-      delete studentObj.token;
-      return { status: 200, student: studentObj };
+      return { status: 200, student: student };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

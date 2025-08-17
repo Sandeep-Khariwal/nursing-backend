@@ -4,7 +4,7 @@ import { GetStudent, UpdateStudent, UpdateStudentExam } from "../controller/stud
 const studentRouter = express.Router();
 
 studentRouter.put("/selectExams",authenticateToken,UpdateStudentExam)
-studentRouter.get("/:id",authenticateToken,GetStudent)
+studentRouter.get("/get",authenticateToken,GetStudent)
 studentRouter.put("/editProfile",authenticateToken,UpdateStudent)
 
 export default studentRouter

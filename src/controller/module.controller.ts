@@ -69,6 +69,20 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   const examService = new ExamService();
   const studentService = new StudentService();
 
+  //get mintiTest and mockDrill instructions of exam
+
+  const examResp = await examService.getExamById(examId);
+  let instructions:any = {}
+
+  if (examResp["status"] === 200) {
+   const miniTestInstructions = examResp["exam"].toObject().miniTestInstructions;
+   const mockDrillInstructions = examResp["exam"].toObject().mockDrillInstructions;
+
+    instructions.miniTestInstructions = miniTestInstructions
+    instructions.mockDrillInstructions = mockDrillInstructions
+  }
+  
+
   let response;
   let modules = [];
 
@@ -154,7 +168,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: 200, data: { modules: modules } });
+      .json({ status: 200, data: {...instructions , modules: modules } });
   } else {
     res
       .status(response["status"])
