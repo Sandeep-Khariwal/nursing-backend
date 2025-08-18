@@ -262,4 +262,45 @@ export class StudentService {
       return { status: 500, message: error.message };
     }
   }
+  public async expireStudentPlan(studentId:string,subscription: {
+    examId: string;
+    subscriptionId: string;
+    planId: string;
+    subscriptionStart: Date;
+    subscriptionEnd: Date;
+    featuresAccess: {
+      accessProModules: boolean;
+      accessJournerSoFar: boolean;
+      accessAdFree: boolean;
+      accessSupportAndNotifications: boolean;
+      accessVideoLibrary: boolean;
+      accessVideoCombo: boolean;
+      accessPrioritySupport: boolean;
+    };
+  }) {
+    try {
+      const updatedStudent = await studentModel.updateOne(
+         {
+        _id: studentId,
+        "subscriptions.subscriptionId": subscription.subscriptionId,
+      },
+        {
+          $set: {
+            "subscriptions.$": subscription,
+          },
+        }
+      );
+
+      if (updatedStudent.modifiedCount === 0) {
+        return {
+          status: 404,
+          message: "Subscription not found!!",
+        };
+      }
+
+      return { status: 200, message: "student update!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
 }

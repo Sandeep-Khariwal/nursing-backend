@@ -13,6 +13,15 @@ export const IsQuiz = (id: string) => {
   }
 };
 
+export const IsSubscriptionExpired = (studentSubscription: any) => {
+  
+  const now = new Date();
+  const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+  const isNotExpired = subscriptionEnd >= now;
+  return !isNotExpired;
+};
+
 export const IsDashboardAccessible = (student: any, examId: string) => {
   let studentSubscription = null;
   let isDashboardAccessible = false;
@@ -23,16 +32,24 @@ export const IsDashboardAccessible = (student: any, examId: string) => {
   }
 
   if (studentSubscription) {
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
     isDashboardAccessible =
-      studentSubscription.featuresAccess.accessJournerSoFar;
+      studentSubscription.featuresAccess.accessJournerSoFar && isNotExpired;
   }
 
   return isDashboardAccessible;
 };
 
-export const IsProModulesAccessible = (student: any, examId: string) => {
+export const IsProModulesAccessible = (
+  student: any,
+  examId: string
+): boolean => {
   let studentSubscription = null;
   let isProModulesAccessible = false;
+
   if (student.subscriptions && student.subscriptions.length > 0) {
     studentSubscription = student.subscriptions.find(
       (subs: any) => subs.examId === examId
@@ -40,8 +57,13 @@ export const IsProModulesAccessible = (student: any, examId: string) => {
   }
 
   if (studentSubscription) {
-    isProModulesAccessible =
-      studentSubscription.featuresAccess.accessProModules;
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
+    const hasProAccess = studentSubscription.featuresAccess?.accessProModules;
+
+    isProModulesAccessible = hasProAccess && isNotExpired;
   }
 
   return isProModulesAccessible;
@@ -59,8 +81,13 @@ export const IsSupportAndNotificationsAccessible = (
     );
   }
   if (studentSubscription) {
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
     accessSupportAndNotifications =
-      studentSubscription.featuresAccess.accessSupportAndNotifications;
+      studentSubscription.featuresAccess.accessSupportAndNotifications &&
+      isNotExpired;
   }
   return accessSupportAndNotifications;
 };
@@ -74,7 +101,12 @@ export const IsVideoLibraryAccessible = (student: any, examId: string) => {
     );
   }
   if (studentSubscription) {
-    accessVideoLibrary = studentSubscription.featuresAccess.accessVideoLibrary;
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
+    accessVideoLibrary =
+      studentSubscription.featuresAccess.accessVideoLibrary && isNotExpired;
   }
   return accessVideoLibrary;
 };
@@ -88,7 +120,12 @@ export const IsVideoComboAccessible = (student: any, examId: string) => {
     );
   }
   if (studentSubscription) {
-    accessVideoCombo = studentSubscription.featuresAccess.accessVideoCombo;
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
+    accessVideoCombo =
+      studentSubscription.featuresAccess.accessVideoCombo && isNotExpired;
   }
   return accessVideoCombo;
 };
@@ -102,8 +139,12 @@ export const IsPrioritySupportAccessible = (student: any, examId: string) => {
     );
   }
   if (studentSubscription) {
+    const now = new Date();
+    const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
+
+    const isNotExpired = subscriptionEnd >= now;
     accessPrioritySupport =
-      studentSubscription.featuresAccess.accessPrioritySupport;
+      studentSubscription.featuresAccess.accessPrioritySupport && isNotExpired;
   }
   return accessPrioritySupport;
 };

@@ -8,7 +8,10 @@ import { StudentService } from "../services/student.service";
 import { ModuleType } from "../enums/test.enum";
 import { ExamService } from "../services/exam.service";
 import mongoose from "mongoose";
-import { IsProModulesAccessible } from "../HelperFunction";
+import {
+  IsProModulesAccessible,
+  IsSubscriptionExpired,
+} from "../HelperFunction";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -28,7 +31,6 @@ export const CreateModule = async (req: Request, res: Response) => {
     // update module in chapter
     if (!moduleId) {
       if (ModuleType.QUESTION_FIELD === moduleType) {
-        console.log(" response[module]._id ", response["module"]._id);
         await chapterService.addNewModuleInChapter(
           module.chapterId,
           response["module"]._id
@@ -72,16 +74,17 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   //get mintiTest and mockDrill instructions of exam
 
   const examResp = await examService.getExamById(examId);
-  let instructions:any = {}
+  let instructions: any = {};
 
   if (examResp["status"] === 200) {
-   const miniTestInstructions = examResp["exam"].toObject().miniTestInstructions;
-   const mockDrillInstructions = examResp["exam"].toObject().mockDrillInstructions;
+    const miniTestInstructions =
+      examResp["exam"].toObject().miniTestInstructions;
+    const mockDrillInstructions =
+      examResp["exam"].toObject().mockDrillInstructions;
 
-    instructions.miniTestInstructions = miniTestInstructions
-    instructions.mockDrillInstructions = mockDrillInstructions
+    instructions.miniTestInstructions = miniTestInstructions;
+    instructions.mockDrillInstructions = mockDrillInstructions;
   }
-  
 
   let response;
   let modules = [];
@@ -151,8 +154,38 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   let isProModulesAccessible = false;
 
   if (studentSubscriptionResp["status"] === 200) {
+        //found subscription for current exam 
+    const currentSubscription = studentSubscriptionResp["user"]?.subscriptions.find((subs:any)=>subs.examId === examId)
+    const studentService = new StudentService()
+      //if subscription expired? then update in db
+    const isSubscriptionExpired = IsSubscriptionExpired(
+     currentSubscription
+    );
+    if (isSubscriptionExpired) {
+      const newSubscription = {
+        examId: currentSubscription.examId,
+        subscriptionStart:
+          currentSubscription.subscriptionStart,
+        subscriptionEnd:
+          currentSubscription.subscriptionEnd,
+        subscriptionId:
+         currentSubscription.subscriptionId,
+        planId: currentSubscription.planId,
+        featuresAccess: {
+          accessProModules: false,
+          accessJournerSoFar: false,
+          accessAdFree: false,
+          accessSupportAndNotifications: false,
+          accessVideoLibrary: false,
+          accessVideoCombo: false,
+          accessPrioritySupport: false,
+        },
+      };
+
+      await studentService.expireStudentPlan(studentId,newSubscription)
+    }
     isProModulesAccessible = IsProModulesAccessible(
-      studentSubscriptionResp["student"],
+      studentSubscriptionResp["user"],
       examId
     );
   }
@@ -168,7 +201,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   if (response["status"] === 200) {
     res
       .status(response["status"])
-      .json({ status: 200, data: {...instructions , modules: modules } });
+      .json({ status: 200, data: { ...instructions, modules: modules } });
   } else {
     res
       .status(response["status"])
