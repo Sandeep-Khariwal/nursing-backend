@@ -19,8 +19,9 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
     registerStartDate,
     registerEndDate,
     quizFees,
+    winnerPrices,
+    priceStaticContent,
   } = req.body;
-
   const quizService = new QuizService();
   let response;
   if (!quizId) {
@@ -47,6 +48,12 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
   }
 
   if (response["status"] === 200) {
+    // add or update winner prize if quiz created
+    await quizService.addWinnerPrizeInQuizById(response["quiz"]._id, {
+      winnerPrices,
+      priceStaticContent,
+    });
+
     resp
       .status(response["status"])
       .json({ status: response["status"], data: response["quiz"] });
@@ -88,8 +95,7 @@ export const GetToQuiz = async (req: clientRequest, res: Response) => {
   const response = await quizService.getQuiz(examId, studentId);
 
   if (response["status"] === 200) {
-
-       const { priceStaticContent, winnerPrices, ...rest } =
+    const { priceStaticContent, winnerPrices, ...rest } =
       response["quiz"].toObject();
 
     res.status(response["status"]).json({
@@ -216,25 +222,6 @@ export const GetQuizForRegistration = async (
       .json({ status: response["status"], message: response["message"] });
   }
 };
-export const AddWinnerPrize = async (req: Request, res: Response) => {
-  const quizId = req.params.id;
-  const data = req.body;
-  const quizService = new QuizService();
-
-  const response = await quizService.addWinnerPrizeInQuizById(quizId, data);
-
-  if (response["status"] === 200) {
-    res.status(response["status"]).json({
-      status: response["status"],
-      data: { quiz: response["quize"] },
-      message: response["message"],
-    });
-  } else {
-    res
-      .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
-  }
-};
 export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
   const quizId = req.params.id;
   try {
@@ -288,6 +275,25 @@ export const RemoveQuiz = async (req: Request, res: Response) => {
   const quizService = new QuizService();
 
   const response = await quizService.removeQuizById(quizId);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: { quiz: response["quize"] },
+      message: response["message"],
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const RemovePrizeImage = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { imageUrl } = req.body;
+  const quizService = new QuizService();
+
+  const response = await quizService.removeImageUrlFromQuiz(id, imageUrl);
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({

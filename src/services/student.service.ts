@@ -57,7 +57,10 @@ export class StudentService {
   public async getStudentById(id: string) {
     try {
       const student = await studentModel.findById(id, { isDeleted: false });
-      return { status: 200, student: student };
+      if (!student) {
+        return { status: 404, message: "Student not found!!" };
+      }
+      return { status: 200, user: student };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;

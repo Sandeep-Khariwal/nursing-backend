@@ -31,4 +31,16 @@ export class AdminService {
       return errorObj;
     }
   }
+    public async getAdminById(id: string) {
+      try {
+        const admin = await Admin.findById(id, { isDeleted: false });
+        if (!admin) {
+          return { status: 404, message: "Admin not found!!" };
+        }
+        return { status: 200, user: admin };
+      } catch (error) {
+        const errorObj = { message: error.message, status: 500 };
+        return errorObj;
+      }
+    }
 }

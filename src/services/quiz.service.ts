@@ -625,7 +625,7 @@ export class QuizService {
 
       quizes = quizes.map((quiz: any) => {
         const newQuiz = quiz.toObject();
-        const { examId, priceStaticContent, winnerPrices, ...rest } = newQuiz;
+        const { examId, ...rest } = newQuiz;
 
         return {
           ...rest,
@@ -680,7 +680,13 @@ export class QuizService {
       const quiz = await Quiz.findByIdAndUpdate(
         quizId,
         {
-          $push: { "winnerPrices.images": imageUrl },
+          $push: {
+            "winnerPrices.images": {
+              $each: [imageUrl],
+              $position: 0,
+            },
+          },
+          push: { "winnerPrices.images": imageUrl },
         },
         { new: true }
       );
@@ -690,6 +696,29 @@ export class QuizService {
       }
 
       return { status: 200, images: quiz.winnerPrices.images };
+    } catch (error: any) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeImageUrlFromQuiz(id: string, imageUrl: string) {
+    try {
+      const quiz = await Quiz.findByIdAndUpdate(
+        id,
+        {
+          $pull: { "winnerPrices.images": imageUrl },
+        },
+        { new: true }
+      );
+
+      if (!quiz) {
+        return { status: 404, message: "Quiz not found!!" };
+      }
+
+      return {
+        status: 200,
+        quiz: quiz,
+        message: "Image Removed successfully!!",
+      };
     } catch (error: any) {
       return { status: 500, message: error.message };
     }

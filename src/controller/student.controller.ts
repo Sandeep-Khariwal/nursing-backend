@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { clientRequest } from "../middleware/jwtToken";
 import { StudentService } from "../services/student.service";
 import { ExamService } from "../services/exam.service";
+import { IsStudent } from "../HelperFunction";
+import { AdminService } from "../services/admin.service";
 
 export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
   const { _id } = req.user;
@@ -37,14 +39,22 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
 };
 
 export const GetStudent = async (req: clientRequest, res: Response) => {
-  const  id  = req.user._id;
+  const id = req.user._id;
   const studentService = new StudentService();
+  const adminService = new AdminService()
 
-  const response = await studentService.getStudentById(id);
+  const isStudent = IsStudent(id);
+  let response;
+  if (isStudent) {
+    response = await studentService.getStudentById(id);
+  } else {
+    response = await adminService.getAdminById(id);
+  }
+
   if (response["status"] == 200) {
     res.status(200).json({
       status: response["status"],
-      data: response["student"],
+      data: response["user"],
     });
   } else {
     res
@@ -57,12 +67,17 @@ export const UpdateStudent = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
   const studentService = new StudentService();
 
-  const response = await studentService.updateStudentExam(studentId, {examId, firstName, lastName, email});
+  const response = await studentService.updateStudentExam(studentId, {
+    examId,
+    firstName,
+    lastName,
+    email,
+  });
   if (response["status"] == 200) {
     res.status(200).json({
       status: response["status"],
       data: response["student"],
-      message:response["message"]
+      message: response["message"],
     });
   } else {
     res
