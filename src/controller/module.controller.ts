@@ -12,6 +12,8 @@ import {
   IsProModulesAccessible,
   IsSubscriptionExpired,
 } from "../HelperFunction";
+import cloudinary from "../config/cloudinary";
+import fs from "fs/promises";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -154,22 +156,19 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
   let isProModulesAccessible = false;
 
   if (studentSubscriptionResp["status"] === 200) {
-        //found subscription for current exam 
-    const currentSubscription = studentSubscriptionResp["user"]?.subscriptions.find((subs:any)=>subs.examId === examId)
-    const studentService = new StudentService()
-      //if subscription expired? then update in db
-    const isSubscriptionExpired = IsSubscriptionExpired(
-     currentSubscription
-    );
+    //found subscription for current exam
+    const currentSubscription = studentSubscriptionResp[
+      "user"
+    ]?.subscriptions.find((subs: any) => subs.examId === examId);
+    const studentService = new StudentService();
+    //if subscription expired? then update in db
+    const isSubscriptionExpired = IsSubscriptionExpired(currentSubscription);
     if (isSubscriptionExpired) {
       const newSubscription = {
         examId: currentSubscription.examId,
-        subscriptionStart:
-          currentSubscription.subscriptionStart,
-        subscriptionEnd:
-          currentSubscription.subscriptionEnd,
-        subscriptionId:
-         currentSubscription.subscriptionId,
+        subscriptionStart: currentSubscription.subscriptionStart,
+        subscriptionEnd: currentSubscription.subscriptionEnd,
+        subscriptionId: currentSubscription.subscriptionId,
         planId: currentSubscription.planId,
         featuresAccess: {
           accessProModules: false,
@@ -182,7 +181,7 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
         },
       };
 
-      await studentService.expireStudentPlan(studentId,newSubscription)
+      await studentService.expireStudentPlan(studentId, newSubscription);
     }
     isProModulesAccessible = IsProModulesAccessible(
       studentSubscriptionResp["user"],
@@ -227,6 +226,26 @@ export const GetAllCompletedModules = async (
     res.status(response["status"]).json({
       status: response["status"],
       data: { modules: response["modules"] },
+      message: response["message"],
+    });
+  } else {
+    res.status(response["status"]).json({
+      status: response["status"],
+      message: response["message"],
+    });
+  }
+};
+export const GetAllVideos = async (req: clientRequest, res: Response) => {
+  const { id } = req.params;
+
+  const modulesService = new ModuleService();
+
+  const response = await modulesService.getAllModulesVideos(id);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: response["module"],
       message: response["message"],
     });
   } else {
@@ -393,6 +412,60 @@ export const SubmitModuleResponse = async (
   // };
 };
 
+export const AddVideoInModules = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const title = toStringParam(req.query.title);
+
+  const files = req.files as {
+    video?: Express.Multer.File[];
+    thumbnail?: Express.Multer.File[];
+  };
+
+  const videoFile = files?.video?.[0];
+  const thumbnailFile = files?.thumbnail?.[0];
+
+  if (!videoFile || !thumbnailFile) {
+    res.status(400).json({
+      status: 400,
+      message: "Both video and thumbnail files are required.",
+    });
+  }
+  // Upload video to Cloudinary
+  const videoResult = await cloudinary.uploader.upload(videoFile.path, {
+    folder: "modules_videos",
+    resource_type: "video",
+  });
+
+  // Upload thumbnail to Cloudinary
+  const thumbnailResult = await cloudinary.uploader.upload(thumbnailFile.path, {
+    folder: "modules_thumbnails",
+    resource_type: "image",
+  });
+
+  // Clean up temporary files
+  await Promise.all([fs.unlink(videoFile.path), fs.unlink(thumbnailFile.path)]);
+  const data = {
+    videoUrl: videoResult.secure_url,
+    thumbnailUrl: thumbnailResult.secure_url,
+    title: title,
+  };
+
+  //update video url in videos
+  const moduleService = new ModuleService();
+  const response = await moduleService.addVideoInModuleById(id, data);
+
+  if (response["status"] === 200) {
+    res.status(response["status"]).json({
+      status: 200,
+      data: response["module"],
+      message: response["message"],
+    });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
 export const RestoreModules = async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -405,6 +478,27 @@ export const RestoreModules = async (req: Request, res: Response) => {
     res
       .status(response["status"])
       .json({ status: 200, message: response["message"] });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const DeleteVideoFromModule = async (req: Request, res: Response) => {
+  const moduleId = toStringParam(req.query.moduleId);
+  const videoId = toStringParam(req.query.videoId);
+
+  const moduleService = new ModuleService();
+  const response = await moduleService.removeVideoFromModule(moduleId, videoId);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({
+        status: 200,
+        message: response["message"],
+        data: response["module"],
+      });
   } else {
     res
       .status(response["status"])

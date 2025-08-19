@@ -6,6 +6,11 @@ interface ModulesModel {
   chapterId: string;
   questions: string[];
   iconImage: string;
+  videos: {
+    videoUrl: string;
+    thumbnailUrl: string;
+    title: string;
+  }[];
   isPro: boolean;
 
   questionAttempted: {
@@ -41,6 +46,25 @@ const moduleSchema = new Schema<ModulesModel>({
   questions: {
     type: [String],
     ref: "question",
+  },
+  videos: {
+    type: [
+      {
+        videoUrl: {
+          type: String,
+          default: "",
+        },
+        thumbnailUrl: {
+          type: String,
+          default: "",
+        },
+        title: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+    default: [],
   },
   iconImage: {
     type: String,

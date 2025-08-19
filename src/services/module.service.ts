@@ -647,7 +647,7 @@ export class ModuleService {
       newModule.isCompleted = false;
       newModule.student_time = 0;
       newModule.resultId = "";
-      newModule.questionAttempted = []
+      newModule.questionAttempted = [];
       // Step 2: Check if student_time entry exists
 
       // if (module && updatedDoc) {
@@ -737,7 +737,6 @@ export class ModuleService {
   }
 
   public async getCompletedModulesByExamId(id: string, studentId: string) {
-    
     try {
       const modules = await Module.find({
         examId: id,
@@ -758,12 +757,12 @@ export class ModuleService {
           "resultId",
           "isCompleted",
           "student_time",
-          "chapterId"
+          "chapterId",
         ])
         .populate([
           {
-            path:"chapterId",
-            select:["_id","name"]
+            path: "chapterId",
+            select: ["_id", "name"],
           },
           {
             path: "questions",
@@ -819,11 +818,11 @@ export class ModuleService {
         const myTime = module.student_time.filter(
           (att) => att.studentId === studentId
         )[0].totalTime;
-        
-        const resultId = module.resultId.filter(
-          (att) => att.studentId === studentId
-        ).map((res)=>res?.id)[0];
-        const {chapterId , ...rest} = module
+
+        const resultId = module.resultId
+          .filter((att) => att.studentId === studentId)
+          .map((res) => res?.id)[0];
+        const { chapterId, ...rest } = module;
         return {
           ...rest,
           questions: processedQuestions.filter((q) => q).map((q) => q._id),
@@ -831,7 +830,7 @@ export class ModuleService {
           student_time: myTime,
           isCompleted,
           resultId,
-          chapterName:chapterId?.name?chapterId.name:""
+          chapterName: chapterId?.name ? chapterId.name : "",
         };
       });
 
@@ -842,20 +841,19 @@ export class ModuleService {
       };
     } catch (error) {
       console.log(error);
-      
+
       return {
         status: 500,
         message: error.message || "Internal Server Error",
       };
     }
   }
-    public async getAllWrongQuestionsByModuleId(id:string,studentId:string) {
+  public async getAllWrongQuestionsByModuleId(id: string, studentId: string) {
     try {
-  
       const modules = await Module.findById(id).populate([
         {
           path: "questions",
-          select: ["_id", "question", "options", "attempt","explaination"],
+          select: ["_id", "question", "options", "attempt", "explaination"],
         },
       ]);
       if (modules && modules.isDeleted) {
@@ -863,67 +861,122 @@ export class ModuleService {
       }
 
       // Process each question to find correct and selected answer
-        const module = modules.toObject();
-        const processedQuestions = module.questions.map((q: any) => {
-          const correctOption = q.options.find(
-            (opt: any) => opt.answer === true
-          );
+      const module = modules.toObject();
+      const processedQuestions = module.questions.map((q: any) => {
+        const correctOption = q.options.find((opt: any) => opt.answer === true);
 
-          // Assuming attempt is an array like: [{ optionId: '...' }]
-          const attempted = q.attempt?.find(
-            (att) => att.studentId === studentId
-          );
+        // Assuming attempt is an array like: [{ optionId: '...' }]
+        const attempted = q.attempt?.find((att) => att.studentId === studentId);
 
-          const selectedOption = q.options.find(
-            (opt: any) => String(opt._id) === String(attempted?.optionId)
-          );
-          if (selectedOption) {
-            const isWrongAnswer =
-              correctOption.answer !== selectedOption.answer;
+        const selectedOption = q.options.find(
+          (opt: any) => String(opt._id) === String(attempted?.optionId)
+        );
+        if (selectedOption) {
+          const isWrongAnswer = correctOption.answer !== selectedOption.answer;
 
-            if (isWrongAnswer && attempted) {
-              const options = q.options.map((opt)=>{
-                if(String(opt._id) === String(attempted?.optionId)){
-                  return {
-                    ...opt,
-                    attempt:true
-                  }
-                } else {
-                   return {
-                    ...opt,
-                    attempt:false
-                  }
-                }
-              })
-              return {
-                _id: q._id,
-                question: q.question,
-                options: options,
-                explaination:q.explaination
-              };
-            }
+          if (isWrongAnswer && attempted) {
+            const options = q.options.map((opt) => {
+              if (String(opt._id) === String(attempted?.optionId)) {
+                return {
+                  ...opt,
+                  attempt: true,
+                };
+              } else {
+                return {
+                  ...opt,
+                  attempt: false,
+                };
+              }
+            });
+            return {
+              _id: q._id,
+              question: q.question,
+              options: options,
+              explaination: q.explaination,
+            };
           }
-        });
+        }
+      });
 
-        const isCompleted = module.isCompleted.filter(
-          (att) => att.studentId === studentId
-        )[0].isCompleted;
-        const myTime = module.student_time.filter(
-          (att) => att.studentId === studentId
-        )[0].totalTime;
-        const resultId = module.resultId.filter(
-          (att) => att.studentId === studentId
-        )[0].id;
+      const isCompleted = module.isCompleted.filter(
+        (att) => att.studentId === studentId
+      )[0].isCompleted;
+      const myTime = module.student_time.filter(
+        (att) => att.studentId === studentId
+      )[0].totalTime;
+      const resultId = module.resultId.filter(
+        (att) => att.studentId === studentId
+      )[0].id;
 
-        const newModule =  {
-          ...module,
-          questions: processedQuestions.filter((q) => q),
-          student_time: myTime,
-          isCompleted,
-          resultId,
-        };
+      const newModule = {
+        ...module,
+        questions: processedQuestions.filter((q) => q),
+        student_time: myTime,
+        isCompleted,
+        resultId,
+      };
 
-      return { status: 200, module:newModule, message: "Questions get!!" };
+      return { status: 200, module: newModule, message: "Questions get!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
+  public async addVideoInModuleById(
+    id: string,
+    data: {
+      videoUrl: string;
+      thumbnailUrl: string;
+      title: string;
+    }
+  ) {
+    try {
+      const module = await Module.findByIdAndUpdate(
+        id,
+        {
+          $addToSet: { videos: data },
+        },
+        { new: true }
+      );
+
+      return { status: 200, module: module };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async getAllModulesVideos(id: string) {
+    try {
+      const module = await Module.findById(id);
+
+      if (!module) {
+        return { status: 404, module: null, message: "Module not found!!" };
+      }
+
+      const { _id, name, videos } = module.toObject();
+
+      return { status: 200, module: { _id, name, videos } };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async removeVideoFromModule(moduleId: string,videoId:string) {
+    try {
+     const module = await Module.findByIdAndUpdate(
+      moduleId,
+      {
+        $pull: {
+          videos: { _id: videoId },
+        },
+      },
+      { new: true } 
+    );
+      if (!module) {
+        return { status: 404, module: null, message: "Module not found!!" };
+      }
+
+      const { _id, name, videos } = module.toObject();
+
+      return { status: 200, module: { _id, name, videos } };
     } catch (error) {
       return { status: 500, message: error.message };
     }

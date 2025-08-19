@@ -20,13 +20,15 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
-
-  if (/^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(file.mimetype)) {
+  if (
+    /^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(file.mimetype) ||
+    /^video\/(mp4|quicktime|webm|x-matroska)$/.test(file.mimetype)
+  ) {
     cb(null, true);
   } else {
     cb(
       new Error(
-        "Only image files are allowed (png, jpg, jpeg, webp, gif, svg)."
+        "Only image and video files are allowed (png, jpg, jpeg, webp, gif, svg, mp4, mov, webm, mkv)."
       )
     );
   }
