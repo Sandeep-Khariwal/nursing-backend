@@ -1,14 +1,14 @@
 import { createReadStream, unlink } from "fs";
 import multer from "multer";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static"; // ensure you install this: npm i ffmpeg-static
+// import ffmpeg from "fluent-ffmpeg";
+// import ffmpegPath from "ffmpeg-static"; // ensure you install this: npm i ffmpeg-static
 import path from "path";
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { Upload } from "@aws-sdk/lib-storage";
 
 // Set ffmpeg static binary path
-ffmpeg.setFfmpegPath(ffmpegPath!);
+// ffmpeg.setFfmpegPath(ffmpegPath!);
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -51,26 +51,26 @@ export async function uploadMediaFile(
     const outputFileName = `${uuidv4()}.mp4`;
     const outputPath = path.join("uploads", outputFileName);
 
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg(inputPath)
-        .outputOptions([
-          "-c:v libx264",
-          "-preset fast",
-          "-c:a aac",
-          "-b:a 128k",
-          "-movflags +faststart",
-        ])
-        .output(outputPath)
-        .on("end", () => {
-          console.log("✅ Video converted to mp4:", outputPath);
-          resolve();
-        })
-        .on("error", (err) => {
-          console.error("❌ FFmpeg conversion error:", err);
-          reject(err);
-        })
-        .run();
-    });
+    // await new Promise<void>((resolve, reject) => {
+    //   ffmpeg(inputPath)
+    //     .outputOptions([
+    //       "-c:v libx264",
+    //       "-preset fast",
+    //       "-c:a aac",
+    //       "-b:a 128k",
+    //       "-movflags +faststart",
+    //     ])
+    //     .output(outputPath)
+    //     .on("end", () => {
+    //       console.log("✅ Video converted to mp4:", outputPath);
+    //       resolve();
+    //     })
+    //     .on("error", (err) => {
+    //       console.error("❌ FFmpeg conversion error:", err);
+    //       reject(err);
+    //     })
+    //     .run();
+    // });
 
     uploadFilePath = outputPath;
     contentType = "video/mp4"; // force mp4 after conversion
