@@ -564,15 +564,28 @@ export class QuizService {
     }
   ) {
     try {
-      const quiz = await Quiz.findByIdAndUpdate(id, data, { new: true });
+      const quiz = await Quiz.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            "winnerPrices.firstPrize": data.winnerPrices.firstPrize,
+            "winnerPrices.secondPrize": data.winnerPrices.secondPrize,
+            "winnerPrices.thirdPrize": data.winnerPrices.thirdPrize,
+          },
+        },
+        { new: true }
+      );
+
       if (!quiz) {
-        return { status: 404, message: "quiz not found!!" };
+        return { status: 404, message: "Quiz not found!!" };
       }
-      return { status: 200, quiz, message: "quiz Winner Prize updated!!" };
-    } catch (error) {
+
+      return { status: 200, quiz, message: "Quiz Winner Prize updated!!" };
+    } catch (error: any) {
       return { status: 500, message: error.message };
     }
   }
+
   public async removeQuizById(id: string) {
     try {
       const quiz = await Quiz.findByIdAndUpdate(
@@ -676,6 +689,8 @@ export class QuizService {
     }
   }
   public async uploadPrizeImages(quizId: string, imageUrl: string) {
+    console.log("imageUrl : ", imageUrl);
+
     try {
       const quiz = await Quiz.findByIdAndUpdate(
         quizId,

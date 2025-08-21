@@ -388,9 +388,6 @@ export class ExamService {
     try {
       const exam = await examsModel.findById(id);
 
-      console.log("exam : ",exam);
-      
-
       if (!exam) {
         return { status: 404, message: "Exam not found!!" };
       }

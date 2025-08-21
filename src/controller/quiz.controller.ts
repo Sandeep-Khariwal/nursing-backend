@@ -1,3 +1,5 @@
+import { quizPriceStaticContent } from "./../staticContent/quiz.static";
+
 import { clientRequest, toStringParam } from "../middleware/jwtToken";
 import { QuizService } from "../services/quiz.service";
 import { Request, Response } from "express";
@@ -7,6 +9,7 @@ import { StudentService } from "../services/student.service";
 import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary";
 import fs from "fs/promises";
+import { uploadMediaFile } from "../aws/awsHelper";
 
 export const CreateQuiz = async (req: Request, resp: Response) => {
   const {
@@ -20,7 +23,6 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
     registerEndDate,
     quizFees,
     winnerPrices,
-    priceStaticContent,
   } = req.body;
   const quizService = new QuizService();
   let response;
@@ -49,14 +51,23 @@ export const CreateQuiz = async (req: Request, resp: Response) => {
 
   if (response["status"] === 200) {
     // add or update winner prize if quiz created
-    await quizService.addWinnerPrizeInQuizById(response["quiz"]._id, {
-      winnerPrices,
-      priceStaticContent,
-    });
+    const newResp = await quizService.addWinnerPrizeInQuizById(
+      response["quiz"]._id,
+      {
+        winnerPrices,
+        priceStaticContent: quizPriceStaticContent,
+      }
+    );
 
-    resp
-      .status(response["status"])
-      .json({ status: response["status"], data: response["quiz"] });
+    if (newResp["status"] === 200) {
+      resp
+        .status(newResp["status"])
+        .json({ status: newResp["status"], data: newResp["quiz"] });
+    } else {
+      resp
+        .status(newResp["status"])
+        .json({ status: newResp["status"], message: newResp["message"] });
+    }
   } else {
     resp
       .status(response["status"])
@@ -95,8 +106,7 @@ export const GetToQuiz = async (req: clientRequest, res: Response) => {
   const response = await quizService.getQuiz(examId, studentId);
 
   if (response["status"] === 200) {
-    const { priceStaticContent, winnerPrices, ...rest } =
-      response["quiz"].toObject();
+    const { priceStaticContent, winnerPrices, ...rest } = response["quiz"];
 
     res.status(response["status"]).json({
       status: response["status"],
@@ -225,33 +235,30 @@ export const GetQuizForRegistration = async (
 export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
   const quizId = req.params.id;
   try {
-    const file = (req as any).file as Express.Multer.File | undefined;
+    const files = req.files as {
+      prizeImage?: Express.Multer.File[];
+    };
 
-    if (!file) {
-      res.status(400).json({
-        status: 400,
-        message: "Prize image is required (field: 'prizeImage')",
-      });
+    console.log(" files : ", files);
+
+    if (!files?.prizeImage) {
+      res.status(400).json({ error: "prizeImage are required" });
     }
 
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: "winner_prize_images",
-      resource_type: "image",
-    });
+    const prizeImage = files.prizeImage[0];
 
-    try {
-      await fs.unlink(file.path);
-    } catch (e) {
-      console.warn("Temp file cleanup failed:", e);
-    }
+    // Upload to S3
+    const thumbnailS3Key = `thumbnails/${Date.now()}_${
+      prizeImage.originalname
+    }`;
+    const prizeImageUrl = await uploadMediaFile(prizeImage, thumbnailS3Key);
+
+    console.log("prizeImageUrl : ", prizeImageUrl);
 
     //update images in quiz
     const quizService = new QuizService();
 
-    const response = await quizService.uploadPrizeImages(
-      quizId,
-      result.secure_url
-    );
+    const response = await quizService.uploadPrizeImages(quizId, prizeImageUrl);
     if (response["status"] === 200) {
       res.status(200).json({
         status: 200,
@@ -298,7 +305,7 @@ export const RemovePrizeImage = async (req: Request, res: Response) => {
   if (response["status"] === 200) {
     res.status(response["status"]).json({
       status: response["status"],
-      data: { quiz: response["quize"] },
+      data: { quiz: response["quiz"] },
       message: response["message"],
     });
   } else {

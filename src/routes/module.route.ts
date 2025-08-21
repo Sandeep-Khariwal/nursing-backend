@@ -1,7 +1,8 @@
 import express from "express";
 import { authenticateToken } from "../middleware/jwtToken";
 import { AddVideoInModules, CreateModule, DeleteVideoFromModule, GetAllCompletedModules, GetAllModules, GetAllVideos, ReAppearModule, RemoveModule, RestoreModules, SubmitModuleResponse } from "../controller/module.controller";
-import upload from "../middleware/multer";
+import { upload } from "../aws/awsHelper";
+// import upload from "../middleware/multer";
 const moduleRouter = express.Router();
 
 moduleRouter.post("/create",CreateModule)

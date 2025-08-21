@@ -3,10 +3,11 @@ import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
 export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
-  const { question, examId, dailyDoseWisdom, questionId , explaination } = req.body;
+  const { question, examId, dailyDoseWisdom, questionId, explaination } =
+    req.body;
 
   const dailyDoseService = new DailyDoseService();
-  const examService = new ExamService()
+  const examService = new ExamService();
   let response;
   if (!questionId) {
     response = await dailyDoseService.createDailyDoseQuestion(
@@ -17,8 +18,11 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
     );
 
     // update daily dose in exam
-    if(response["question"]._id){
-     await examService.updateDDQById(question.examId,response["question"]._id)
+    if (response["question"]._id) {
+      await examService.updateDDQById(
+        question.examId,
+        response["question"]._id
+      );
     }
   } else {
     response = await dailyDoseService.updateDailyDoseQuestion(
@@ -31,13 +35,11 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
   }
 
   if (response["status"] === 200) {
-    res
-      .status(response["status"])
-      .json({
-        status: response["status"],
-        data: { question: response["question"] },
-        message: response["message"],
-      });
+    res.status(response["status"]).json({
+      status: response["status"],
+      data: { question: response["question"] },
+      message: response["message"],
+    });
   } else {
     res
       .status(response["status"])
@@ -47,12 +49,22 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
 export const GetTodayQuestion = async (req: Request, res: Response) => {
   const { id } = req.params;
   const dailyDoseService = new DailyDoseService();
+  const examService = new ExamService();
   const response = await dailyDoseService.getTodayQuestion(id);
+  const examResponse = await examService.getExamById(id);
+
+  let roadmapToSuccess = "";
+  if (examResponse["status"] === 200) {
+    roadmapToSuccess = examResponse["exam"].roadmapToSuccess;
+  }
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({
       status: response["status"],
-      data: { question: response["question"] },
+      data: {
+        question: response["question"],
+        roadmapToSuccess: roadmapToSuccess,
+      },
     });
   } else {
     res

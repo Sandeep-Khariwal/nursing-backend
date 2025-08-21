@@ -16,7 +16,7 @@ import {
   SubmitQuizResponse,
 } from "../controller/quiz.controller";
 import { authenticateToken } from "../middleware/jwtToken";
-import upload from "../middleware/multer";
+import { upload } from "../aws/awsHelper";
 const quizRouter = express.Router();
 
 quizRouter.post("/create", authenticateToken, CreateQuiz);
@@ -30,7 +30,9 @@ quizRouter.put("/removeQuiz", authenticateToken, RemoveQuiz);
 // quizRouter.put("/addWinnerPrize/:id" , authenticateToken , AddWinnerPrize);
 quizRouter.put(
   "/uploadWinnerPrizeImage/:id",
-  upload.single("prizeImage"),
+    upload.fields([
+      { name: "prizeImage", maxCount: 1 },
+    ]),
   AddWinnerPrizeImage
 );
 quizRouter.put("/removePrizeImage/:id", authenticateToken, RemovePrizeImage);

@@ -14,7 +14,10 @@ export const IsQuiz = (id: string) => {
 };
 
 export const IsSubscriptionExpired = (studentSubscription: any) => {
-  
+  if(!studentSubscription){
+    return false
+  }
+
   const now = new Date();
   const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
 

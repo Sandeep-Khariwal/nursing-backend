@@ -14,6 +14,7 @@ import {
 } from "../HelperFunction";
 import cloudinary from "../config/cloudinary";
 import fs from "fs/promises";
+import { uploadMediaFile } from "../aws/awsHelper";
 
 export const CreateModule = async (req: Request, res: Response) => {
   const { module, moduleId, moduleType } = req.body;
@@ -416,54 +417,65 @@ export const AddVideoInModules = async (req: Request, res: Response) => {
   const { id } = req.params;
   const title = toStringParam(req.query.title);
 
-  const files = req.files as {
-    video?: Express.Multer.File[];
-    thumbnail?: Express.Multer.File[];
-  };
+  try {
+   const files = req.files as {
+      video?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    };
 
-  const videoFile = files?.video?.[0];
-  const thumbnailFile = files?.thumbnail?.[0];
+    if (!files?.video || !files?.thumbnail) {
+      res.status(400).json({ error: "Both video and thumbnail are required" });
+    }
 
-  if (!videoFile || !thumbnailFile) {
-    res.status(400).json({
-      status: 400,
-      message: "Both video and thumbnail files are required.",
-    });
-  }
-  // Upload video to Cloudinary
-  const videoResult = await cloudinary.uploader.upload(videoFile.path, {
-    folder: "modules_videos",
-    resource_type: "video",
-  });
+    const videoFile = files.video[0];
+    const thumbnailFile = files.thumbnail[0];
 
-  // Upload thumbnail to Cloudinary
-  const thumbnailResult = await cloudinary.uploader.upload(thumbnailFile.path, {
-    folder: "modules_thumbnails",
-    resource_type: "image",
-  });
+    // Upload to S3
+    const videoS3Key = `videos/${Date.now()}_${videoFile.originalname}`;
+    const thumbnailS3Key = `thumbnails/${Date.now()}_${thumbnailFile.originalname}`;
 
-  // Clean up temporary files
-  await Promise.all([fs.unlink(videoFile.path), fs.unlink(thumbnailFile.path)]);
-  const data = {
-    videoUrl: videoResult.secure_url,
-    thumbnailUrl: thumbnailResult.secure_url,
-    title: title,
-  };
+    const videoUrl = await uploadMediaFile(videoFile, videoS3Key);
+    const thumbnailUrl = await uploadMediaFile(thumbnailFile, thumbnailS3Key);
 
-  //update video url in videos
-  const moduleService = new ModuleService();
-  const response = await moduleService.addVideoInModuleById(id, data);
+    // Upload thumbnail to Cloudinary
+    // const thumbnailResult = await cloudinary.uploader.upload(
+    //   thumbnailFile.path,
+    //   {
+    //     folder: "modules_thumbnails",
+    //     resource_type: "image",
+    //   }
+    // );
 
-  if (response["status"] === 200) {
-    res.status(response["status"]).json({
-      status: 200,
-      data: response["module"],
-      message: response["message"],
-    });
-  } else {
-    res
-      .status(response["status"])
-      .json({ status: response["status"], message: response["message"] });
+    // // Clean up temporary files
+    // await Promise.all([
+    //   // fs.unlink(videoFile.path),
+    //   fs.unlink(thumbnailFile.path),
+    // ]);
+    
+    const data = {
+      videoUrl: videoUrl,
+      thumbnailUrl: thumbnailUrl,
+      title: title,
+    };
+    //update video url in videos
+    const moduleService = new ModuleService();
+    const response = await moduleService.addVideoInModuleById(id, data);
+
+    if (response["status"] === 200) {
+      res.status(response["status"]).json({
+        status: 200,
+        data: response["module"],
+        message: response["message"],
+      });
+    } else {
+      res
+        .status(response["status"])
+        .json({ status: response["status"], message: response["message"] });
+    }
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ status: 500, message: error.message });
   }
 };
 export const RestoreModules = async (req: Request, res: Response) => {
@@ -492,13 +504,11 @@ export const DeleteVideoFromModule = async (req: Request, res: Response) => {
   const response = await moduleService.removeVideoFromModule(moduleId, videoId);
 
   if (response["status"] === 200) {
-    res
-      .status(response["status"])
-      .json({
-        status: 200,
-        message: response["message"],
-        data: response["module"],
-      });
+    res.status(response["status"]).json({
+      status: 200,
+      message: response["message"],
+      data: response["module"],
+    });
   } else {
     res
       .status(response["status"])
