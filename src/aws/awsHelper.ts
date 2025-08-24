@@ -83,6 +83,8 @@ export async function uploadMediaFile(
     );
   }
 
+  
+
   // Upload file (video or image) to S3
   const stream = createReadStream(uploadFilePath);
   const parallelUpload = new Upload({
