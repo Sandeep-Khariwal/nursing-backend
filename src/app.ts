@@ -25,7 +25,7 @@ import subscriptionRouter from "./routes/subscription.route";
 dotenv.config();
 
 const app: Express = express();
-const PORT =  process.env.PORT || 8000;
+const PORT = parseInt(process.env.PORT || "8080", 10);
 const VERSION = "v1";
 
 app.use(cors());
@@ -74,6 +74,6 @@ export const myRazorpayInstance = new Razorpay({
 });
 
 // server creation
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running at ${PORT}`);
 });
