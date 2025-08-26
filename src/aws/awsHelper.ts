@@ -32,7 +32,6 @@ const s3Client = new S3Client({
   },
 });
 
-// ✅ Upload a media file with conversion to mp4
 export async function uploadMediaFile(
   file: Express.Multer.File,
   newName: string
@@ -48,9 +47,8 @@ export async function uploadMediaFile(
 
   if (isVideo) {
     // Convert video to mp4
-    const outputFileName = `${uuidv4()}.mp4`;
-    const outputPath = path.join("uploads", outputFileName);
-
+    // const outputFileName = `${uuidv4()}.mp4`;
+    // const outputPath = path.join("uploads", outputFileName);
     // await new Promise<void>((resolve, reject) => {
     //   ffmpeg(inputPath)
     //     .outputOptions([
@@ -71,9 +69,8 @@ export async function uploadMediaFile(
     //     })
     //     .run();
     // });
-
-    uploadFilePath = outputPath;
-    contentType = "video/mp4"; // force mp4 after conversion
+    // uploadFilePath = outputPath;
+    // contentType = "video/mp4"; // force mp4 after conversion
   } else if (isImage) {
     console.log("✅ Image detected, skipping conversion:", inputPath);
     // uploadFilePath remains inputPath
@@ -82,8 +79,6 @@ export async function uploadMediaFile(
       "Unsupported file type. Only images and videos are allowed."
     );
   }
-
-  
 
   // Upload file (video or image) to S3
   const stream = createReadStream(uploadFilePath);

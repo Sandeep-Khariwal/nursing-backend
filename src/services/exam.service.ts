@@ -29,6 +29,19 @@ export class ExamService {
       return { message: error.message, status: 500 };
     }
   }
+  public async getExamIdByName(examName: string) {
+    try {
+      const exam = await examsModel.findOne({
+        name: examName,
+      });
+      if(!exam){
+        return {status:404,message:"Exam not found!!"}
+      }
+      return { status: 200, exam, message: "Exam updated!!" };
+    } catch (error) {
+      return { message: error.message, status: 500 };
+    }
+  }
   public async updateDDQById(id: string, questionId: string) {
     try {
       await examsModel.findByIdAndUpdate(id, {

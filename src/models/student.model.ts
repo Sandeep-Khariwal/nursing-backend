@@ -8,6 +8,7 @@ interface StudentModel {
   exams: { _id: string; name: string; is_primary: boolean }[];
   parentNumber: string;
   email: string;
+  fcmToken: string;
   dateOfBirth: Date;
   dateOfJoining: Date;
   address: string;
@@ -170,6 +171,10 @@ const studentSchema = new Schema<StudentModel>({
   email: {
     type: String,
     required: false,
+  },
+  fcmToken: {
+    type: String,
+    default:""
   },
   subscriptionType: {
     type: String,

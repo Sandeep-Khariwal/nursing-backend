@@ -262,28 +262,31 @@ export class StudentService {
       return { status: 500, message: error.message };
     }
   }
-  public async expireStudentPlan(studentId:string,subscription: {
-    examId: string;
-    subscriptionId: string;
-    planId: string;
-    subscriptionStart: Date;
-    subscriptionEnd: Date;
-    featuresAccess: {
-      accessProModules: boolean;
-      accessJournerSoFar: boolean;
-      accessAdFree: boolean;
-      accessSupportAndNotifications: boolean;
-      accessVideoLibrary: boolean;
-      accessVideoCombo: boolean;
-      accessPrioritySupport: boolean;
-    };
-  }) {
+  public async expireStudentPlan(
+    studentId: string,
+    subscription: {
+      examId: string;
+      subscriptionId: string;
+      planId: string;
+      subscriptionStart: Date;
+      subscriptionEnd: Date;
+      featuresAccess: {
+        accessProModules: boolean;
+        accessJournerSoFar: boolean;
+        accessAdFree: boolean;
+        accessSupportAndNotifications: boolean;
+        accessVideoLibrary: boolean;
+        accessVideoCombo: boolean;
+        accessPrioritySupport: boolean;
+      };
+    }
+  ) {
     try {
       const updatedStudent = await studentModel.updateOne(
-         {
-        _id: studentId,
-        "subscriptions.subscriptionId": subscription.subscriptionId,
-      },
+        {
+          _id: studentId,
+          "subscriptions.subscriptionId": subscription.subscriptionId,
+        },
         {
           $set: {
             "subscriptions.$": subscription,
@@ -299,6 +302,31 @@ export class StudentService {
       }
 
       return { status: 200, message: "student update!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+
+  public async addFcmToeknById(id: string, fcmToken: string) {
+    try {
+      await studentModel.findByIdAndUpdate(id, {
+        $set: { fcmToken: fcmToken },
+      });
+
+      return { status: 200, message: "FCM Token updated succesfully!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async getAllStudent() {
+    try {
+      const students = await studentModel.find({ isDeleted: false });
+
+      if (!students && !students.length) {
+        return { status: 400, students: [], message: "Students not found!!" };
+      }
+
+      return { status: 200, students: students };
     } catch (error) {
       return { status: 500, message: error.message };
     }

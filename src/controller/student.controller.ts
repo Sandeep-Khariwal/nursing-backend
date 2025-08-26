@@ -41,7 +41,7 @@ export const UpdateStudentExam = async (req: clientRequest, res: Response) => {
 export const GetStudent = async (req: clientRequest, res: Response) => {
   const id = req.user._id;
   const studentService = new StudentService();
-  const adminService = new AdminService()
+  const adminService = new AdminService();
 
   const isStudent = IsStudent(id);
   let response;
@@ -79,6 +79,24 @@ export const UpdateStudent = async (req: clientRequest, res: Response) => {
       data: response["student"],
       message: response["message"],
     });
+  } else {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
+  }
+};
+export const AddStudentFcmToken = async (req: clientRequest, res: Response) => {
+  const studentId = req.user._id;
+  const {fcmToken} = req.body;
+
+  const studentService = new StudentService();
+
+  const response = await studentService.addFcmToeknById(studentId, fcmToken);
+
+  if (response["status"] === 200) {
+    res
+      .status(response["status"])
+      .json({ status: response["status"], message: response["message"] });
   } else {
     res
       .status(response["status"])

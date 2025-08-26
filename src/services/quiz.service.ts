@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import Quiz from "../models/quiz.model";
 import { AddCloseQuizJob } from "../bullmq/producer";
+import { quizPriceStaticContent } from "../staticContent/quiz.static";
 
 export class QuizService {
   public async createQuiz(data: {
@@ -22,6 +23,7 @@ export class QuizService {
       quiz.startAt = data.startAt;
       quiz.registerStartDate = data.registerStartDate;
       quiz.registerEndDate = data.registerEndDate;
+      quiz.priceStaticContent = quizPriceStaticContent;
 
       quiz.isQuizLive = false;
       quiz.isRegistrationOpen = true;

@@ -418,59 +418,64 @@ export const AddVideoInModules = async (req: Request, res: Response) => {
   const title = toStringParam(req.query.title);
 
   try {
-   const files = req.files as {
+    const files = req.files as {
       video?: Express.Multer.File[];
       thumbnail?: Express.Multer.File[];
     };
-
-    if (!files?.video || !files?.thumbnail) {
-      res.status(400).json({ error: "Both video and thumbnail are required" });
-    }
-
-    const videoFile = files.video[0];
-    const thumbnailFile = files.thumbnail[0];
-
-    // Upload to S3
-    const videoS3Key = `videos/${Date.now()}_${videoFile.originalname}`;
-    const thumbnailS3Key = `thumbnails/${Date.now()}_${thumbnailFile.originalname}`;
-
-    const videoUrl = await uploadMediaFile(videoFile, videoS3Key);
-    const thumbnailUrl = await uploadMediaFile(thumbnailFile, thumbnailS3Key);
-
-    // Upload thumbnail to Cloudinary
-    // const thumbnailResult = await cloudinary.uploader.upload(
-    //   thumbnailFile.path,
-    //   {
-    //     folder: "modules_thumbnails",
-    //     resource_type: "image",
-    //   }
-    // );
-
-    // // Clean up temporary files
-    // await Promise.all([
-    //   // fs.unlink(videoFile.path),
-    //   fs.unlink(thumbnailFile.path),
-    // ]);
-    
-    const data = {
-      videoUrl: videoUrl,
-      thumbnailUrl: thumbnailUrl,
-      title: title,
-    };
-    //update video url in videos
-    const moduleService = new ModuleService();
-    const response = await moduleService.addVideoInModuleById(id, data);
-
-    if (response["status"] === 200) {
-      res.status(response["status"]).json({
-        status: 200,
-        data: response["module"],
-        message: response["message"],
+    // ✅ Validate both files are present
+    if (!files?.video?.[0] || !files?.thumbnail?.[0]) {
+      res.status(400).json({
+        success: false,
+        message: "Both video and thumbnail files are required.",
       });
     } else {
-      res
-        .status(response["status"])
-        .json({ status: response["status"], message: response["message"] });
+      const videoFile = files.video[0];
+      const thumbnailFile = files.thumbnail[0];
+
+      // ✅ Generate unique names
+      const videoName = `videos/${Date.now()}-${videoFile.originalname}`;
+      const thumbnailName = `thumbnails/${Date.now()}-${
+        thumbnailFile.originalname
+      }`;
+
+      const videoUrl = await uploadMediaFile(videoFile, videoName);
+      const thumbnailUrl = await uploadMediaFile(thumbnailFile, thumbnailName);
+
+      // Upload thumbnail to Cloudinary
+      // const thumbnailResult = await cloudinary.uploader.upload(
+      //   thumbnailFile.path,
+      //   {
+      //     folder: "modules_thumbnails",
+      //     resource_type: "image",
+      //   }
+      // );
+
+      // // Clean up temporary files
+      // await Promise.all([
+      //   // fs.unlink(videoFile.path),
+      //   fs.unlink(thumbnailFile.path),
+      // ]);
+
+      const data = {
+        videoUrl: videoUrl,
+        thumbnailUrl: thumbnailUrl,
+        title: title,
+      };
+      //update video url in videos
+      const moduleService = new ModuleService();
+      const response = await moduleService.addVideoInModuleById(id, data);
+
+      if (response["status"] === 200) {
+        res.status(response["status"]).json({
+          status: 200,
+          data: response["module"],
+          message: response["message"],
+        });
+      } else {
+        res
+          .status(response["status"])
+          .json({ status: response["status"], message: response["message"] });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -497,8 +502,9 @@ export const RestoreModules = async (req: Request, res: Response) => {
   }
 };
 export const DeleteVideoFromModule = async (req: Request, res: Response) => {
-  const moduleId = toStringParam(req.query.moduleId);
-  const videoId = toStringParam(req.query.videoId);
+  const { moduleId, videoId } = req.body;
+  // const moduleId = toStringParam(req.query.moduleId);
+  // const videoId = toStringParam(req.query.videoId);
 
   const moduleService = new ModuleService();
   const response = await moduleService.removeVideoFromModule(moduleId, videoId);

@@ -3,11 +3,22 @@ import { DailyDoseService } from "./../services/dailyDoseQuestion";
 import { Request, Response } from "express";
 
 export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
-  const { question, examId, dailyDoseWisdom, questionId, explaination } =
+  const { question, dailyDoseWisdom, questionId, explaination, examName } =
     req.body;
 
+  let examId = req.body.examId;
   const dailyDoseService = new DailyDoseService();
   const examService = new ExamService();
+
+  let examResp;
+  if (examName && !examId) {
+    examResp = examService.getExamIdByName(examName);
+  }
+
+  if(examResp["status"]===200){
+    examId = examResp["exam"]._id
+  }
+  
   let response;
   if (!questionId) {
     response = await dailyDoseService.createDailyDoseQuestion(
