@@ -310,7 +310,7 @@ export class StudentService {
   public async addFcmToeknById(id: string, fcmToken: string) {
     try {
       await studentModel.findByIdAndUpdate(id, {
-        $set: { fcmToken: fcmToken },
+        $set: { fcmToken: fcmToken }
       });
 
       return { status: 200, message: "FCM Token updated succesfully!!" };
