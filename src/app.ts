@@ -16,7 +16,7 @@ import resultRouter from "./routes/result.route";
 import queryRouter from "./routes/query.route";
 import quizRouter from "./routes/quiz.route";
 import quizQuestionRouter from "./routes/quizQuestion.rote";
-import { testRedis } from "./bullmq/redisConnection";
+// import { testRedis } from "./bullmq/redisConnection";
 import paymentRouter from "./routes/payment.route";
 import Razorpay from "razorpay";
 import nurtureRouter from "./routes/nurture.route";
@@ -65,7 +65,7 @@ app.use(`/api/${VERSION}/subscription`, subscriptionRouter);
 DataBase();
 
 // redis
-testRedis();
+// testRedis();
 
 //razorpay
 export const myRazorpayInstance = new Razorpay({

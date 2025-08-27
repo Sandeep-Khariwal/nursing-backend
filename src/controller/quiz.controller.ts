@@ -7,7 +7,6 @@ import { ResultService } from "../services/result.service";
 import { QuizQuestionService } from "../services/quizQuestion.service";
 import { StudentService } from "../services/student.service";
 import mongoose from "mongoose";
-import cloudinary from "../config/cloudinary";
 import fs from "fs/promises";
 import { uploadMediaFile } from "../aws/awsHelper";
 

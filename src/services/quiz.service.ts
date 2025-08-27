@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import Quiz from "../models/quiz.model";
-import { AddCloseQuizJob } from "../bullmq/producer";
+// import { AddCloseQuizJob } from "../bullmq/producer";
 import { quizPriceStaticContent } from "../staticContent/quiz.static";
 
 export class QuizService {
@@ -179,7 +179,7 @@ export class QuizService {
         };
       }
 
-      AddCloseQuizJob({ totalTime: quiz.totalTime, quizId: quizId });
+      // AddCloseQuizJob({ totalTime: quiz.totalTime, quizId: quizId });
 
       return { status: 200, message: "Quiz is now live!!" };
     } catch (error) {
@@ -415,10 +415,10 @@ export class QuizService {
         });
 
         // Step 6: Schedule the job to close the quiz later
-        AddCloseQuizJob({
-          totalTime: quiz.totalTime,
-          quizId: quiz._id,
-        });
+        // AddCloseQuizJob({
+        //   totalTime: quiz.totalTime,
+        //   quizId: quiz._id,
+        // });
 
         // Optional: refetch updated quiz if needed
         quiz = await Quiz.findById(quiz._id).populate([

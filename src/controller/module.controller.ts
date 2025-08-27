@@ -12,7 +12,6 @@ import {
   IsProModulesAccessible,
   IsSubscriptionExpired,
 } from "../HelperFunction";
-import cloudinary from "../config/cloudinary";
 import fs from "fs/promises";
 import { uploadMediaFile } from "../aws/awsHelper";
 
