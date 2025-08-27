@@ -691,7 +691,6 @@ export class QuizService {
     }
   }
   public async uploadPrizeImages(quizId: string, imageUrl: string) {
-    console.log("imageUrl : ", imageUrl);
 
     try {
       const quiz = await Quiz.findByIdAndUpdate(

@@ -840,8 +840,6 @@ export class ModuleService {
         message: "List found!!",
       };
     } catch (error) {
-      console.log(error);
-
       return {
         status: 500,
         message: error.message || "Internal Server Error",

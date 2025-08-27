@@ -26,7 +26,6 @@ export async function sendPushNotification(
     };
 
     const response = await admin.messaging().send(message);
-    console.log('✅ Notification sent:', response);
     return response
   } catch (error) {
     console.error('❌ Error sending notification:', error);

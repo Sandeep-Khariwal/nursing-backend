@@ -18,7 +18,6 @@ export const GetRazorpayKeys = (req: Request, res: Response) => {
 
 export const CreateOrder = async (req: Request, res: Response) => {
   const { amount } = await req.body;
-  console.log("amount");
 
   try {
     const options = {

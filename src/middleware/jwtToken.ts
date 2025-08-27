@@ -84,7 +84,7 @@ export const authenticateToken = (
       }
     );
   } catch (error) {
-    console.log(error);
+       res.status(401).json({ message: "expired" });
   }
 };
 export const LogoutMiddleware = (
@@ -127,7 +127,7 @@ export const LogoutMiddleware = (
       }
     );
   } catch (error) {
-    console.log(error);
+      res.status(401).json({ message: "expired" });
   }
 };
 

@@ -153,8 +153,6 @@ export class StudentService {
 
       return { status: 200, results: filteredResults };
     } catch (error) {
-      console.log(error);
-
       return { message: error.message, status: 500 };
     }
   }

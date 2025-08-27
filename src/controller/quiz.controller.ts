@@ -237,9 +237,6 @@ export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
     const files = req.files as {
       prizeImage?: Express.Multer.File[];
     };
-
-    console.log(" files : ", files);
-
     if (!files?.prizeImage) {
       res.status(400).json({ error: "prizeImage are required" });
     }
@@ -251,9 +248,6 @@ export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
       prizeImage.originalname
     }`;
     const prizeImageUrl = await uploadMediaFile(prizeImage, thumbnailS3Key);
-
-    console.log("prizeImageUrl : ", prizeImageUrl);
-
     //update images in quiz
     const quizService = new QuizService();
 

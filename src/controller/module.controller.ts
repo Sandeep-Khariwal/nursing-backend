@@ -477,8 +477,6 @@ export const AddVideoInModules = async (req: Request, res: Response) => {
       }
     }
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({ status: 500, message: error.message });
   }
 };

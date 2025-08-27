@@ -71,10 +71,7 @@ export async function uploadMediaFile(
     // });
     // uploadFilePath = outputPath;
     // contentType = "video/mp4"; // force mp4 after conversion
-  } else if (isImage) {
-    console.log("✅ Image detected, skipping conversion:", inputPath);
-    // uploadFilePath remains inputPath
-  } else {
+  }else {
     throw new Error(
       "Unsupported file type. Only images and videos are allowed."
     );
