@@ -18,8 +18,8 @@ moduleRouter.put("/deleteVideo", authenticateToken , DeleteVideoFromModule)
 moduleRouter.put(
   "/uploadVideo/:id",
   upload.fields([
-    { name: "video"},
-    { name: "thumbnail"},
+    { name: "video" , maxCount:1},
+    { name: "thumbnail",maxCount:1},
   ]),
   authenticateToken,
   AddVideoInModules
