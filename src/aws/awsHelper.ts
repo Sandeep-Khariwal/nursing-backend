@@ -10,6 +10,16 @@ import { Upload } from "@aws-sdk/lib-storage";
 // Set ffmpeg static binary path
 // ffmpeg.setFfmpegPath(ffmpegPath!);
 
+const allowedMimeTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
+  "video/quicktime", // .mov
+  "video/x-msvideo", // .avi
+  "video/x-matroska", // .mkv
+];
 // Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, "uploads/"),
@@ -17,7 +27,16 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname)),
 });
 
-export const upload = multer({ storage });
+const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
+    console.log("Uploaded file mimetype:", file.mimetype); 
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Unsupported file type. Only images and videos are allowed."), false);
+  }
+};
+
+export const upload = multer({ storage, fileFilter });
 
 // AWS S3 Client config
 const REGION = process.env.REGION || "ap-south-1";
@@ -71,6 +90,8 @@ export async function uploadMediaFile(
     // });
     // uploadFilePath = outputPath;
     // contentType = "video/mp4"; // force mp4 after conversion
+  } else if (isImage) {
+    // ✅ No processing needed — image can be uploaded as-is
   }else {
     throw new Error(
       "Unsupported file type. Only images and videos are allowed."

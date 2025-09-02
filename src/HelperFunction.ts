@@ -14,15 +14,18 @@ export const IsQuiz = (id: string) => {
 };
 
 export const IsSubscriptionExpired = (studentSubscription: any) => {
-  if(!studentSubscription){
-    return false
+  if (!studentSubscription) {
+    return false;
   }
 
   const now = new Date();
+  const subscriptionStart = new Date(studentSubscription.subscriptionStart);
   const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
 
-  const isNotExpired = subscriptionEnd >= now;
-  return !isNotExpired;
+  // Check if current time is within the subscription window
+  const isActive = now >= subscriptionStart && now <= subscriptionEnd;
+
+  return !isActive;
 };
 
 export const IsDashboardAccessible = (student: any, examId: string) => {

@@ -133,8 +133,9 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
           const months = Number(totalMonths);
 
           const now = new Date();
-          const subscriptionEnd = new Date(now);
-          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
+          const subscriptionEnd = new Date(now.getTime() + 5 * 60 * 1000);
+          // const subscriptionEnd = new Date(now);
+          // subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
 
           newSubscription = {
             examId: user.examId,

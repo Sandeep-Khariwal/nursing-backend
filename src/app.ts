@@ -21,8 +21,17 @@ import paymentRouter from "./routes/payment.route";
 import Razorpay from "razorpay";
 import nurtureRouter from "./routes/nurture.route";
 import subscriptionRouter from "./routes/subscription.route";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
+
+const uploadDir = path.join(__dirname, "uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
 
 const app: Express = express();
 const PORT = process.env.PORT || 9799;

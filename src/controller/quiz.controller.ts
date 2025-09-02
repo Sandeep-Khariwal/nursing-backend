@@ -237,6 +237,7 @@ export const AddWinnerPrizeImage = async (req: Request, res: Response) => {
     const files = req.files as {
       prizeImage?: Express.Multer.File[];
     };
+    
     if (!files?.prizeImage) {
       res.status(400).json({ error: "prizeImage are required" });
     }
