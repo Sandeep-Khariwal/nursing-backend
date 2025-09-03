@@ -18,13 +18,15 @@ export const IsSubscriptionExpired = (studentSubscription: any) => {
     return false;
   }
 
-  const now = new Date();
+  const date = new Date();
+  const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
+  const now = new Date(date.getTime() + fiveAndHalfHoursInMs);
+
   const subscriptionStart = new Date(studentSubscription.subscriptionStart);
   const subscriptionEnd = new Date(studentSubscription.subscriptionEnd);
 
   // Check if current time is within the subscription window
   const isActive = now >= subscriptionStart && now <= subscriptionEnd;
-
   return !isActive;
 };
 

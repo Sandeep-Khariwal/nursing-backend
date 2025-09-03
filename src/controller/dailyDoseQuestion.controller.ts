@@ -9,15 +9,17 @@ export const CreateDailyDoseQuestion = async (req: Request, res: Response) => {
   let examId = req.body.examId;
   const dailyDoseService = new DailyDoseService();
   const examService = new ExamService();
-
+  
   let examResp;
   if (examName && !examId) {
-    examResp = examService.getExamIdByName(examName);
+    examResp = await examService.getExamIdByName(examName);
+  }
+  if(examName){
+    if(examResp["status"]===200){
+      examId = examResp["exam"]._id
+    }
   }
 
-  if(examResp["status"]===200){
-    examId = examResp["exam"]._id
-  }
   
   let response;
   if (!questionId) {
