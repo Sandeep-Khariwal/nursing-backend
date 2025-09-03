@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "nodemon --exec npx ts-node src/app.ts",
-    "start": "nodemon dist/app.js",
+    "dev": "ts-node src/app.ts",
+    "start": "node dist/app.js",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "keywords": [],

@@ -6,6 +6,7 @@ import path from "path";
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { Upload } from "@aws-sdk/lib-storage";
+import { existsSync, mkdirSync } from "fs";
 
 // Set ffmpeg static binary path
 // ffmpeg.setFfmpegPath(ffmpegPath!);
@@ -22,7 +23,13 @@ const allowedMimeTypes = [
 ];
 // Multer setup for file uploads
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, "uploads/"),
+  destination: (_req, _file, cb) => {
+    const uploadPath = "uploads/";
+    if (!existsSync(uploadPath)) {
+      mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
   filename: (_req, file, cb) =>
     cb(null, Date.now() + path.extname(file.originalname)),
 });
