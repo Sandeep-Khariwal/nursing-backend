@@ -414,7 +414,7 @@ export const SubmitModuleResponse = async (
 
 export const AddVideoInModules = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const title = toStringParam(req.query.title);
+  const {title} = req.body
 
   try {
     const files = req.files as {
