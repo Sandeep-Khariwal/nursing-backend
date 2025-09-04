@@ -34,7 +34,7 @@ if (!fs.existsSync(uploadDir)) {
 
 
 const app: Express = express();
-const PORT = 8000 //process.env.PORT || 9799;
+const PORT = process.env.PORT || 9799;
 const VERSION = "v1";
 
 app.use(cors());
