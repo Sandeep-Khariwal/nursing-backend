@@ -5,7 +5,7 @@ export class SubscriptionService {
   public async createSubscription(data: {
     name: string;
     examId: string;
-    plans: { price: number; discountPrice: number; duration: string , subscriptionType }[];
+    plans: { price: number; discountPrice: number; duration: string , subscriptionType:string }[];
     planTag: string;
     includes: string[];
   }) {
@@ -35,7 +35,7 @@ export class SubscriptionService {
     data: {
       name: string;
       examId: string;
-      plans: {  price: number; discountPrice: number; duration: string  }[];
+      plans: {  price: number; discountPrice: number; duration: string;subscriptionType:string  }[];
       planTag: string;
       includes: string[];
     }
