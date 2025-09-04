@@ -35,7 +35,7 @@ export class SubscriptionService {
     data: {
       name: string;
       examId: string;
-      prizing: { originalPrize: number; oldPeize: number; duration: string }[];
+      plans: {  price: number; discountPrice: number; duration: string  }[];
       planTag: string;
       includes: string[];
     }

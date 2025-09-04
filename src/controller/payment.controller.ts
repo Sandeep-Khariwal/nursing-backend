@@ -125,14 +125,15 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
       if (subscriptionResp["status"] === 200) {
         const subscription = subscriptionResp["subscription"];
         const plan = subscription.plans.find(
-          (plan: any) => plan._id === notes.planId
+          (plan: any) => plan._id.toString() === notes.planId.toString()
         );
-
         if (SubscriptionType.MONTHLY === plan.subscriptionType) {
           const totalMonths = plan.duration.split(" ")[0];
           const months = Number(totalMonths);
 
-          const now = new Date();
+          const date = new Date();
+          const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
+          const now = new Date(date.getTime() + fiveAndHalfHoursInMs);
           const subscriptionEnd = new Date(now.getTime() + 5 * 60 * 1000);
           // const subscriptionEnd = new Date(now);
           // subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
@@ -157,7 +158,9 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
           const years = plan.duration.split(" ")[0];
           const months = Number(years) * 12;
 
-          const now = new Date();
+          const date = new Date();
+          const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
+          const now = new Date(date.getTime() + fiveAndHalfHoursInMs);
           const subscriptionEnd = new Date(now);
           subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
 
@@ -179,7 +182,6 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
           };
         }
       }
-
       await studentService.updateSubscriptionInStudent(
         user.studentId,
         newSubscription
