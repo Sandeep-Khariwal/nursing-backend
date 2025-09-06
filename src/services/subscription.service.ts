@@ -5,7 +5,12 @@ export class SubscriptionService {
   public async createSubscription(data: {
     name: string;
     examId: string;
-    plans: { price: number; discountPrice: number; duration: string , subscriptionType:string }[];
+    plans: {
+      price: number;
+      discountPrice: number;
+      duration: string;
+      subscriptionType: string;
+    }[];
     planTag: string;
     includes: string[];
   }) {
@@ -35,19 +40,30 @@ export class SubscriptionService {
     data: {
       name: string;
       examId: string;
-      plans: {  price: number; discountPrice: number; duration: string;subscriptionType:string  }[];
-      planTag: string;
-      includes: string[];
+      plan: { price: number; discountPrice: number; duration: string };
+      planId: string;
     }
   ) {
     try {
-      const subscription = await Subscription.findByIdAndUpdate(id, data, {
-        new: true,
-      });
+      const updatedSubscription = await Subscription.findOneAndUpdate(
+        { _id: id, "plans._id": data.planId },
+        {
+          $set: {
+            name: data.name,
+            examId: data.examId,
+            "plans.$.price": data.plan.price,
+            "plans.$.discountPrice": data.plan.discountPrice,
+            "plans.$.duration": data.plan.duration,
+          },
+        },
+        {
+          new: true,
+        }
+      );
 
       return {
         status: 200,
-        subcription: subscription,
+        subcription: updatedSubscription,
         message: "Subscription updated!!",
       };
     } catch (error) {

@@ -24,7 +24,6 @@ export async function sendPushNotification(
         userId: '123',
       },
     };
-
     const response = await admin.messaging().send(message);
     return response
   } catch (error) {

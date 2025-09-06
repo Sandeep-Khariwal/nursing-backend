@@ -14,7 +14,7 @@ export const SendNotification = async (req: Request, res: Response) => {
   const response = await studentService.getAllStudent();
   if (response["status"] === 200) {
     const studentsFcmTokens = response["students"]
-      .filter((stud: any) => !stud.fcmToken)
+      .filter((stud: any) => stud.fcmToken)
       .map((stud: any) => stud.fcmToken);
 
     let allPromises = [];
