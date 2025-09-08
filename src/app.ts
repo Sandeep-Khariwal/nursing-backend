@@ -40,7 +40,7 @@ const VERSION = "v1";
 app.use(cors());
 app.use(
   express.json({
-    strict: false, // allows non-object JSON values like "" (not recommended long-term)
+    strict: false,
     verify: (req: Request, res: Response, buf) => {
       if (!buf.length) {
         req.body = {};

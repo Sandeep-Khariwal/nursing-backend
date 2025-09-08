@@ -4,7 +4,7 @@ import admin from "../firebase/firebase";
 
 interface NotificationPayload {
   title: string;
-  message : string;
+  message: string;
 }
 
 export async function sendPushNotification(
@@ -16,18 +16,38 @@ export async function sendPushNotification(
       token: fcmToken,
       notification: {
         title: payload.title,
-        body: payload.message ,
+        body: payload.message,
+      },
+
+      android: {
+        notification: {
+          icon: "ic_stat_notification", // Android drawable resource name
+          color: "#FF0000", // Optional: icon background color
+        },
+      },
+
+      apns: {
+        payload: {
+          aps: {
+            alert: {
+              title: payload.title,
+              body: payload.message,
+            },
+            sound: "default",
+            badge: 1,
+          },
+        },
       },
       data: {
         // Optional: custom key-value data
-        screen: 'chat',
-        userId: '123',
+        screen: "chat",
+        userId: "123",
       },
     };
     const response = await admin.messaging().send(message);
-    return response
+    return response;
   } catch (error) {
-    console.error('❌ Error sending notification:', error);
+    console.error("❌ Error sending notification:", error);
     throw error;
   }
 }
