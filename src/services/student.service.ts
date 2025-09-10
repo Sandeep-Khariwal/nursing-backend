@@ -56,11 +56,14 @@ export class StudentService {
   }
   public async getStudentById(id: string) {
     try {
-      const student = await studentModel.findById(id, { isDeleted: false });
+      let student = await studentModel.findById(id, { isDeleted: false });
       if (!student) {
         return { status: 404, message: "Student not found!!" };
       }
-      return { status: 200, user: student };
+      return {
+        status: 200,
+        user: student
+      };
     } catch (error) {
       const errorObj = { message: error.message, status: 500 };
       return errorObj;
@@ -251,14 +254,6 @@ export class StudentService {
     }
   ) {
     try {
-      // First: Pull any existing subscription with the same examId
-      await studentModel.findByIdAndUpdate(id, {
-        $pull: {
-          subscriptions: {
-            examId: newSubscription.examId,
-          },
-        },
-      });
 
       // Then: Push the new subscription
       await studentModel.findByIdAndUpdate(id, {
@@ -272,39 +267,19 @@ export class StudentService {
       return { status: 500, message: error.message };
     }
   }
-  public async expireStudentPlan(
-    studentId: string,
-    subscription: {
-      examId: string;
-      subscriptionId: string;
-      planId: string;
-      subscriptionStart: Date;
-      subscriptionEnd: Date;
-      featuresAccess: {
-        accessProModules: boolean;
-        accessJournerSoFar: boolean;
-        accessAdFree: boolean;
-        accessSupportAndNotifications: boolean;
-        accessVideoLibrary: boolean;
-        accessVideoCombo: boolean;
-        accessPrioritySupport: boolean;
-      };
-    }
-  ) {
+  public async expireStudentPlan(studentId: string, examId: string) {
     try {
-      const updatedStudent = await studentModel.updateOne(
+      console.log("expireStudentPlan : ");
+      
+      const updatedStudent = await studentModel.findByIdAndUpdate(
+        studentId,
+        { $pull: { subscriptions: { examId } } },
         {
-          _id: studentId,
-          "subscriptions.subscriptionId": subscription.subscriptionId,
-        },
-        {
-          $set: {
-            "subscriptions.$": subscription,
-          },
+          new: true,
         }
       );
 
-      if (updatedStudent.modifiedCount === 0) {
+      if (!updatedStudent) {
         return {
           status: 404,
           message: "Subscription not found!!",

@@ -164,24 +164,8 @@ export const GetAllModules = async (req: clientRequest, res: Response) => {
     //if subscription expired? then update in db
     const isSubscriptionExpired = IsSubscriptionExpired(currentSubscription);
     if (isSubscriptionExpired) {
-      const newSubscription = {
-        examId: currentSubscription.examId,
-        subscriptionStart: currentSubscription.subscriptionStart,
-        subscriptionEnd: currentSubscription.subscriptionEnd,
-        subscriptionId: currentSubscription.subscriptionId,
-        planId: currentSubscription.planId,
-        featuresAccess: {
-          accessProModules: false,
-          accessJournerSoFar: false,
-          accessAdFree: false,
-          accessSupportAndNotifications: false,
-          accessVideoLibrary: false,
-          accessVideoCombo: false,
-          accessPrioritySupport: false,
-        },
-      };
-
-      await studentService.expireStudentPlan(studentId, newSubscription);
+      const examId = currentSubscription.examId
+      await studentService.expireStudentPlan(studentId,examId);
     }
     isProModulesAccessible = IsProModulesAccessible(
       studentSubscriptionResp["user"],

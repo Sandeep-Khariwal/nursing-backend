@@ -5,7 +5,10 @@ import { clientRequest } from "../middleware/jwtToken";
 import { ModuleService } from "../services/module.service";
 import { ResultService } from "../services/result.service";
 import { QuestionService } from "../services/question.service";
-import { IsDashboardAccessible, IsSubscriptionExpired } from "../HelperFunction";
+import {
+  IsDashboardAccessible,
+  IsSubscriptionExpired,
+} from "../HelperFunction";
 
 export const CreateResult = async (req: clientRequest, res: Response) => {
   const studentId = req.user._id;
@@ -150,40 +153,23 @@ export const GetAllResultsForExam = async (
   );
   let isDashboardAccessible = false;
   if (studentSubscriptionResp["status"] === 200) {
-    //found subscription for current exam 
-    const currentSubscription = studentSubscriptionResp["user"]?.subscriptions.find((subs:any)=>subs.examId === examId)
+    //found subscription for current exam
+    const currentSubscription = studentSubscriptionResp[
+      "user"
+    ]?.subscriptions.find((subs: any) => subs.examId === examId);
     //if subscription expired? then update in db
-    const isSubscriptionExpired = IsSubscriptionExpired(
-     currentSubscription
-    );
+    const isSubscriptionExpired = IsSubscriptionExpired(currentSubscription);
     
-    if (isSubscriptionExpired) {
-      const newSubscription = {
-        examId: currentSubscription.examId,
-        subscriptionStart:
-          currentSubscription.subscriptionStart,
-        subscriptionEnd:
-        currentSubscription.subscriptionEnd,
-        subscriptionId:
-        currentSubscription.subscriptionId,
-        planId: currentSubscription.planId,
-        featuresAccess: {
-          accessProModules: false,
-          accessJournerSoFar: false,
-          accessAdFree: false,
-          accessSupportAndNotifications: false,
-          accessVideoLibrary: false,
-          accessVideoCombo: false,
-          accessPrioritySupport: false,
-        },
-      };
 
-      await studentService.expireStudentPlan(studentId,newSubscription);
+    if (isSubscriptionExpired) {
+      const examId = currentSubscription.examId;
+      await studentService.expireStudentPlan(studentId, examId);
+    } else {
+      isDashboardAccessible = IsDashboardAccessible(
+        studentSubscriptionResp["user"],
+        examId
+      );
     }
-    isDashboardAccessible = IsDashboardAccessible(
-      studentSubscriptionResp["user"],
-      examId
-    );
   }
 
   if (response["status"] === 200) {
@@ -193,7 +179,7 @@ export const GetAllResultsForExam = async (
         .json({ status: 200, data: response["results"] });
     } else {
       res.status(response["status"]).json({
-        status: 404,
+        status: 405,
         data: [],
         message: "Please purchase a subscription to unlock this feature !!",
       });

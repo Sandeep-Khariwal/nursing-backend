@@ -127,6 +127,8 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
         const plan = subscription.plans.find(
           (plan: any) => plan._id.toString() === notes.planId.toString()
         );
+        console.log("user  : ", user,plan);
+        
         if (SubscriptionType.MONTHLY === plan.subscriptionType) {
           const totalMonths = plan.duration.split(" ")[0];
           const months = Number(totalMonths);
@@ -134,9 +136,9 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
           const date = new Date();
           const fiveAndHalfHoursInMs = 5.5 * 60 * 60 * 1000;
           const now = new Date(date.getTime() + fiveAndHalfHoursInMs);
-          const subscriptionEnd = new Date(now.getTime() + 5 * 60 * 1000);
-          // const subscriptionEnd = new Date(now);
-          // subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
+          // const subscriptionEnd = new Date(now.getTime() + 5 * 60 * 1000);
+          const subscriptionEnd = new Date(now);
+          subscriptionEnd.setMonth(subscriptionEnd.getMonth() + months);
 
           newSubscription = {
             examId: user.examId,
@@ -144,7 +146,7 @@ export const PurchaseSubscription = async (req: Request, res: Response) => {
             subscriptionEnd: subscriptionEnd,
             subscriptionId: user.mainPlanId,
             planId: user.planId,
-            features: {
+            featuresAccess: {
               accessProModules: true,
               accessJournerSoFar: true,
               accessAdFree: true,
