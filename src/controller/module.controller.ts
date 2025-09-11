@@ -220,11 +220,12 @@ export const GetAllCompletedModules = async (
   }
 };
 export const GetAllVideos = async (req: clientRequest, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.params; 
+     const search = toStringParam(req.query.search);
 
   const modulesService = new ModuleService();
 
-  const response = await modulesService.getAllModulesVideos(id);
+  const response = await modulesService.getAllModulesVideos(id,search);
 
   if (response["status"] === 200) {
     res.status(response["status"]).json({

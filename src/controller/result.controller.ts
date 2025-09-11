@@ -172,7 +172,7 @@ export const GetAllResultsForExam = async (
     }
   }
 
-  if (response["status"] === 200) {
+  if (response["status"] === 200 && studentSubscriptionResp["status"]===200) {
     if (isDashboardAccessible) {
       res
         .status(response["status"])
@@ -180,7 +180,7 @@ export const GetAllResultsForExam = async (
     } else {
       res.status(response["status"]).json({
         status: 405,
-        data: [],
+        data: studentSubscriptionResp["user"],
         message: "Please purchase a subscription to unlock this feature !!",
       });
     }

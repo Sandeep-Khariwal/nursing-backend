@@ -942,7 +942,7 @@ export class ModuleService {
       return { status: 500, message: error.message };
     }
   }
-  public async getAllModulesVideos(id: string) {
+  public async getAllModulesVideos(id: string, search: string) {
     try {
       const module = await Module.findById(id);
 
@@ -950,24 +950,31 @@ export class ModuleService {
         return { status: 404, module: null, message: "Module not found!!" };
       }
 
-      const { _id, name, videos } = module.toObject();
+      let { _id, name, videos } = module.toObject();
+
+      if (search) {
+        const searchLower = search.toLowerCase();
+        videos = videos.filter((video: any) =>
+          video.title?.toLowerCase().includes(searchLower)
+        );
+      }
 
       return { status: 200, module: { _id, name, videos } };
     } catch (error) {
       return { status: 500, message: error.message };
     }
   }
-  public async removeVideoFromModule(moduleId: string,videoId:string) {
+  public async removeVideoFromModule(moduleId: string, videoId: string) {
     try {
-     const module = await Module.findByIdAndUpdate(
-      moduleId,
-      {
-        $pull: {
-          videos: { _id: videoId },
+      const module = await Module.findByIdAndUpdate(
+        moduleId,
+        {
+          $pull: {
+            videos: { _id: videoId },
+          },
         },
-      },
-      { new: true } 
-    );
+        { new: true }
+      );
       if (!module) {
         return { status: 404, module: null, message: "Module not found!!" };
       }
