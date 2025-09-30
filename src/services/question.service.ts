@@ -46,21 +46,33 @@ export class QuestionService {
       }[];
       correctAns: string;
       explaination: string;
-    }
+    },
+    imageUrl?: string
   ) {
     try {
-      const updatedQuestion = await Question.findByIdAndUpdate(id, question, {
+      // Create the update object dynamically
+      const updateData: any = { ...question };
+
+      // If imageUrl is provided, add it to the updateData
+      if (imageUrl) {
+        updateData.imageUrl = imageUrl;
+      }
+
+      // Perform the update
+      const updatedQuestion = await Question.findByIdAndUpdate(id, updateData, {
         new: true,
       });
+
       return {
         status: 200,
         question: updatedQuestion,
         message: "Question updated!!",
       };
     } catch (error) {
-      return { status: 200, message: error.message };
+      return { status: 500, message: error.message }; // Return status 500 for server errors
     }
   }
+
   public async updateStudentResponseById(
     id: string,
     student: {
@@ -92,9 +104,9 @@ export class QuestionService {
   }
   public async getQuestionById(id: string) {
     try {
-      const question = await Question.findById(id,{ isDeleted:false});
-      if(!question){
-        return {status:404,message:"Question not found"}
+      const question = await Question.findById(id, { isDeleted: false });
+      if (!question) {
+        return { status: 404, message: "Question not found" };
       }
       return { status: 200, question: question };
     } catch (error) {
@@ -121,9 +133,8 @@ export class QuestionService {
       const questions = await Question.find({ moduleId: moduleId });
 
       // Step 2: Remove student attempt from each question
-      const updatePromises = questions.map((question) =>
-      {
-       return Question.findByIdAndUpdate(
+      const updatePromises = questions.map((question) => {
+        return Question.findByIdAndUpdate(
           question._id,
           {
             $pull: {
@@ -131,12 +142,11 @@ export class QuestionService {
             },
           },
           { new: true }
-        )
-      }
-      );
+        );
+      });
 
       const updatedQuestions = await Promise.all(updatePromises);
-      
+
       return { status: 200, updatedQuestions };
     } catch (error) {
       return { status: 500, message: error.message };
@@ -179,5 +189,22 @@ export class QuestionService {
       return { status: 500, message: error.message };
     }
   }
+  public async removeImageFromQuestion(id: string) {
+    try {
+      const question = await Question.findByIdAndUpdate(
+        id,
+        {
+          $set: { imageUrl: "" },
+        },
+        { new: true }
+      );
 
+      if (!question) {
+        return { status: 404, message: "Question not found!!" };
+      }
+      return { status: 200,question, message: "Image Removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
 }

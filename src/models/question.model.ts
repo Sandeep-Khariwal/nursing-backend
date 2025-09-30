@@ -12,8 +12,9 @@ interface QuestionsModel {
     optionId: string;
   }[];
   correctAns: string;
+  imageUrl: string;
   explaination: string;
-  isDeleted:boolean
+  isDeleted: boolean;
 }
 const moduleSchema = new Schema<QuestionsModel>({
   _id: {
@@ -62,12 +63,16 @@ const moduleSchema = new Schema<QuestionsModel>({
     type: String,
     default: "",
   },
+  imageUrl: {
+    type: String,
+    default: "",
+  },
   explaination: {
     type: String,
   },
-    isDeleted:{
-    type:Boolean,
-    default:false
-  }
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 export default model<QuestionsModel>("question", moduleSchema);
