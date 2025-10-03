@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 import { uploadMediaFile } from "../aws/awsHelper";
 
 export const CreateQuestion = async (req: Request, res: Response) => {
-  const { question, questionId, imageUrl } = req.body;
+  const { question, questionId } = req.body;
 
   const questionService = new QuestionService();
   const moduleService = new ModuleService();
@@ -14,7 +14,7 @@ export const CreateQuestion = async (req: Request, res: Response) => {
 
   let response;
   if (questionId) {
-    response = await questionService.updateById(questionId, question, imageUrl);
+    response = await questionService.updateById(questionId, question);
   } else {
     response = await questionService.createQuestion(question);
   }
@@ -40,6 +40,8 @@ export const CreateQuestion = async (req: Request, res: Response) => {
 };
 export const UploadQuestioImage = async (req: Request, res: Response) => {
   try {
+    const {questionId} = req.body;
+    const questionService = new QuestionService();
     const files = req.files as {
       questionImage?: Express.Multer.File[];
     };
@@ -59,7 +61,22 @@ export const UploadQuestioImage = async (req: Request, res: Response) => {
       thumbnailS3Key
     );
 
-    res.status(200).json({ status: 200, imageUrl: questionImageUrl });
+    let response;
+    if (questionImageUrl) {
+      response = await questionService.addImageToQuestion(questionId, questionImageUrl);
+    }
+
+    if (response["status"] === 200) {
+      res.status(response["status"]).json({
+        status: 200,
+        data: response["question"],
+        message: response["message"],
+      });
+    } else {
+      res
+        .status(response["status"])
+        .json({ status: response["status"], message: response["message"] });
+    }
   } catch (error) {
     console.error("Error uploading logo:", error);
     res
@@ -69,10 +86,10 @@ export const UploadQuestioImage = async (req: Request, res: Response) => {
 };
 
 export const RemoveImageFromQuestion = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { questionId } = req.body;
   const questionService = new QuestionService();
 
-  const response = await questionService.removeImageFromQuestion(id);
+  const response = await questionService.removeImageFromQuestion(questionId);
   if (response["status"] === 200) {
     res.status(response["status"]).json({
       status: 200,

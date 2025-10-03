@@ -46,33 +46,21 @@ export class QuestionService {
       }[];
       correctAns: string;
       explaination: string;
-    },
-    imageUrl?: string
+    }
   ) {
     try {
-      // Create the update object dynamically
-      const updateData: any = { ...question };
-
-      // If imageUrl is provided, add it to the updateData
-      if (imageUrl) {
-        updateData.imageUrl = imageUrl;
-      }
-
-      // Perform the update
-      const updatedQuestion = await Question.findByIdAndUpdate(id, updateData, {
+      const updatedQuestion = await Question.findByIdAndUpdate(id, question, {
         new: true,
       });
-
       return {
         status: 200,
         question: updatedQuestion,
         message: "Question updated!!",
       };
     } catch (error) {
-      return { status: 500, message: error.message }; // Return status 500 for server errors
+      return { status: 200, message: error.message };
     }
   }
-
   public async updateStudentResponseById(
     id: string,
     student: {
@@ -189,6 +177,7 @@ export class QuestionService {
       return { status: 500, message: error.message };
     }
   }
+
   public async removeImageFromQuestion(id: string) {
     try {
       const question = await Question.findByIdAndUpdate(
@@ -202,7 +191,25 @@ export class QuestionService {
       if (!question) {
         return { status: 404, message: "Question not found!!" };
       }
-      return { status: 200,question, message: "Image Removed!!" };
+      return { status: 200, question, message: "Image Removed!!" };
+    } catch (error) {
+      return { status: 500, message: error.message };
+    }
+  }
+  public async addImageToQuestion(id: string, imageUrl: string) {
+    try {
+      const question = await Question.findByIdAndUpdate(
+        id,
+        {
+          $set: { imageUrl: imageUrl },
+        },
+        { new: true }
+      );
+
+      if (!question) {
+        return { status: 404, message: "Question not found!!" };
+      }
+      return { status: 200, question, message: "Image Added!!" };
     } catch (error) {
       return { status: 500, message: error.message };
     }

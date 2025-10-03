@@ -12,7 +12,7 @@ questionRouter.get("/getAll/:id", authenticateToken , GetAllQuestions)
 questionRouter.get("/getWrongAttempted/:id", authenticateToken , GetWrongAttemptedQuestions)
 
 
-questionRouter.put("/removeQuestionImage/:id", authenticateToken , RemoveImageFromQuestion)
+questionRouter.put("/removeQuestionImage", authenticateToken , RemoveImageFromQuestion)
 
 questionRouter.put(
   "/uploadQuestionImage",
