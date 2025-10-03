@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from "express";
-import dotenv from "dotenv";
+import * as dotenv from 'dotenv';
 import cors from "cors";
 import bodyParser from "body-parser";
 import authRouter from "./routes/auth.route";
